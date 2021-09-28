@@ -19,5 +19,4 @@ RUN dotnet publish "SmartHomeWWW.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY raspi3.local.pfx /app/raspi3.local.pfx
 ENTRYPOINT ["dotnet", "SmartHomeWWW.dll"]
