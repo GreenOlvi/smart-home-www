@@ -6,22 +6,27 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SmartHomeWWW.Logic;
+using SmartHomeWWW.Logic.Firmware;
 
 namespace SmartHomeWWW.Controllers
 {
     public class UpdateController : Controller
     {
-        public UpdateController(ILogger<UpdateController> logger)
+        public UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository)
         {
             _logger = logger;
+            _firmwareRepository = firmwareRepository;
         }
 
         private readonly ILogger<UpdateController> _logger;
+        private readonly IFirmwareRepository _firmwareRepository;
 
         public IActionResult Index()
         {
-            _logger.LogInformation("Update index page");
+            ViewBag.Firmwares = _firmwareRepository.GetAllVersions();
             return View();
         }
 
@@ -41,23 +46,14 @@ namespace SmartHomeWWW.Controllers
             _logger.LogInformation($"ESP8266 [{mac}] connected");
 
             var deviceVersion = Request.Headers["x-ESP8266-version"];
-            if (deviceVersion == CurrentVersion)
+            if (deviceVersion == _firmwareRepository.GetCurrentVersion())
             {
                 _logger.LogInformation($"ESP8266 [{mac}] nothing new");
                 return new StatusCodeResult(304);
             }
 
-            if (!System.IO.File.Exists(CurrentFirmware))
-            {
-                _logger.LogError($"Could not find file with current firmware: {CurrentFirmware}");
-                _logger.LogError($"PWD={Directory.GetCurrentDirectory()}");
-            }
-
-            return new FileStreamResult(new FileStream(CurrentFirmware, FileMode.Open, FileAccess.Read), "application/octet-stream");
+            return new FileStreamResult(_firmwareRepository.GetCurrentFirmware(), "application/octet-stream");
         }
-
-        private const string CurrentFirmware = "firmware/firmware.0.0.4.bin";
-        private const string CurrentVersion = "0.0.4";
 
         private static string DumpHeaders(IHeaderDictionary headers)
         {

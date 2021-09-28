@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
+using SmartHomeWWW.Controllers;
+using SmartHomeWWW.Logic.Firmware;
 using NUnit.Framework;
 using FluentAssertions;
-using SmartHomeWWW.Controllers;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.AspNetCore.Mvc;
+using Moq;
 
 namespace SmartHomeWWWTests
 {
@@ -12,7 +14,8 @@ namespace SmartHomeWWWTests
         [SetUp]
         public void Setup()
         {
-            _controller = new UpdateController(NullLogger<UpdateController>.Instance);
+            var _firmwareRepository = new Mock<IFirmwareRepository>();
+            _controller = new UpdateController(NullLogger<UpdateController>.Instance, _firmwareRepository.Object);
         }
 
         private UpdateController _controller;

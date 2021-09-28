@@ -24,6 +24,9 @@ namespace SmartHomeWWW
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddScoped<Logic.Firmware.IFirmwareRepository>(c =>
+                new Logic.Firmware.DiskFirmwareRepository(Configuration.GetValue<string>("FirmwarePath")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

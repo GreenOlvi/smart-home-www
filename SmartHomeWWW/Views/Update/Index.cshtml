@@ -5,4 +5,9 @@
 
 <div class="text-center">
     <h1 class="display-4">Updates</h1>
+    <ul>
+        @foreach (var firmware in ViewBag.Firmwares as IEnumerable<Version>) {
+            <li>@firmware</li>
+        }
+    </ul>
 </div>
