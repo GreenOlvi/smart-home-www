@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace SmartHomeWWW
 {
@@ -25,8 +21,8 @@ namespace SmartHomeWWW
         {
             services.AddControllersWithViews();
 
-            services.AddScoped<Logic.Firmware.IFirmwareRepository>(c =>
-                new Logic.Firmware.DiskFirmwareRepository(Configuration.GetValue<string>("FirmwarePath")));
+            services.AddScoped<Logic.Firmware.IFirmwareRepository>(sp =>
+                new Logic.Firmware.DiskFirmwareRepository(sp.GetService<ILogger<Logic.Firmware.DiskFirmwareRepository>>(), Configuration.GetValue<string>("FirmwarePath")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

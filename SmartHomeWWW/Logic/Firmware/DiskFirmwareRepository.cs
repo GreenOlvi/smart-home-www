@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,24 +8,29 @@ namespace SmartHomeWWW.Logic.Firmware
 {
     public class DiskFirmwareRepository : IFirmwareRepository
     {
-        public DiskFirmwareRepository(string firmwarePath)
+        public DiskFirmwareRepository(ILogger<DiskFirmwareRepository> logger, string firmwarePath)
         {
+            _logger = logger;
             _firmwarePath = firmwarePath;
         }
 
+        private readonly ILogger<DiskFirmwareRepository> _logger;
         private readonly string _firmwarePath;
 
         public IEnumerable<Version> GetAllVersions()
         {
+            _logger.LogInformation($"Checking [{_firmwarePath}]");
             if (!Directory.Exists(_firmwarePath))
             {
+                _logger.LogInformation($"Path [{Path.GetFullPath(_firmwarePath)}] does not exist");
                 return Enumerable.Empty<Version>();
             }
 
-            return Directory.GetFiles(_firmwarePath, "firmware.*.bin")
+            return Directory.GetFiles(_firmwarePath)
                 .Select(n => Path.GetFileName(n))
                 .Select(n =>
                 {
+                    _logger.LogInformation($"Found: [{n}]");
                     var c = FirmwareUtils.TryExtractVersionFromFileName(n, out var version);
                     return (Success: c, Version: version);
                 })
