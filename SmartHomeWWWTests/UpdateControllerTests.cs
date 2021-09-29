@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using SmartHomeWWW.Controllers;
-using SmartHomeWWW.Logic.Firmware;
 using NUnit.Framework;
 using FluentAssertions;
 using Moq;
+using SmartHomeCore.Firmwares;
 
 namespace SmartHomeWWWTests
 {

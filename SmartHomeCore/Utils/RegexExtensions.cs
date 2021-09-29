@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace SmartHomeWWW.Logic
+namespace SmartHomeCore.Utils
 {
     public static class RegexExtensions
     {

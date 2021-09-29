@@ -2,12 +2,29 @@
 @{
     ViewData["Title"] = "Updates";
 }
+@model FirmwareListViewModel
 
 <div class="text-center">
     <h1 class="display-4">Updates</h1>
-    <ul>
-        @foreach (var firmware in ViewBag.Firmwares as IEnumerable<Version>) {
-            <li>@firmware</li>
-        }
-    </ul>
+    @if (Model.Firmwares.Any()) {
+    <table class="table table-borderless">
+        <thead>
+            <tr>
+                <th scope="col">Version</th>
+                <th scope="col">Size</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var firmware in Model.Firmwares)
+                {
+            <tr>
+                <td>@firmware.Version</td>
+                <td>@firmware.Size</td>
+            </tr>
+                }
+        </tbody>
+    </table>
+    } else {
+    <div class="alert alert-warning" role="alert">No firmwares found</div>
+    }
 </div>

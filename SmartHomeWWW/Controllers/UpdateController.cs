@@ -1,15 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SmartHomeCore.Firmwares;
+using SmartHomeWWW.Models;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using SmartHomeWWW.Logic;
-using SmartHomeWWW.Logic.Firmware;
 
 namespace SmartHomeWWW.Controllers
 {
@@ -26,8 +22,13 @@ namespace SmartHomeWWW.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.Firmwares = _firmwareRepository.GetAllVersions();
-            return View();
+            var list = new FirmwareListViewModel
+            {
+                Firmwares = Array.AsReadOnly(_firmwareRepository.GetAllFirmwares()
+                    .Select(f => FirmwareViewModel.FromFirmware(f))
+                    .ToArray()),
+            };
+            return View(list);
         }
 
         [HttpGet("/{controller}/firmware.bin")]
