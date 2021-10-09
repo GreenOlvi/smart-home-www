@@ -47,7 +47,13 @@ namespace SmartHomeWWW.Controllers
             _logger.LogInformation($"ESP8266 [{mac}] connected");
 
             var deviceVersion = Request.Headers["x-ESP8266-version"];
-            if (deviceVersion == _firmwareRepository.GetCurrentVersion())
+            if (!_firmwareRepository.TryGetCurrentVersion(out var currentVeresion))
+            {
+                _logger.LogWarning($"No current version found");
+                return new StatusCodeResult(304);
+            }
+
+            if (deviceVersion == currentVeresion)
             {
                 _logger.LogInformation($"ESP8266 [{mac}] nothing new");
                 return new StatusCodeResult(304);

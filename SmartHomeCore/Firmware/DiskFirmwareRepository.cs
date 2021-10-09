@@ -39,12 +39,17 @@ namespace SmartHomeCore.Firmwares
                 .Unpack();
         }
 
+        public bool TryGetCurrentVersion(out Version version) {
+            version = GetCurrentVersion();
+            return version is not null;
+        }
+
         public Version GetCurrentVersion() => GetAllFirmwares().Max(f => f.Version);
 
         public Stream GetCurrentFirmware()
         {
             var version = GetCurrentVersion();
-            var filePath = Path.Combine(_firmwarePath, $"firmware.{version}.bin");
+            var filePath = Path.Combine(_firmwarePath, $"^firmware.{version}.bin$");
             return new FileStream(filePath, FileMode.Open, FileAccess.Read);
         }
 
