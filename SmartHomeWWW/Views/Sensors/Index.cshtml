@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Updates";
+}
+@model SensorListViewModel
+
+<div class="text-center">
+    <h1 class="display-4">Sensors</h1>
+    @if (Model.Sensors.Any()) {
+    <table class="table table-borderless">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">MAC</th>
+                <th scope="col">Chip type</th>
+                <th scope="col">Last contact</th>
+                <th scope="col">Firmware version</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var sensor in Model.Sensors)
+                {
+            <tr>
+                <td>@sensor.Alias</td>
+                <td>@sensor.Mac</td>
+                <td>@sensor.ChipType</td>
+                <td>@sensor.LastContact</td>
+                <td>@sensor.FirmwareVersion</td>
+            </tr>
+                }
+        </tbody>
+    </table>
+    } else {
+    <div class="alert alert-warning" role="alert">No sensors found</div>
+    }
+</div>

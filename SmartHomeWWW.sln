@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartHomeWWW", "SmartHomeWW
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartHomeWWWTests", "SmartHomeWWWTests\SmartHomeWWWTests.csproj", "{D5346282-9D19-44B5-99AC-9DB5133CDE19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHomeCore", "SmartHomeCore\SmartHomeCore.csproj", "{137CD6A4-94F4-48AC-A2FA-6BF7E23B89BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartHomeCore", "SmartHomeCore\SmartHomeCore.csproj", "{137CD6A4-94F4-48AC-A2FA-6BF7E23B89BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHomeCoreTests", "SmartHomeCoreTests\SmartHomeCoreTests.csproj", "{698D7513-D3DD-41AA-98ED-EF116F3C392E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartHomeCoreTests", "SmartHomeCoreTests\SmartHomeCoreTests.csproj", "{698D7513-D3DD-41AA-98ED-EF116F3C392E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

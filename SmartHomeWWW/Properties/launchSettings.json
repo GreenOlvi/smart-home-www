@@ -30,7 +30,7 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "publishAllPorts": true,
       "useSSL": true,
-      "DockerfileRunArguments": "-v E:\\dev\\docker\\firmwares\\:/firmwares/"
+      "DockerfileRunArguments": "-v E:\\dev\\docker\\firmwares\\:/firmwares/ -v C:\\Users\\szulo\\source\\repos\\SmartHomeWWW\\tmp\\data:/data"
     },
     "WSL": {
       "commandName": "WSL2",
