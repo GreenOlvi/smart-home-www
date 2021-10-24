@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SmartHomeCore.Infrastructure;
 
 namespace SmartHomeWWW
 {
@@ -25,6 +27,11 @@ namespace SmartHomeWWW
                 new SmartHomeCore.Firmwares.DiskFirmwareRepository(
                     sp.GetService<ILogger<SmartHomeCore.Firmwares.DiskFirmwareRepository>>(),
                     Configuration.GetValue<string>("FirmwarePath")));
+
+            services.AddDbContext<SmartHomeDbContext>(optionsBuilder =>
+                optionsBuilder.UseSqlite(
+                    Configuration.GetConnectionString("SmartHomeSqliteContext"),
+                    o => o.MigrationsAssembly("SmartHomeWWW")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,9 +56,7 @@ namespace SmartHomeWWW
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapDefaultControllerRoute();
             });
         }
     }

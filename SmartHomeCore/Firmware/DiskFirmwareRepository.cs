@@ -49,7 +49,7 @@ namespace SmartHomeCore.Firmwares
         public Stream GetCurrentFirmware()
         {
             var version = GetCurrentVersion();
-            var filePath = Path.Combine(_firmwarePath, $"^firmware.{version}.bin$");
+            var filePath = Path.Combine(_firmwarePath, $"firmware.{version}.bin");
             return new FileStream(filePath, FileMode.Open, FileAccess.Read);
         }
 
