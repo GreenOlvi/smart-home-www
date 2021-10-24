@@ -35,7 +35,6 @@ namespace SmartHomeWWW.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mac")
-                        .HasMaxLength(17)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

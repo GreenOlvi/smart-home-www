@@ -7,7 +7,6 @@ namespace SmartHomeCore.Domain
     {
         [Key]
         public Guid Id { get; init; }
-        [MaxLength(17)]
         public string Mac { get; init; }
         public string Alias { get; set; }
         public string ChipType { get; set; }
