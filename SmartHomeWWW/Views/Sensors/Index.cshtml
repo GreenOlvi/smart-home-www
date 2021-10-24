@@ -23,7 +23,7 @@
                 <td>@sensor.Alias</td>
                 <td>@sensor.Mac</td>
                 <td>@sensor.ChipType</td>
-                <td>@sensor.LastContact</td>
+                <td>@sensor.LastContact?.ToLocalTime()</td>
                 <td>@sensor.FirmwareVersion</td>
             </tr>
                 }
