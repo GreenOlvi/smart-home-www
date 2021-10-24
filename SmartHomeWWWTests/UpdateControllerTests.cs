@@ -15,7 +15,7 @@ namespace SmartHomeWWWTests
         public void Setup()
         {
             var _firmwareRepository = new Mock<IFirmwareRepository>();
-            _controller = new UpdateController(NullLogger<UpdateController>.Instance, _firmwareRepository.Object);
+            _controller = new UpdateController(NullLogger<UpdateController>.Instance, _firmwareRepository.Object, DbContextHelper.MemoryContext);
         }
 
         private UpdateController _controller;

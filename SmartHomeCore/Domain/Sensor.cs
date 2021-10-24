@@ -13,5 +13,7 @@ namespace SmartHomeCore.Domain
         public string ChipType { get; set; }
         public DateTime? LastContact { get; set; }
         public string FirmwareVersion { get; set; }
+
+        public override string ToString() => $"{ChipType} {Alias ?? Mac}";
     }
 }

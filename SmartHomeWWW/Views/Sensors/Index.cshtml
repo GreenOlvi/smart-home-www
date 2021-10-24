@@ -1,11 +1,11 @@
 ﻿@{
     ViewData["Title"] = "Updates";
 }
-@model SensorListViewModel
+@model IEnumerable<SensorViewModel>
 
 <div class="text-center">
     <h1 class="display-4">Sensors</h1>
-    @if (Model.Sensors.Any()) {
+    @if (Model.Any()) {
     <table class="table table-borderless">
         <thead>
             <tr>
@@ -14,10 +14,11 @@
                 <th scope="col">Chip type</th>
                 <th scope="col">Last contact</th>
                 <th scope="col">Firmware version</th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
-        @foreach (var sensor in Model.Sensors)
+        @foreach (var sensor in Model)
                 {
             <tr>
                 <td>@sensor.Alias</td>
@@ -25,6 +26,7 @@
                 <td>@sensor.ChipType</td>
                 <td>@sensor.LastContact?.ToLocalTime()</td>
                 <td>@sensor.FirmwareVersion</td>
+                <td><button type="button" class="btn btn-danger" onclick="deleteSensor('@sensor.Id');">Delete</button></td>
             </tr>
                 }
         </tbody>
@@ -33,3 +35,19 @@
     <div class="alert alert-warning" role="alert">No sensors found</div>
     }
 </div>
+
+@section Scripts
+{
+<script>
+    function deleteSensor(id)
+    {
+        $.ajax({
+            method: "DELETE",
+            url: "Sensors/Delete/" + id,
+            success: function (r) {
+                location.reload();
+            }
+        });
+    }
+</script>
+}

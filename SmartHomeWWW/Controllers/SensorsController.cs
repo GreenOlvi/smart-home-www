@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmartHomeCore.Infrastructure;
 using SmartHomeWWW.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,18 +17,23 @@ namespace SmartHomeWWW.Controllers
             _dbContext = dbContext;
         }
 
-        private ILogger<SensorsController> _logger;
-        private SmartHomeDbContext _dbContext;
+        private readonly ILogger<SensorsController> _logger;
+        private readonly SmartHomeDbContext _dbContext;
 
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> Index()
         {
             var sensors = await _dbContext.Sensors.ToListAsync();
+            return View(sensors.Select(SensorViewModel.FromSensor).ToArray());
+        }
 
-            var list = new SensorListViewModel
-            {
-                Sensors = sensors.Select(SensorViewModel.FromSensor).ToArray(),
-            };
-            return View(list);
+        [HttpDelete("/{controller}/Delete/{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var sensor = await _dbContext.Sensors.SingleAsync(s => s.Id == id);
+            _dbContext.Sensors.Remove(sensor);
+            await _dbContext.SaveChangesAsync();
+            _logger.LogInformation($"Deleted {sensor}.");
+            return RedirectToAction("Index");
         }
     }
 }
