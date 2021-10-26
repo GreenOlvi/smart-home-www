@@ -28,6 +28,9 @@
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "TZ": "Europe/Warsaw"
+      },
       "publishAllPorts": true,
       "useSSL": true,
       "DockerfileRunArguments": "-v E:\\dev\\docker\\firmwares\\:/firmwares/ -v C:\\Users\\szulo\\source\\repos\\SmartHomeWWW\\tmp\\data:/data"

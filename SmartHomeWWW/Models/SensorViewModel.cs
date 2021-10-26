@@ -10,6 +10,7 @@ namespace SmartHomeWWW.Models
         public string Alias { get; init; }
         public string ChipType { get; init; }
         public DateTime? LastContact { get; init; }
+        public TimeSpan? TimeSinceLastContact => DateTime.Now - LastContact;
         public string FirmwareVersion { get; init; }
 
         public static SensorViewModel FromSensor(Sensor sensor) =>
@@ -19,7 +20,7 @@ namespace SmartHomeWWW.Models
                 Mac = sensor.Mac,
                 Alias = sensor.Alias,
                 ChipType = sensor.ChipType,
-                LastContact = sensor.LastContact,
+                LastContact = sensor.LastContact?.ToLocalTime(),
                 FirmwareVersion = sensor.FirmwareVersion,
             };
     }

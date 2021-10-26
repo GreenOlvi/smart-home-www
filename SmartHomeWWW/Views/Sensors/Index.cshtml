@@ -9,7 +9,7 @@
     <table class="table table-borderless">
         <thead>
             <tr>
-                <th scope="col">Name</th>
+                <th scope="col">Alias</th>
                 <th scope="col">MAC</th>
                 <th scope="col">Chip type</th>
                 <th scope="col">Last contact</th>
@@ -24,7 +24,7 @@
                 <td>@sensor.Alias</td>
                 <td>@sensor.Mac</td>
                 <td>@sensor.ChipType</td>
-                <td>@sensor.LastContact?.ToLocalTime()</td>
+                <td>@sensor.LastContact?.ToString("yyyy-MM-dd HH:mm:ss")<br />@sensor.TimeSinceLastContact?.ToString("c")</td>
                 <td>@sensor.FirmwareVersion</td>
                 <td><button type="button" class="btn btn-danger" onclick="deleteSensor('@sensor.Id');">Delete</button></td>
             </tr>
