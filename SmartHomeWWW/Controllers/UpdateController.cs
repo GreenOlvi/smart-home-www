@@ -30,6 +30,7 @@ namespace SmartHomeWWW.Controllers
         {
             var list = new FirmwareListViewModel
             {
+                CurrentVersion = _firmwareRepository.GetCurrentVersion(),
                 Firmwares = Array.AsReadOnly(_firmwareRepository.GetAllFirmwares()
                     .Select(f => FirmwareViewModel.FromFirmware(f))
                     .ToArray()),
