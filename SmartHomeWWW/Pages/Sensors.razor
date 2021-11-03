@@ -1,0 +1,72 @@
+﻿@page "/sensors"
+@inject ILogger<Sensors> _logger
+@inject IDbContextFactory<SmartHomeDbContext> DbContextFactory
+
+<div class="text-center">
+    <h1 class="display-4">Sensors</h1>
+    @if (SensorsList != null && SensorsList.Any())
+    {
+<table class="table table-borderless">
+    <thead>
+        <tr>
+            <th scope="col">Alias</th>
+            <th scope="col">MAC</th>
+            <th scope="col">Chip type</th>
+            <th scope="col">Last contact</th>
+            <th scope="col">Firmware version</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var sensor in SensorsList)
+        {
+        <tr>
+            <td>@sensor.Alias</td>
+            <td>@sensor.Mac</td>
+            <td>@sensor.ChipType</td>
+            <td>@sensor.LastContact?.ToString("yyyy-MM-dd HH:mm:ss")<br />@TimeSinceLastContact(sensor).ToString("c")</td>
+            <td>@sensor.FirmwareVersion</td>
+            <td><button type="button" class="btn btn-danger" @onclick="(() => DeleteSensor(sensor))">Delete</button></td>
+        </tr>
+        }
+    </tbody>
+</table>
+    }
+    else
+    {
+<div class="alert alert-warning" role="alert">No sensors found</div>
+    }
+</div>
+
+
+@code {
+
+    IReadOnlyList<Sensor> SensorsList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = DbContextFactory.CreateDbContext();
+        await LoadSensors(dbContext);
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadSensors(SmartHomeDbContext dbContext)
+    {
+        SensorsList = await dbContext.Sensors.ToListAsync();
+    }
+
+    private TimeSpan TimeSinceLastContact(Sensor sensor)
+    {
+        return DateTime.Now - (sensor.LastContact?.ToLocalTime()).Value;
+    }
+
+    private async Task DeleteSensor(Sensor sensor)
+    {
+        using var dbContext = DbContextFactory.CreateDbContext();
+        dbContext.Sensors.Remove(sensor);
+        _logger.LogInformation($"Deleted {sensor}.");
+        await dbContext.SaveChangesAsync();
+        await LoadSensors(dbContext);
+    }
+
+}

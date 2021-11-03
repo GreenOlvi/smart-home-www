@@ -3,8 +3,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:48970",
-      "sslPort": 44373
+      "applicationUrl": "http://localhost:46795",
+      "sslPort": 0
     }
   },
   "profiles": {
@@ -22,25 +22,26 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+      "applicationUrl": "http://localhost:5000"
     },
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
-        "TZ": "Europe/Warsaw"
+        "TZ": "Europe/Warsaw",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,
-      "useSSL": true,
-      "DockerfileRunArguments": "-v E:\\dev\\docker\\firmwares\\:/firmwares/ -v C:\\Users\\szulo\\source\\repos\\SmartHomeWWW\\tmp\\data:/data"
+      "useSSL": false,
+      "DockerfileRunArguments": ""
     },
     "WSL": {
       "commandName": "WSL2",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:5001",
+      "launchUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
+        "ASPNETCORE_URLS": "http://localhost:5000",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "distributionName": ""

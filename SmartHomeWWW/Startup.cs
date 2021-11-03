@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SmartHomeCore.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SmartHomeWWW
 {
@@ -19,16 +24,18 @@ namespace SmartHomeWWW
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
 
             services.AddScoped<SmartHomeCore.Firmwares.IFirmwareRepository>(sp =>
                 new SmartHomeCore.Firmwares.DiskFirmwareRepository(
                     sp.GetService<ILogger<SmartHomeCore.Firmwares.DiskFirmwareRepository>>(),
                     Configuration.GetValue<string>("FirmwarePath")));
 
-            services.AddDbContext<SmartHomeDbContext>(optionsBuilder =>
+            services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
                 optionsBuilder.UseSqlite(
                     Configuration.GetConnectionString("SmartHomeSqliteContext"),
                     o => o.MigrationsAssembly("SmartHomeWWW")));
@@ -43,20 +50,19 @@ namespace SmartHomeWWW
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                app.UseExceptionHandler("/Error");
             }
-            app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();
+                endpoints.MapControllerRoute("firmware", "update/firmware.bin");
+
+                endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("/_Host");
             });
         }
     }
