@@ -1,0 +1,46 @@
+﻿@page "/update"
+@using SmartHomeCore.Firmwares
+@inject IFirmwareRepository FirmwareRepository
+
+<div class="text-center">
+    <h1 class="display-4">Updates</h1>
+    @if (Firmwares != null && Firmwares.Any())
+    {
+<table class="table table-borderless">
+    <thead>
+        <tr>
+            <th scope="col">Version</th>
+            <th scope="col">Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var firmware in Firmwares)
+        {
+        <tr>
+            <td>@firmware.Version</td>
+            <td>@firmware.Size</td>
+        </tr>
+        }
+    </tbody>
+</table>
+    }
+    else
+    {
+    <div class="alert alert-warning" role="alert">No firmwares found</div>
+    }
+    <div>Current version: <strong>@CurrentVersion</strong></div>
+</div>
+
+@code {
+
+    private IReadOnlyList<Firmware> Firmwares;
+    private Version CurrentVersion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Firmwares = FirmwareRepository.GetAllFirmwares().OrderByDescending(f => f.Version).ToList();
+        CurrentVersion = FirmwareRepository.GetCurrentVersion();
+        await base.OnInitializedAsync();
+    }
+
+}

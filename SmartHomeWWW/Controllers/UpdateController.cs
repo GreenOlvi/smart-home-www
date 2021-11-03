@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using SmartHomeCore.Domain;
 using SmartHomeCore.Firmwares;
 using SmartHomeCore.Infrastructure;
-using SmartHomeWWW.Models;
 using System;
 using System.Linq;
 using System.Text;
@@ -15,27 +14,15 @@ namespace SmartHomeWWW.Controllers
 {
     public class UpdateController : Controller
     {
-        public UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository, SmartHomeDbContext dbContext)
+        private readonly ILogger<UpdateController> _logger;
+        private readonly IFirmwareRepository _firmwareRepository;
+        private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+
+        public UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
         {
             _logger = logger;
             _firmwareRepository = firmwareRepository;
-            _dbContext = dbContext;
-        }
-
-        private readonly ILogger<UpdateController> _logger;
-        private readonly IFirmwareRepository _firmwareRepository;
-        private readonly SmartHomeDbContext _dbContext;
-
-        public IActionResult Index()
-        {
-            var list = new FirmwareListViewModel
-            {
-                CurrentVersion = _firmwareRepository.GetCurrentVersion(),
-                Firmwares = Array.AsReadOnly(_firmwareRepository.GetAllFirmwares()
-                    .Select(f => FirmwareViewModel.FromFirmware(f))
-                    .ToArray()),
-            };
-            return View(list);
+            _dbContextFactory = dbContextFactory;
         }
 
         [HttpGet("/{controller}/firmware.bin")]
@@ -47,7 +34,7 @@ namespace SmartHomeWWW.Controllers
             if (userAgent != "ESP8266-http-Update")
             {
                 _logger.LogInformation("Not ESP");
-                return new RedirectToActionResult("Index", "Update", null);
+                return new RedirectResult("/");
             }
 
             var mac = Request.Headers["x-ESP8266-STA-MAC"].Single().ToUpper();
@@ -74,6 +61,8 @@ namespace SmartHomeWWW.Controllers
 
         private async Task UpdateSensorInfo(string mac, string firmwareVersion)
         {
+            using var _dbContext = _dbContextFactory.CreateDbContext();
+
             var sensor = await _dbContext.Sensors
                 .FirstOrDefaultAsync(s => s.Mac == mac);
 
@@ -106,5 +95,6 @@ namespace SmartHomeWWW.Controllers
             }
             return sb.ToString();
         }
+
     }
 }
