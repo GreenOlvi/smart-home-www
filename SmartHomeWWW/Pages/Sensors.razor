@@ -24,7 +24,7 @@
             <td>@sensor.Alias</td>
             <td>@sensor.Mac</td>
             <td>@sensor.ChipType</td>
-            <td>@sensor.LastContact?.ToString("yyyy-MM-dd HH:mm:ss")<br />@TimeSinceLastContact(sensor).ToString("c")</td>
+            <td>@sensor.LastContact?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")<br /><SensorTimer StartTime="sensor.LastContact.Value" /></td>
             <td>@sensor.FirmwareVersion</td>
             <td><button type="button" class="btn btn-danger" @onclick="(() => DeleteSensor(sensor))">Delete</button></td>
         </tr>
