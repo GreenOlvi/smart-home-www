@@ -1,14 +1,24 @@
 ﻿@using System.Threading
 @using Humanizer
 @using Humanizer.Localisation
+@using Utils 
 
-<em>@TimeSince.Humanize(precision:3, minUnit: TimeUnit.Second)</em>
+<em style="color: @CurrentColour.ToCss()">@TimeSince.Humanize(precision:3, minUnit: TimeUnit.Second)</em>
 
 @code {
+    private const int HighSeconds = 70;
+
     [Parameter]
     public DateTime StartTime { get; init; }
 
     private TimeSpan TimeSince => DateTime.UtcNow - StartTime;
+    private double l => Math.Min(1.0, TimeSince.TotalSeconds / (double)HighSeconds);
+
+    private readonly ColourGradient _gradient = new ColourGradient(
+        new Colour { R = 0, G = 128, B = 0 },
+        new Colour { R = 255, G = 0, B = 0 });
+
+    private Colour CurrentColour => _gradient.GetIntermediate(l);
 
     private Timer _timer;
 
