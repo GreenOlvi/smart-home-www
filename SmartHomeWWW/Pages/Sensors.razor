@@ -1,6 +1,13 @@
 ﻿@page "/sensors"
-@inject ILogger<Sensors> _logger
+
+@using Microsoft.AspNetCore.SignalR.Client
+@using Hubs 
+
+@implements IAsyncDisposable
+
+@inject ILogger<Sensors> Logger
 @inject IDbContextFactory<SmartHomeDbContext> DbContextFactory
+@inject NavigationManager NavigationManager
 
 <div class="text-center">
     <h1 class="display-4">Sensors</h1>
@@ -42,12 +49,28 @@
 @code {
 
     IReadOnlyList<Sensor> SensorsList;
+    private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         using var dbContext = DbContextFactory.CreateDbContext();
         await LoadSensors(dbContext);
-        await base.OnInitializedAsync();
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri(SensorsHub.RelativePath))
+            .Build();
+
+        hubConnection.On<Sensor>("SensorUpdated", async sensor =>
+        {
+            Logger.LogInformation($"Received SensorUpdated on {sensor.Mac}");
+            using var dbContext = DbContextFactory.CreateDbContext();
+            await LoadSensors(dbContext);
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
     }
 
     private async Task LoadSensors(SmartHomeDbContext dbContext)
@@ -55,18 +78,20 @@
         SensorsList = await dbContext.Sensors.ToListAsync();
     }
 
-    private TimeSpan TimeSinceLastContact(Sensor sensor)
-    {
-        return DateTime.Now - (sensor.LastContact?.ToLocalTime()).Value;
-    }
-
     private async Task DeleteSensor(Sensor sensor)
     {
         using var dbContext = DbContextFactory.CreateDbContext();
         dbContext.Sensors.Remove(sensor);
-        _logger.LogInformation($"Deleted {sensor}.");
+        Logger.LogInformation($"Deleted {sensor}.");
         await dbContext.SaveChangesAsync();
         await LoadSensors(dbContext);
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
 }

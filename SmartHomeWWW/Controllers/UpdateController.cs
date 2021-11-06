@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmartHomeCore.Domain;
@@ -12,11 +13,12 @@ using System.Threading.Tasks;
 
 namespace SmartHomeWWW.Controllers
 {
-    public class UpdateController : Controller
+    public class UpdateController : Controller, IAsyncDisposable
     {
         private readonly ILogger<UpdateController> _logger;
         private readonly IFirmwareRepository _firmwareRepository;
         private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+        private HubConnection _hubConnection = null;
 
         public UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
         {
@@ -82,6 +84,23 @@ namespace SmartHomeWWW.Controllers
             sensor.FirmwareVersion = firmwareVersion;
 
             await _dbContext.SaveChangesAsync();
+
+            await NotifySensorsHub(sensor);
+        }
+
+        private async Task NotifySensorsHub(Sensor sensor)
+        {
+            if (_hubConnection is null)
+            {
+                var sensorHubUrl = $"{Request.Scheme}://{Request.Host}{Hubs.SensorsHub.RelativePath}";
+
+                _hubConnection = new HubConnectionBuilder()
+                    .WithUrl(sensorHubUrl)
+                    .Build();
+                await _hubConnection.StartAsync();
+            }
+
+            await _hubConnection.SendAsync("UpdateSensor", sensor);
         }
 
         private static string DumpHeaders(IHeaderDictionary headers)
@@ -96,5 +115,12 @@ namespace SmartHomeWWW.Controllers
             return sb.ToString();
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            if (_hubConnection is not null)
+            {
+                await _hubConnection.DisposeAsync();
+            }
+        }
     }
 }

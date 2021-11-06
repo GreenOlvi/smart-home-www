@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SmartHomeCore.Infrastructure;
+using SmartHomeWWW.Hubs;
+using System.Linq;
 
 namespace SmartHomeWWW
 {
@@ -25,6 +28,13 @@ namespace SmartHomeWWW
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
+            services.AddSignalR();
+
+            services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+            });
+
             services.AddScoped<SmartHomeCore.Firmwares.IFirmwareRepository>(sp =>
                 new SmartHomeCore.Firmwares.DiskFirmwareRepository(
                     sp.GetService<ILogger<SmartHomeCore.Firmwares.DiskFirmwareRepository>>(),
@@ -39,6 +49,8 @@ namespace SmartHomeWWW
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseResponseCompression();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -58,6 +70,7 @@ namespace SmartHomeWWW
                 endpoints.MapControllerRoute("firmware", "update/firmware.bin");
 
                 endpoints.MapBlazorHub();
+                endpoints.MapHub<SensorsHub>(SensorsHub.RelativePath);
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
