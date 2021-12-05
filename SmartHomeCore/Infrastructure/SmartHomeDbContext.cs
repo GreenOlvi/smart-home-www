@@ -9,11 +9,7 @@ namespace SmartHomeCore.Infrastructure
         {
         }
 
-        public DbSet<Sensor> Sensors { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-
-        }
+        public DbSet<Sensor> Sensors { get; init; }
+        public DbSet<WeatherCache> WeatherCaches { get; init; }
     }
 }

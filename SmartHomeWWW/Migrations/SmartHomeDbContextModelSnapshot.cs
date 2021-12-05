@@ -41,6 +41,29 @@ namespace SmartHomeWWW.Migrations
 
                     b.ToTable("Sensors");
                 });
+
+            modelBuilder.Entity("SmartHomeCore.Domain.WeatherCache", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Expires")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WeatherCaches");
+                });
 #pragma warning restore 612, 618
         }
     }

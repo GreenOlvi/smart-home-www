@@ -68,6 +68,7 @@ namespace SmartHomeWWW
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute("firmware", "update/firmware.bin");
+                endpoints.MapControllers();
 
                 endpoints.MapBlazorHub();
                 endpoints.MapHub<SensorsHub>(SensorsHub.RelativePath);
