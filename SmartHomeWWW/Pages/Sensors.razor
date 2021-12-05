@@ -59,7 +59,7 @@
         await LoadSensors(dbContext);
 
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri(SensorsHub.RelativePath))
+            .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
             .Build();
 
         hubConnection.On<Sensor>("SensorUpdated", async sensor =>

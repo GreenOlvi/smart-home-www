@@ -92,7 +92,7 @@ namespace SmartHomeWWW.Controllers
         {
             if (_hubConnection is null)
             {
-                var sensorHubUrl = $"{Request.Scheme}://{Request.Host}{Hubs.SensorsHub.RelativePath}";
+                var sensorHubUrl = $"http://localhost:80{Hubs.SensorsHub.RelativePath}";
 
                 _hubConnection = new HubConnectionBuilder()
                     .WithUrl(sensorHubUrl)
