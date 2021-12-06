@@ -9,4 +9,3 @@ RUN dotnet restore "SmartHomeWWW/SmartHomeWWW.csproj"
 COPY . .
 
 WORKDIR /src
-ENTRYPOINT dotnet ef database update --project SmartHomeWWW
