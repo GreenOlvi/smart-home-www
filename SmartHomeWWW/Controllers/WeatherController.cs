@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using SmartHomeCore.Domain;
 using SmartHomeCore.Infrastructure;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,8 +26,10 @@ namespace SmartHomeWWW.Controllers
         public async Task<string> GetCurrent()
         {
             using var db = _dbContextFactory.CreateDbContext();
-            var current = await db.WeatherCaches.OrderByDescending(w => w.Timestamp).FirstOrDefaultAsync();
-            return current.Data;
+            var current = await db.WeatherCaches
+                .OrderByDescending(w => w.Timestamp)
+                .FirstOrDefaultAsync();
+            return current?.Data;
         }
 
         [HttpPost]
