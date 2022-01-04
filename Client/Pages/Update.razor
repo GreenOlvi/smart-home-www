@@ -1,7 +1,10 @@
 ﻿@page "/update"
+
+@using SmartHomeWWW.Client.Repositories
 @using SmartHomeWWW.Core.Domain
 @using SmartHomeWWW.Core.Firmwares
-@inject IFirmwareRepository FirmwareRepository
+
+@inject FirmwareHttpClient FirmwareHttpClient
 
 <div class="text-center">
     <h1 class="display-4">Updates</h1>
@@ -34,13 +37,17 @@
 
 @code {
 
-    private IReadOnlyList<Firmware> Firmwares;
-    private Version CurrentVersion;
+    private IReadOnlyList<Firmware> Firmwares = Array.Empty<Firmware>();
+    private Version? CurrentVersion;
 
     protected override async Task OnInitializedAsync()
     {
-        Firmwares = FirmwareRepository.GetAllFirmwares().OrderByDescending(f => f.Version).ToList();
-        CurrentVersion = FirmwareRepository.GetCurrentVersion();
+        Firmwares = (await FirmwareHttpClient.GetAllFirmwares())
+            .OrderByDescending(f => f.Version)
+            .ToList();
+
+        CurrentVersion = await FirmwareHttpClient.GetCurrentVersion();
+
         await base.OnInitializedAsync();
     }
 

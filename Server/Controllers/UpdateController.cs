@@ -7,7 +7,9 @@ using System.Text;
 
 namespace SmartHomeWWW.Server.Controllers;
 
-public class UpdateController : Controller, IAsyncDisposable
+[Route("api/[controller]")]
+[ApiController]
+public class UpdateController : ControllerBase, IAsyncDisposable
 {
     private readonly ILogger<UpdateController> _logger;
     private readonly IFirmwareRepository _firmwareRepository;
@@ -21,7 +23,13 @@ public class UpdateController : Controller, IAsyncDisposable
         _dbContextFactory = dbContextFactory;
     }
 
-    [HttpGet("/{controller}/firmware.bin")]
+    [HttpGet]
+    public ActionResult<IEnumerable<Firmware>> GetFirmwares() => Ok(_firmwareRepository.GetAllFirmwares().ToArray());
+
+    [HttpGet("version/current")]
+    public ActionResult<Version> GetCurrentVersion() => Ok(_firmwareRepository.GetCurrentVersion());
+
+    [HttpGet("/Update/firmware.bin")]
     public async Task<IActionResult> Firmware()
     {
         _logger.LogInformation(DumpHeaders(Request.Headers));

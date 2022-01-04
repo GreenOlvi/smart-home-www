@@ -1,14 +1,15 @@
 ﻿@page "/sensors"
 
 @using Microsoft.EntityFrameworkCore
+@using SmartHomeWWW.Client.Repositories
 @using SmartHomeWWW.Core.Domain
 @using SmartHomeWWW.Core.Infrastructure
 
 @implements IAsyncDisposable
 
 @inject ILogger<Sensors> Logger
-@inject IDbContextFactory<SmartHomeDbContext> DbContextFactory
 @inject NavigationManager NavigationManager
+@inject SensorsHttpClient SensorsClient
 
 <div class="text-center">
     <h1 class="display-4">Sensors</h1>
@@ -49,15 +50,14 @@
 
 @code {
 
-    IReadOnlyList<Sensor> SensorsList;
+    IReadOnlyList<Sensor> SensorsList = Array.Empty<Sensor>();
     //private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        //using var dbContext = DbContextFactory.CreateDbContext();
-        //await LoadSensors(dbContext);
+        await LoadSensors();
 
         //hubConnection = new HubConnectionBuilder()
         //    .WithUrl($"http:localhost:80{SensorsHub.RelativePath}")
@@ -74,18 +74,15 @@
         //await hubConnection.StartAsync();
     }
 
-    private async Task LoadSensors(SmartHomeDbContext dbContext)
+    private async Task LoadSensors()
     {
-        SensorsList = await dbContext.Sensors.ToListAsync();
+        SensorsList = (await SensorsClient.GetSensors()).ToList();
     }
 
     private async Task DeleteSensor(Sensor sensor)
     {
-        using var dbContext = DbContextFactory.CreateDbContext();
-        dbContext.Sensors.Remove(sensor);
-        Logger.LogInformation($"Deleted {sensor}.");
-        await dbContext.SaveChangesAsync();
-        await LoadSensors(dbContext);
+        await SensorsClient.DeleteSensor(sensor.Id);
+        await LoadSensors();
     }
 
     public async ValueTask DisposeAsync()
