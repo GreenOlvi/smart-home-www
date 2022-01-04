@@ -1,0 +1,98 @@
+﻿@page "/sensors"
+
+@using Microsoft.EntityFrameworkCore
+@using SmartHomeWWW.Core.Domain
+@using SmartHomeWWW.Core.Infrastructure
+
+@implements IAsyncDisposable
+
+@inject ILogger<Sensors> Logger
+@inject IDbContextFactory<SmartHomeDbContext> DbContextFactory
+@inject NavigationManager NavigationManager
+
+<div class="text-center">
+    <h1 class="display-4">Sensors</h1>
+    @if (SensorsList != null && SensorsList.Any())
+    {
+<table class="table table-borderless">
+    <thead>
+        <tr>
+            <th scope="col">Alias</th>
+            <th scope="col">MAC</th>
+            <th scope="col">Chip type</th>
+            <th scope="col">Last contact</th>
+            <th scope="col">Firmware version</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var sensor in SensorsList)
+        {
+        <tr>
+            <td>@sensor.Alias</td>
+            <td>@sensor.Mac</td>
+            <td>@sensor.ChipType</td>
+            <td>@sensor.LastContact?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")<br /><SensorTimer StartTime="sensor.LastContact.Value" /></td>
+            <td>@sensor.FirmwareVersion</td>
+            <td><button type="button" class="btn btn-danger" @onclick="(() => DeleteSensor(sensor))">Delete</button></td>
+        </tr>
+        }
+    </tbody>
+</table>
+    }
+    else
+    {
+<div class="alert alert-warning" role="alert">No sensors found</div>
+    }
+</div>
+
+
+@code {
+
+    IReadOnlyList<Sensor> SensorsList;
+    //private HubConnection hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        //using var dbContext = DbContextFactory.CreateDbContext();
+        //await LoadSensors(dbContext);
+
+        //hubConnection = new HubConnectionBuilder()
+        //    .WithUrl($"http:localhost:80{SensorsHub.RelativePath}")
+        //    .Build();
+
+        //hubConnection.On<Sensor>("SensorUpdated", async sensor =>
+        //{
+        //    Logger.LogInformation($"Received SensorUpdated on {sensor.Mac}");
+        //    using var dbContext = DbContextFactory.CreateDbContext();
+        //    await LoadSensors(dbContext);
+        //    StateHasChanged();
+        //});
+
+        //await hubConnection.StartAsync();
+    }
+
+    private async Task LoadSensors(SmartHomeDbContext dbContext)
+    {
+        SensorsList = await dbContext.Sensors.ToListAsync();
+    }
+
+    private async Task DeleteSensor(Sensor sensor)
+    {
+        using var dbContext = DbContextFactory.CreateDbContext();
+        dbContext.Sensors.Remove(sensor);
+        Logger.LogInformation($"Deleted {sensor}.");
+        await dbContext.SaveChangesAsync();
+        await LoadSensors(dbContext);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        //if (hubConnection is not null)
+        //{
+        //    await hubConnection.DisposeAsync();
+        //}
+    }
+}

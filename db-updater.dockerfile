@@ -1,11 +1,11 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
 WORKDIR /src
 COPY .config .config
 RUN dotnet tool restore
 
-COPY ["SmartHomeWWW/SmartHomeWWW.csproj", "SmartHomeWWW/"]
-RUN dotnet restore "SmartHomeWWW/SmartHomeWWW.csproj"
+COPY ["Server/SmartHomeWWW.Server.csproj", "Server/"]
+RUN dotnet restore "Server/SmartHomeWWW.Server.csproj"
 COPY . .
 
 WORKDIR /src
