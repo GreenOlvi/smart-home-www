@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain;
 using SmartHomeWWW.Core.Firmwares;
@@ -9,16 +10,17 @@ namespace SmartHomeWWW.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UpdateController : ControllerBase, IAsyncDisposable
+public class UpdateController : ControllerBase
 {
     private readonly ILogger<UpdateController> _logger;
     private readonly IFirmwareRepository _firmwareRepository;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    //private HubConnection _hubConnection = null;
+    private readonly HubConnection _hubConnection;
 
-    public UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+    public UpdateController(ILogger<UpdateController> logger, HubConnection hubConnection, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
     {
         _logger = logger;
+        _hubConnection = hubConnection;
         _firmwareRepository = firmwareRepository;
         _dbContextFactory = dbContextFactory;
     }
@@ -92,17 +94,11 @@ public class UpdateController : ControllerBase, IAsyncDisposable
 
     private async Task NotifySensorsHub(Sensor sensor)
     {
-        //if (_hubConnection is null)
-        //{
-        //    var sensorHubUrl = $"http://localhost:80{Hubs.SensorsHub.RelativePath}";
-
-        //    _hubConnection = new HubConnectionBuilder()
-        //        .WithUrl(sensorHubUrl)
-        //        .Build();
-        //    await _hubConnection.StartAsync();
-        //}
-
-        //await _hubConnection.SendAsync("UpdateSensor", sensor);
+        if (_hubConnection.State == HubConnectionState.Disconnected)
+        {
+            await _hubConnection.StartAsync();
+        }
+        await _hubConnection.SendAsync("UpdateSensor", sensor);
     }
 
     private static string DumpHeaders(IHeaderDictionary headers)
@@ -115,14 +111,6 @@ public class UpdateController : ControllerBase, IAsyncDisposable
             sb.AppendLine();
         }
         return sb.ToString();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        //if (_hubConnection is not null)
-        //{
-        //    await _hubConnection.DisposeAsync();
-        //}
     }
 }
 

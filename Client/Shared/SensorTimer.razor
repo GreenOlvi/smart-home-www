@@ -3,6 +3,8 @@
 @using Humanizer.Localisation
 @using Utils 
 
+@implements IAsyncDisposable
+
 <em style="color: @CurrentColour.ToCss()">@TimeSince.Humanize(precision:3, minUnit: TimeUnit.Second)</em>
 
 @code {
@@ -14,7 +16,7 @@
     private TimeSpan TimeSince => DateTime.UtcNow - StartTime;
     private double l => Math.Min(1.0, TimeSince.TotalSeconds / (double)HighSeconds);
 
-    private readonly ColourGradient _gradient = new ColourGradient(
+    private readonly ColourGradient _gradient = new(
         new Colour { R = 0, G = 128, B = 0 },
         new Colour { R = 255, G = 0, B = 0 });
 
@@ -26,9 +28,17 @@
     {
         await base.OnInitializedAsync();
 
-        _timer = new(async (object stateInfo) =>
+        _timer = new(async (object? stateInfo) =>
         {
             await InvokeAsync(StateHasChanged);
         }, new AutoResetEvent(false), 1000 - TimeSince.Milliseconds, 1000);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_timer is not null)
+        {
+            await _timer.DisposeAsync();
+        }
     }
 }

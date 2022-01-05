@@ -1,15 +1,13 @@
 ﻿@page "/sensors"
 
-@using Microsoft.EntityFrameworkCore
-@using SmartHomeWWW.Client.Repositories
-@using SmartHomeWWW.Core.Domain
-@using SmartHomeWWW.Core.Infrastructure
+@using Microsoft.AspNetCore.SignalR.Client
 
 @implements IAsyncDisposable
 
 @inject ILogger<Sensors> Logger
 @inject NavigationManager NavigationManager
 @inject SensorsHttpClient SensorsClient
+@inject HubConnection HubConnection
 
 <div class="text-center">
     <h1 class="display-4">Sensors</h1>
@@ -33,7 +31,13 @@
             <td>@sensor.Alias</td>
             <td>@sensor.Mac</td>
             <td>@sensor.ChipType</td>
-            <td>@sensor.LastContact?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")<br /><SensorTimer StartTime="sensor.LastContact.Value" /></td>
+            <td>
+                @sensor.LastContact?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")<br />
+                @if (sensor.LastContact.HasValue)
+                {
+                    <SensorTimer StartTime="sensor.LastContact.Value" />
+                }
+            </td>
             <td>@sensor.FirmwareVersion</td>
             <td><button type="button" class="btn btn-danger" @onclick="(() => DeleteSensor(sensor))">Delete</button></td>
         </tr>
@@ -49,9 +53,7 @@
 
 
 @code {
-
     IReadOnlyList<Sensor> SensorsList = Array.Empty<Sensor>();
-    //private HubConnection hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,19 +61,17 @@
 
         await LoadSensors();
 
-        //hubConnection = new HubConnectionBuilder()
-        //    .WithUrl($"http:localhost:80{SensorsHub.RelativePath}")
-        //    .Build();
+        HubConnection.On<Sensor>("SensorUpdated", async sensor =>
+        {
+            Logger.LogInformation($"Received SensorUpdated on {sensor.Mac}");
+            await LoadSensors();
+            StateHasChanged();
+        });
 
-        //hubConnection.On<Sensor>("SensorUpdated", async sensor =>
-        //{
-        //    Logger.LogInformation($"Received SensorUpdated on {sensor.Mac}");
-        //    using var dbContext = DbContextFactory.CreateDbContext();
-        //    await LoadSensors(dbContext);
-        //    StateHasChanged();
-        //});
-
-        //await hubConnection.StartAsync();
+        if (HubConnection.State == HubConnectionState.Disconnected)
+        {
+            await HubConnection.StartAsync();
+        }
     }
 
     private async Task LoadSensors()
@@ -85,11 +85,9 @@
         await LoadSensors();
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        //if (hubConnection is not null)
-        //{
-        //    await hubConnection.DisposeAsync();
-        //}
+        HubConnection.Remove("SensorUpdated");
+        return ValueTask.CompletedTask;
     }
 }
