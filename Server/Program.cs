@@ -33,8 +33,8 @@ builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
 builder.Services.AddSingleton<HubConnection>(sp =>
 {
     return new HubConnectionBuilder()
-        .WithUrl($"https://localhost:7013{SensorsHub.RelativePath}")
-        //.WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
+        //.WithUrl($"https://localhost:7013{SensorsHub.RelativePath}")
+        .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
         .WithAutomaticReconnect()
         .Build();
 });
