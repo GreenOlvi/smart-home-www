@@ -28,6 +28,9 @@ builder.Services.AddScoped<IFirmwareRepository>(sp =>
 builder.Services.AddSingleton<ITasmotaClientFactory>(sp =>
     new TasmotaHttpClientFactory(sp.GetService<IHttpClientFactory>()));
 
+builder.Services.AddSingleton<IRelayFactory>(sp =>
+    new RelayFactory(sp.GetService<ITasmotaClientFactory>()));
+
 builder.Services.AddHttpClient<HttpClient>();
 
 builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
