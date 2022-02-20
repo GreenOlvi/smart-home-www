@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SmartHomeWWW.Core.Domain;
+using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 
 namespace SmartHomeWWW.Server.Controllers

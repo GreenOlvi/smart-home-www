@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace SmartHomeWWW.Core.Domain
+namespace SmartHomeWWW.Core.Domain.Entities
 {
     public record WeatherCache
     {

@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +24,11 @@ builder.Services.AddScoped<IFirmwareRepository>(sp =>
     new DiskFirmwareRepository(
         sp.GetService<ILogger<DiskFirmwareRepository>>(),
         builder.Configuration.GetValue<string>("FirmwarePath")));
+
+builder.Services.AddSingleton<ITasmotaClientFactory>(sp =>
+    new TasmotaHttpClientFactory(sp.GetService<IHttpClientFactory>()));
+
+builder.Services.AddHttpClient<HttpClient>();
 
 builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
     optionsBuilder.UseSqlite(

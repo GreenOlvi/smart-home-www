@@ -22,17 +22,17 @@ namespace SmartHomeWWW.Core.Firmwares
 
         public IEnumerable<Firmware> GetAllFirmwares()
         {
-            _logger.LogInformation($"Checking [{_firmwarePath}]");
+            _logger.LogDebug($"Checking [{_firmwarePath}]");
             if (!Directory.Exists(_firmwarePath))
             {
-                _logger.LogInformation($"Path [{Path.GetFullPath(_firmwarePath)}] does not exist");
+                _logger.LogWarning($"Path [{Path.GetFullPath(_firmwarePath)}] does not exist");
                 return Enumerable.Empty<Firmware>();
             }
 
             return Directory.GetFiles(_firmwarePath)
                 .Select(n =>
                 {
-                    _logger.LogInformation($"Found: [{n}]");
+                    _logger.LogDebug($"Found: [{n}]");
                     var s = TryGetFromFile(n, out var firmware);
                     return (s, firmware);
                 })

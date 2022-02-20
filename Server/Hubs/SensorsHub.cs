@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using SmartHomeWWW.Core.Domain;
+using SmartHomeWWW.Core.Domain.Entities;
 
 namespace SmartHomeWWW.Server.Hubs
 {

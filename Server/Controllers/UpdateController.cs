@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain;
+using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using System.Text;
