@@ -1,0 +1,48 @@
+﻿@page "/relays"
+
+@inject ILogger<Relays> Logger
+@inject RelaysHttpClient RelaysClient
+
+<main>
+    <div class="text-center">
+        <h1>Relays</h1>
+    </div>
+
+    @if (RelayList != null && RelayList.Any())
+    {
+    <div class="container px-4 py5">
+        <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+            @foreach (var relay in RelayList)
+            {
+            <div class="col">
+                <h2>Relay <i>@relay.Name</i></h2>
+                <p>@relay.Type</p>
+                <button type="button" class="btn btn-primary" @onclick="(() => ToggleRelay(relay.Id))">Toggle</button>
+            </div>
+            }
+        </div>
+    </div>
+    }
+    else
+    {
+<div class="alert alert-warning" role="alert">No relays found</div>
+    }
+</main>
+
+@code {
+    IReadOnlyList<RelayEntry> RelayList = Array.Empty<RelayEntry>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await LoadRelays();
+    }
+
+    private async Task LoadRelays()
+    {
+        RelayList = (await RelaysClient.GetRelays()).ToList();
+    }
+
+    private Task ToggleRelay(Guid id) => RelaysClient.ToggleRelay(id);
+}

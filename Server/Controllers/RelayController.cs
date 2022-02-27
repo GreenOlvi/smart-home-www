@@ -1,10 +1,8 @@
-﻿using CSharpFunctionalExtensions;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
-using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Core.ViewModel;
 
 namespace SmartHomeWWW.Server.Controllers
 {
@@ -68,7 +66,7 @@ namespace SmartHomeWWW.Server.Controllers
         }
 
         [HttpGet("{id}/state")]
-        public async Task<ActionResult<object>> GetValue(Guid id)
+        public async Task<ActionResult<RelayStateViewModel>> GetValue(Guid id)
         {
             using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             var relayEntry = await dbContext.Relays.FindAsync(id);
@@ -81,7 +79,8 @@ namespace SmartHomeWWW.Server.Controllers
             var relay = _relayFactory.Create(relayEntry);
             var status = await relay.GetStateAsync();
 
-            return new {
+            return new RelayStateViewModel
+            {
                 RelayId = id,
                 State = status.GetValueOrThrow(),
             };
@@ -117,7 +116,7 @@ namespace SmartHomeWWW.Server.Controllers
 
             var state = (await relay.GetStateAsync()).GetValueOrThrow();
 
-            return Ok(new { RelayId = id, State = state });
+            return Ok(new RelayStateViewModel { RelayId = id, State = state });
         }
     }
 }
