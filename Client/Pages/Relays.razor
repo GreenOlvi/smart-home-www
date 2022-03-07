@@ -14,35 +14,40 @@
         <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
             @foreach (var relay in RelayList)
             {
-            <div class="col">
-                <h2>Relay <i>@relay.Name</i></h2>
-                <p>@relay.Type</p>
-                <button type="button" class="btn btn-primary" @onclick="(() => ToggleRelay(relay.Id))">Toggle</button>
-            </div>
+            <div class="col"><RelayBox Entry="relay" /></div>
             }
         </div>
     </div>
     }
     else
     {
-<div class="alert alert-warning" role="alert">No relays found</div>
+        if (_isLoading)
+        {
+            <div class="col align-content-center">
+                <span class="spinner-border text-primary" role="status"></span>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning" role="alert">No relays found</div>
+        }
     }
 </main>
 
 @code {
-    IReadOnlyList<RelayEntry> RelayList = Array.Empty<RelayEntry>();
+    private IReadOnlyList<RelayEntry> RelayList = Array.Empty<RelayEntry>();
+    private bool _isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
         await LoadRelays();
     }
 
     private async Task LoadRelays()
     {
+        _isLoading = true;
         RelayList = (await RelaysClient.GetRelays()).ToList();
+        _isLoading = false;
     }
-
-    private Task ToggleRelay(Guid id) => RelaysClient.ToggleRelay(id);
 }

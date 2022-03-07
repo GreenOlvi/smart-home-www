@@ -82,7 +82,7 @@ namespace SmartHomeWWW.Server.Controllers
             return new RelayStateViewModel
             {
                 RelayId = id,
-                State = status.GetValueOrThrow(),
+                State = status.HasValue ? status.Value : null,
             };
         }
 
@@ -114,9 +114,13 @@ namespace SmartHomeWWW.Server.Controllers
                     throw new InvalidOperationException($"Unknown action type '{value}'");
             }
 
-            var state = (await relay.GetStateAsync()).GetValueOrThrow();
+            var state = await relay.GetStateAsync();
 
-            return Ok(new RelayStateViewModel { RelayId = id, State = state });
+            return Ok(new RelayStateViewModel
+            {
+                RelayId = id,
+                State = state.HasValue ? state.Value : null,
+            });
         }
     }
 }
