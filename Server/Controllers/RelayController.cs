@@ -83,7 +83,7 @@ namespace SmartHomeWWW.Server.Controllers
         }
 
         [HttpGet("{id}/state")]
-        public async Task<ActionResult<RelayStateViewModel>> GetValue(Guid id)
+        public async Task<ActionResult<RelayStateViewModel>> GetState(Guid id)
         {
             using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             var relayEntry = await dbContext.Relays.FindAsync(id);

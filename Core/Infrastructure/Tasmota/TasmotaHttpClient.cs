@@ -4,17 +4,20 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Flurl;
+using Microsoft.Extensions.Logging;
 
 namespace SmartHomeWWW.Core.Infrastructure.Tasmota
 {
     public class TasmotaHttpClient : ITasmotaClient
     {
-        public TasmotaHttpClient(HttpClient httpClient, Uri baseUrl)
+        public TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl)
         {
+            _logger = logger;
             _httpClient = httpClient;
             _baseUrl = baseUrl;
         }
 
+        private readonly ILogger<TasmotaHttpClient> _logger;
         private readonly HttpClient _httpClient;
         private readonly Uri _baseUrl;
 
@@ -26,13 +29,23 @@ namespace SmartHomeWWW.Core.Infrastructure.Tasmota
 
         private async Task<Maybe<JsonDocument>> GetUrl(Url uri)
         {
-            var response = await _httpClient.GetAsync(uri);
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                return Maybe.None;
-            }
+                var response = await _httpClient.GetAsync(uri);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"Error from relay: {response.StatusCode}");
+                    return Maybe.None;
+                }
 
-            return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+                return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Error while sending request to relay: {e.Message}");
+                _logger.LogDebug(e, "Exception caught");
+            }
+            return Maybe.None;
         }
     }
 }

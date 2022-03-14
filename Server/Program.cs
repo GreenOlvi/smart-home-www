@@ -26,12 +26,12 @@ builder.Services.AddScoped<IFirmwareRepository>(sp =>
         builder.Configuration.GetValue<string>("FirmwarePath")));
 
 builder.Services.AddSingleton<ITasmotaClientFactory>(sp =>
-    new TasmotaHttpClientFactory(sp.GetService<IHttpClientFactory>()));
+    new TasmotaHttpClientFactory(sp.GetService<ILoggerFactory>(), sp.GetService<IHttpClientFactory>()));
 
 builder.Services.AddSingleton<IRelayFactory>(sp =>
     new RelayFactory(sp.GetService<ITasmotaClientFactory>()));
 
-builder.Services.AddHttpClient<HttpClient>();
+builder.Services.AddHttpClient<HttpClient>("Tasmota", client => { client.Timeout = TimeSpan.FromSeconds(5); });
 
 builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
     optionsBuilder.UseSqlite(
