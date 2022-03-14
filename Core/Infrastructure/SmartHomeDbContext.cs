@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SmartHomeWWW.Core.Domain;
+using SmartHomeWWW.Core.Domain.Entities;
 
 namespace SmartHomeWWW.Core.Infrastructure
 {
@@ -9,6 +9,7 @@ namespace SmartHomeWWW.Core.Infrastructure
         {
         }
 
+        public DbSet<RelayEntry> Relays { get; init; }
         public DbSet<Sensor> Sensors { get; init; }
         public DbSet<WeatherCache> WeatherCaches { get; init; }
     }

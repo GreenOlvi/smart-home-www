@@ -11,6 +11,7 @@ using System.Text.Json;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Controllers;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+using SmartHomeWWW.Core.Domain.Entities;
 
 namespace SmartHomeWWW.Server.Tests
 {
@@ -20,8 +21,8 @@ namespace SmartHomeWWW.Server.Tests
         public async Task Setup()
         {
             var dbOptions = new DbContextOptionsBuilder<SmartHomeDbContext>()
-                .UseSqlite("Data Source=SmartHomeDb;Mode=Memory;Cache=Shared",
-                    o => o.MigrationsAssembly("SmartHomeWWW"))
+                .UseSqlite("Data Source=:memory:;Mode=Memory;Cache=Shared",
+                    o => o.MigrationsAssembly("SmartHomeWWW.Server"))
                 .Options;
 
             _context = new SmartHomeDbContext(dbOptions);
@@ -70,7 +71,7 @@ namespace SmartHomeWWW.Server.Tests
 
             var serialized = JsonSerializer.Serialize(weather);
 
-            _context.WeatherCaches.Add(new Core.Domain.WeatherCache
+            _context.WeatherCaches.Add(new WeatherCache
             {
                 Id = Guid.NewGuid(),
                 Name = "current",

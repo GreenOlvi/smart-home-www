@@ -1,0 +1,65 @@
+﻿@inject RelaysHttpClient RelayClient
+
+<h3>Relay <i>@Name</i></h3>
+<p>@Type</p>
+<div class="btn @StateClass">
+    <span class="spinner-border @(StateClass)" hidden="@(State != RelayState.Fetching)" role="status"></span>
+    @StateText
+</div>
+
+<button type="button" class="btn btn-primary" @onclick="(async () => await Toggle())">Toggle</button>
+
+@code {
+
+    [Parameter]
+    public RelayEntry Entry { get; init; }
+
+    public string Name => Entry.Name;
+    public string Type => Entry.Type;
+
+    public RelayState State { get; private set; } = RelayState.Unknown;
+
+    private string StateClass =>
+        State switch
+        {
+            RelayState.Fetching => "btn-secondary",
+            RelayState.On => "btn-success",
+            RelayState.Off => "btn-danger",
+            _ => "btn-secondary",
+        };
+
+    private string StateText =>
+        State switch
+        {
+            RelayState.Fetching => string.Empty,
+            RelayState.On => "On",
+            RelayState.Off => "Off",
+            _ => "?",
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await FetchState();
+    }
+
+    private async ValueTask Toggle()
+    {
+        State = RelayState.Fetching;
+        State = await RelayClient.ToggleRelay(Entry.Id);
+    }
+
+    private async ValueTask FetchState()
+    {
+        State = RelayState.Fetching;
+        State = await RelayClient.GetState(Entry.Id);
+    }
+
+    public enum RelayState
+    {
+        Unknown,
+        Fetching,
+        On,
+        Off,
+    }
+}
