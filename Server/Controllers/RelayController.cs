@@ -65,6 +65,23 @@ namespace SmartHomeWWW.Server.Controllers
             return CreatedAtAction(nameof(GetRelay), new { id = relay.Id }, relay);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteRelay(Guid id)
+        {
+            using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            var relay = await dbContext.Relays.FindAsync(id);
+
+            if (relay is null)
+            {
+                return NotFound();
+            }
+
+            dbContext.Relays.Remove(relay);
+            await dbContext.SaveChangesAsync();
+            _logger.LogInformation($"Deleted relay {relay.Id}");
+            return Ok();
+        }
+
         [HttpGet("{id}/state")]
         public async Task<ActionResult<RelayStateViewModel>> GetValue(Guid id)
         {
