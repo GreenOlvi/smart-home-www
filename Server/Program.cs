@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Hubs;
+using SmartHomeWWW.Server.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,14 +24,12 @@ builder.Services.AddResponseCompression(opts =>
 
 builder.Services.AddScoped<IFirmwareRepository>(sp =>
     new DiskFirmwareRepository(
-        sp.GetService<ILogger<DiskFirmwareRepository>>(),
+        sp.GetService<ILogger<DiskFirmwareRepository>>() ?? throw new ArgumentNullException("ILogger<DiskFirmwareRepository>"),
         builder.Configuration.GetValue<string>("FirmwarePath")));
 
-builder.Services.AddSingleton<ITasmotaClientFactory>(sp =>
-    new TasmotaHttpClientFactory(sp.GetService<ILoggerFactory>(), sp.GetService<IHttpClientFactory>()));
+builder.Services.AddSingleton<ITasmotaClientFactory, TasmotaHttpClientFactory>();
 
-builder.Services.AddSingleton<IRelayFactory>(sp =>
-    new RelayFactory(sp.GetService<ITasmotaClientFactory>()));
+builder.Services.AddSingleton<IRelayFactory, RelayFactory>();
 
 builder.Services.AddHttpClient<HttpClient>("Tasmota", client => { client.Timeout = TimeSpan.FromSeconds(5); });
 
@@ -41,11 +41,16 @@ builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
 builder.Services.AddSingleton<HubConnection>(sp =>
 {
     return new HubConnectionBuilder()
-        //.WithUrl($"https://localhost:7013{SensorsHub.RelativePath}")
-        .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
+        .WithUrl($"https://localhost:7013{SensorsHub.RelativePath}")
+        //.WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
         .WithAutomaticReconnect()
         .Build();
 });
+
+// Mqtt client service
+var mqttConfig = new MqttConfig();
+builder.Configuration.GetSection("Mqtt").Bind(mqttConfig);
+builder.Services.AddMqttClientHostedService(mqttConfig);
 
 var app = builder.Build();
 
