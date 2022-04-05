@@ -27,13 +27,13 @@ public class TasmotaRelay : IRelay
 
         if (obj.TryGetProperty("Command", out var cmd))
         {
-            if (cmd.GetString().ToLowerInvariant() == "error")
+            if (cmd.GetString()?.ToLowerInvariant() == "error")
             {
                 return Maybe.None;
             }
         }
 
-        var value = obj.GetProperty("POWER").GetString().ToLowerInvariant();
+        var value = obj.GetProperty("POWER").GetString()?.ToLowerInvariant();
         return value == "on";
     }
 

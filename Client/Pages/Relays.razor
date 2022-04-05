@@ -1,4 +1,5 @@
 ﻿@page "/relays"
+@using SmartHomeWWW.Core.ViewModel
 
 @inject ILogger<Relays> Logger
 @inject RelaysHttpClient RelaysClient
@@ -35,7 +36,7 @@
 </main>
 
 @code {
-    private IReadOnlyList<RelayEntry> RelayList = Array.Empty<RelayEntry>();
+    private IReadOnlyList<RelayEntryViewModel> RelayList = Array.Empty<RelayEntryViewModel>();
     private bool _isLoading = false;
 
     protected override async Task OnInitializedAsync()
