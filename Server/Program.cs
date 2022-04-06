@@ -10,6 +10,8 @@ using SmartHomeWWW.Server.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("secrets.json");
+
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
@@ -49,8 +51,14 @@ builder.Services.AddSingleton<HubConnection>(sp =>
 
 // Mqtt client service
 var mqttConfig = new MqttConfig();
-builder.Configuration.GetSection("Mqtt").Bind(mqttConfig);
+builder.Configuration.GetRequiredSection("Mqtt").Bind(mqttConfig);
 builder.Services.AddMqttClientHostedService(mqttConfig);
+
+// Telegram bot service
+var telegramConfig = new TelegramConfig();
+builder.Configuration.GetRequiredSection("Telegram").Bind(telegramConfig);
+builder.Services.AddHttpClient<HttpClient>("Telegram");
+builder.Services.AddTelegramBotHostedService(telegramConfig);
 
 var app = builder.Build();
 

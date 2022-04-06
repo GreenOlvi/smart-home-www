@@ -2,6 +2,7 @@
 using MQTTnet.Client.Options;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Mqtt;
+using SmartHomeWWW.Server.Telegram;
 
 namespace SmartHomeWWW.Server.Utils
 {
@@ -14,8 +15,8 @@ namespace SmartHomeWWW.Server.Utils
                 var optionsBuilder = new MqttClientOptionsBuilder();
                 config(optionsBuilder);
                 var options = optionsBuilder.Build();
-                var logger = sp.GetService<ILogger<MqttClientHostedService>>() ?? throw new("ILogger<MqttClientHostedService>");
-                return new MqttClientHostedService(logger, new MqttFactory());
+                var logger = sp.GetRequiredService<ILogger<MqttClientHostedService>>();
+                return new MqttClientHostedService(logger, new MqttFactory(), options);
             });
 
         public static IServiceCollection AddMqttClientHostedService(this IServiceCollection services, MqttConfig config) =>
@@ -27,5 +28,13 @@ namespace SmartHomeWWW.Server.Utils
                     opt.WithClientId(config.ClientId);
                 }
             });
+
+        public static IServiceCollection AddTelegramBotHostedService(this IServiceCollection services, TelegramConfig config) =>
+            services.AddHostedService(sp =>
+                new TelegramBotHostedService(
+                    sp.GetRequiredService<ILogger<TelegramBotHostedService>>(),
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Telegram"),
+                    config));
+
     }
 }

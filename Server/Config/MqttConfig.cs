@@ -1,9 +1,9 @@
 ﻿namespace SmartHomeWWW.Server.Config
 {
-    public record struct MqttConfig
+    public record MqttConfig
     {
-        public readonly string Host = string.Empty;
-        public readonly int Port = 1883;
-        public readonly string? ClientId = null;
+        public string Host { get; set; } = string.Empty;
+        public int Port { get; set; } = 1883;
+        public string? ClientId { get; set; } = null;
     }
 }

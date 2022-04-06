@@ -6,14 +6,11 @@ namespace SmartHomeWWW.Server.Mqtt
 {
     public class MqttClientHostedService : IHostedService, IAsyncDisposable
     {
-        public MqttClientHostedService(ILogger<MqttClientHostedService> logger, IMqttClientFactory clientFactory)
+        public MqttClientHostedService(ILogger<MqttClientHostedService> logger, IMqttClientFactory clientFactory, IMqttClientOptions options)
         {
             _logger = logger;
             _client = clientFactory.CreateMqttClient();
-
-            _options = new MqttClientOptionsBuilder()
-                .WithTcpServer("raspi4.local", 1883)
-                .Build();
+            _options = options;
 
             _client.UseConnectedHandler(e =>
             {
