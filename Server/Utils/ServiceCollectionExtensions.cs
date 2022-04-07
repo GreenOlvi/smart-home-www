@@ -1,6 +1,7 @@
 ﻿using MQTTnet;
 using MQTTnet.Client.Options;
 using SmartHomeWWW.Server.Config;
+using SmartHomeWWW.Server.Events;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Telegram;
 
@@ -34,7 +35,8 @@ namespace SmartHomeWWW.Server.Utils
                 new TelegramBotHostedService(
                     sp.GetRequiredService<ILogger<TelegramBotHostedService>>(),
                     sp.GetRequiredService<IHttpClientFactory>().CreateClient("Telegram"),
-                    config));
+                    config,
+                    sp.GetRequiredService<IEventBus>()));
 
     }
 }

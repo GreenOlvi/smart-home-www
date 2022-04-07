@@ -5,7 +5,9 @@ using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Config;
+using SmartHomeWWW.Server.Events;
 using SmartHomeWWW.Server.Hubs;
+using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,13 +54,16 @@ builder.Services.AddSingleton<HubConnection>(sp =>
 // Mqtt client service
 var mqttConfig = new MqttConfig();
 builder.Configuration.GetRequiredSection("Mqtt").Bind(mqttConfig);
-builder.Services.AddMqttClientHostedService(mqttConfig);
+//builder.Services.AddMqttClientHostedService(mqttConfig);
 
 // Telegram bot service
 var telegramConfig = new TelegramConfig();
 builder.Configuration.GetRequiredSection("Telegram").Bind(telegramConfig);
 builder.Services.AddHttpClient<HttpClient>("Telegram");
 builder.Services.AddTelegramBotHostedService(telegramConfig);
+
+builder.Services.AddSingleton<IEventBus, BasicEventBus>();
+builder.Services.AddSingleton<AddressBook>(sp => new AddressBook(telegramConfig));
 
 var app = builder.Build();
 

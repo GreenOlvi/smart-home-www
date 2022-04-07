@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.ViewModel;
+using SmartHomeWWW.Server.Events;
 
 namespace SmartHomeWWW.Server.Controllers
 {
@@ -11,16 +11,20 @@ namespace SmartHomeWWW.Server.Controllers
     [ApiController]
     public class RelayController : ControllerBase
     {
-        public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory)
+        public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory, IEventBus eventBus, IServiceProvider sp)
         {
             _logger = logger;
             _dbContextFactory = dbContextFactory;
             _relayFactory = relayFactory;
+            _eventBus = eventBus;
+            _sp = sp;
         }
 
         private readonly ILogger<RelayController> _logger;
         private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
         private readonly IRelayFactory _relayFactory;
+        private readonly IEventBus _eventBus;
+        private readonly IServiceProvider _sp;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RelayEntryViewModel>>> GetRelays()
@@ -136,6 +140,15 @@ namespace SmartHomeWWW.Server.Controllers
             }
 
             var state = await relay.GetStateAsync();
+
+            var addressBook = _sp.GetRequiredService<Telegram.AddressBook>();
+
+            var stateText = state.HasValue ? (state.Value ? "on" : "off") : "unknown";
+            var msg = new Telegram.TelegramSendTextMessageCommand(addressBook.OwnerId)
+            {
+                Text = $"Relay `{relayEntry.Name}` is {stateText}",
+            };
+            _eventBus.Publish(msg);
 
             return Ok(new RelayStateViewModel
             {
