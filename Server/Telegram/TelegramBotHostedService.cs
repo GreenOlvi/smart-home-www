@@ -1,12 +1,14 @@
 ﻿using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Server.Messages.Commands;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.Telegram
 {
-    public class TelegramBotHostedService : IHostedService, IAsyncDisposable, IMessageHandler<TelegramSendTextMessageCommand>
+    public class TelegramBotHostedService : IHostedService, IAsyncDisposable,
+        IMessageHandler<TelegramSendTextMessageCommand>
     {
         public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, HttpClient httpClient, TelegramConfig config, IMessageBus messageBus)
         {
@@ -43,6 +45,9 @@ namespace SmartHomeWWW.Server.Telegram
         {
             var me = await _bot.GetMeAsync(cancellationToken);
             _logger.LogInformation("Stopping {botname}...", me.Username);
+
+            _messageBus.Unsubscribe<TelegramSendTextMessageCommand>(this);
+
             _cancellationTokenSource.Cancel();
             //await _bot.SendTextMessageAsync(_config.OwnerId, "Shutting down", cancellationToken: cancellationToken);
         }

@@ -1,8 +1,6 @@
-﻿using SmartHomeWWW.Server.Messages;
-
-namespace SmartHomeWWW.Server.Telegram
+﻿namespace SmartHomeWWW.Server.Messages.Commands
 {
-    public class TelegramSendTextMessageCommand : IMessage
+    public record TelegramSendTextMessageCommand : IMessage
     {
         public long ChatId { get; }
         public string Text { get; init; } = string.Empty;

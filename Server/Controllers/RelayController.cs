@@ -141,15 +141,6 @@ namespace SmartHomeWWW.Server.Controllers
 
             var state = await relay.GetStateAsync();
 
-            var addressBook = _sp.GetRequiredService<Telegram.AddressBook>();
-
-            var stateText = state.HasValue ? (state.Value ? "on" : "off") : "unknown";
-            var msg = new Telegram.TelegramSendTextMessageCommand(addressBook.OwnerId)
-            {
-                Text = $"Relay `{relayEntry.Name}` is {stateText}",
-            };
-            _bus.Publish(msg);
-
             return Ok(new RelayStateViewModel
             {
                 RelayId = id,

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Server;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
@@ -20,12 +21,6 @@ internal static class Program
         MapConfig(builder);
 
         AddServices(builder);
-
-        builder.Services.AddMqttClientHostedService();
-        builder.Services.AddTelegramBotHostedService();
-
-        builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();
-        builder.Services.AddSingleton<AddressBook>();
 
         var app = builder.Build();
 
@@ -94,6 +89,14 @@ internal static class Program
         });
 
         AddHttpClients(builder);
+
+        builder.Services.AddMqttClientHostedService();
+        builder.Services.AddTelegramBotHostedService();
+
+        builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();
+        builder.Services.AddSingleton<AddressBook>();
+
+        builder.Services.AddHostedService<Orchestrator>();
     }
 
     private static void AddHttpClients(WebApplicationBuilder builder)
