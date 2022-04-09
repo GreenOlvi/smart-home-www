@@ -1,20 +1,17 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using SmartHomeWWW.Core.Domain;
 using SmartHomeWWW.Core.Utils;
+using SmartHomeWWW.Core.Firmwares;
+using SmartHomeWWW.Server.Config;
 
-namespace SmartHomeWWW.Core.Firmwares
+namespace SmartHomeWWW.Server.Firmwares
 {
     public class DiskFirmwareRepository : IFirmwareRepository
     {
-        public DiskFirmwareRepository(ILogger<DiskFirmwareRepository> logger, string firmwarePath)
+        public DiskFirmwareRepository(ILogger<DiskFirmwareRepository> logger, FirmwaresConfig config)
         {
             _logger = logger;
-            _firmwarePath = firmwarePath;
+            _firmwarePath = config.Path;
         }
 
         private readonly ILogger<DiskFirmwareRepository> _logger;
@@ -22,17 +19,17 @@ namespace SmartHomeWWW.Core.Firmwares
 
         public IEnumerable<Firmware> GetAllFirmwares()
         {
-            _logger.LogDebug($"Checking [{_firmwarePath}]");
+            _logger.LogDebug("Checking [{path}]", _firmwarePath);
             if (!Directory.Exists(_firmwarePath))
             {
-                _logger.LogWarning($"Path [{Path.GetFullPath(_firmwarePath)}] does not exist");
+                _logger.LogWarning("Path [{path}] does not exist", Path.GetFullPath(_firmwarePath));
                 return Enumerable.Empty<Firmware>();
             }
 
             return Directory.GetFiles(_firmwarePath)
                 .Select(n =>
                 {
-                    _logger.LogDebug($"Found: [{n}]");
+                    _logger.LogDebug("Found: [{name}]", n);
                     var s = TryGetFromFile(n, out var firmware);
                     return (s, firmware);
                 })
@@ -45,7 +42,7 @@ namespace SmartHomeWWW.Core.Firmwares
             return version is not null;
         }
 
-        public Version GetCurrentVersion() => GetAllFirmwares().Max(f => f.Version);
+        public Version GetCurrentVersion() => GetAllFirmwares().Max(f => f.Version) ?? new Version();
 
         public Stream GetCurrentFirmware()
         {
@@ -59,7 +56,7 @@ namespace SmartHomeWWW.Core.Firmwares
             var file = new FileInfo(filename);
             if (!TryExtractVersionFromFileName(file.Name, out var version))
             {
-                firmware = null;
+                firmware = new Firmware();
                 return false;
             }
 
@@ -74,13 +71,14 @@ namespace SmartHomeWWW.Core.Firmwares
         public static bool TryExtractVersionFromFileName(string filename, out Version version)
         {
             var match = FirmwareVersionExtract.Match(Path.GetFileName(filename));
-            if (!match.Success)
+            if (!match.Success || !Version.TryParse(match.Groups["version"].Value, out var parsedVersion))
             {
-                version = null;
+                version = new Version();
                 return false;
             }
 
-            return Version.TryParse(match.Groups["version"].Value, out version);
+            version = parsedVersion;
+            return true;
         }
 
         private static readonly Regex FirmwareVersionExtract = new(@"firmware\.(?<version>.+)\.bin", RegexOptions.Compiled);

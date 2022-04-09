@@ -6,96 +6,113 @@ using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Events;
+using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
+using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Telegram;
-using SmartHomeWWW.Server.Utils;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Configuration.AddJsonFile("secrets.json");
-
-// Add services to the container.
-
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
-
-builder.Services.AddSignalR();
-
-builder.Services.AddResponseCompression(opts =>
+internal static class Program
 {
-    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
-});
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IFirmwareRepository>(sp =>
-    new DiskFirmwareRepository(
-        sp.GetService<ILogger<DiskFirmwareRepository>>() ?? throw new ArgumentNullException("ILogger<DiskFirmwareRepository>"),
-        builder.Configuration.GetValue<string>("FirmwarePath")));
+        MapConfig(builder);
 
-builder.Services.AddSingleton<ITasmotaClientFactory, TasmotaHttpClientFactory>();
+        AddServices(builder);
 
-builder.Services.AddSingleton<IRelayFactory, RelayFactory>();
+        builder.Services.AddMqttClientHostedService();
+        builder.Services.AddTelegramBotHostedService();
 
-builder.Services.AddHttpClient<HttpClient>("Tasmota", client => { client.Timeout = TimeSpan.FromSeconds(5); });
+        builder.Services.AddSingleton<IEventBus, BasicEventBus>();
+        builder.Services.AddSingleton<AddressBook>();
 
-builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
-    optionsBuilder.UseSqlite(
-        builder.Configuration.GetConnectionString("SmartHomeSqliteContext"),
-        o => o.MigrationsAssembly("SmartHomeWWW.Server")));
+        var app = builder.Build();
 
-builder.Services.AddSingleton<HubConnection>(sp =>
-{
-    return new HubConnectionBuilder()
-        .WithUrl($"https://localhost:7013{SensorsHub.RelativePath}")
-        //.WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
-        .WithAutomaticReconnect()
-        .Build();
-});
+        // Configure the HTTP request pipeline.
 
-// Mqtt client service
-var mqttConfig = new MqttConfig();
-builder.Configuration.GetRequiredSection("Mqtt").Bind(mqttConfig);
-//builder.Services.AddMqttClientHostedService(mqttConfig);
+        app.UseResponseCompression();
 
-// Telegram bot service
-var telegramConfig = new TelegramConfig();
-builder.Configuration.GetRequiredSection("Telegram").Bind(telegramConfig);
-builder.Services.AddHttpClient<HttpClient>("Telegram");
-builder.Services.AddTelegramBotHostedService(telegramConfig);
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseWebAssemblyDebugging();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
+        }
 
-builder.Services.AddSingleton<IEventBus, BasicEventBus>();
-builder.Services.AddSingleton<AddressBook>(sp => new AddressBook(telegramConfig));
+        app.UseHttpsRedirection();
 
-var app = builder.Build();
+        app.UseBlazorFrameworkFiles();
+        app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
+        app.UseRouting();
 
-app.UseResponseCompression();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapHub<SensorsHub>(SensorsHub.RelativePath);
+        });
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseWebAssemblyDebugging();
+        app.MapRazorPages();
+        app.MapControllers();
+        app.MapFallbackToFile("index.html");
+
+        app.Run();
+    }
+
+    private static void AddServices(WebApplicationBuilder builder)
+    {
+        // Add services to the container.
+        builder.Services.AddControllersWithViews();
+        builder.Services.AddRazorPages();
+        builder.Services.AddSignalR();
+
+        builder.Services.AddResponseCompression(opts =>
+        {
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+        });
+
+        builder.Services.AddScoped<IFirmwareRepository, DiskFirmwareRepository>();
+
+        builder.Services.AddSingleton<ITasmotaClientFactory, TasmotaHttpClientFactory>();
+        builder.Services.AddSingleton<IRelayFactory, RelayFactory>();
+
+        builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
+            optionsBuilder.UseSqlite(
+                builder.Configuration.GetConnectionString("SmartHomeSqliteContext"),
+                o => o.MigrationsAssembly("SmartHomeWWW.Server")));
+
+        builder.Services.AddSingleton(sp =>
+        {
+            return new HubConnectionBuilder()
+                .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
+                .WithAutomaticReconnect()
+                .Build();
+        });
+
+        AddHttpClients(builder);
+    }
+
+    private static void AddHttpClients(WebApplicationBuilder builder)
+    {
+        builder.Services.AddHttpClient<HttpClient>("Tasmota", client => { client.Timeout = TimeSpan.FromSeconds(5); });
+        builder.Services.AddHttpClient<HttpClient>("Telegram");
+    }
+
+    private static void MapConfig(WebApplicationBuilder builder)
+    {
+        builder.Configuration.AddJsonFile("secrets.json");
+
+        var generalConfig = new GeneralConfig();
+        builder.Configuration.Bind(generalConfig);
+
+        builder.Services.AddSingleton(generalConfig);
+        builder.Services.AddSingleton(generalConfig.Firmwares);
+        builder.Services.AddSingleton(generalConfig.Mqtt);
+        builder.Services.AddSingleton(generalConfig.Telegram);
+    }
 }
-else
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
 
-app.UseHttpsRedirection();
-
-app.UseBlazorFrameworkFiles();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<SensorsHub>(SensorsHub.RelativePath);
-});
-
-app.MapRazorPages();
-app.MapControllers();
-app.MapFallbackToFile("index.html");
-
-app.Run();
