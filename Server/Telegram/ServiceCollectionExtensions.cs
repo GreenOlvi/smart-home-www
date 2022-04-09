@@ -1,5 +1,5 @@
 ﻿using SmartHomeWWW.Server.Config;
-using SmartHomeWWW.Server.Events;
+using SmartHomeWWW.Server.Messages;
 
 namespace SmartHomeWWW.Server.Telegram
 {
@@ -11,7 +11,7 @@ namespace SmartHomeWWW.Server.Telegram
                     sp.GetRequiredService<ILogger<TelegramBotHostedService>>(),
                     sp.GetRequiredService<IHttpClientFactory>().CreateClient("Telegram"),
                     config,
-                    sp.GetRequiredService<IEventBus>()));
+                    sp.GetRequiredService<IMessageBus>()));
 
         public static IServiceCollection AddTelegramBotHostedService(this IServiceCollection services) =>
             services.AddHostedService(sp =>
@@ -19,6 +19,6 @@ namespace SmartHomeWWW.Server.Telegram
                     sp.GetRequiredService<ILogger<TelegramBotHostedService>>(),
                     sp.GetRequiredService<IHttpClientFactory>().CreateClient("Telegram"),
                     sp.GetRequiredService<TelegramConfig>(),
-                    sp.GetRequiredService<IEventBus>()));
+                    sp.GetRequiredService<IMessageBus>()));
     }
 }

@@ -1,8 +1,8 @@
-﻿using SmartHomeWWW.Server.Events;
+﻿using SmartHomeWWW.Server.Messages;
 
 namespace SmartHomeWWW.Server.Telegram
 {
-    public class TelegramSendTextMessageCommand : IEvent
+    public class TelegramSendTextMessageCommand : IMessage
     {
         public long ChatId { get; }
         public string Text { get; init; } = string.Empty;

@@ -1,25 +1,25 @@
 ﻿using SmartHomeWWW.Server.Config;
-using SmartHomeWWW.Server.Events;
+using SmartHomeWWW.Server.Messages;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.Telegram
 {
-    public class TelegramBotHostedService : IHostedService, IAsyncDisposable, IEventHandler<TelegramSendTextMessageCommand>
+    public class TelegramBotHostedService : IHostedService, IAsyncDisposable, IMessageHandler<TelegramSendTextMessageCommand>
     {
-        public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, HttpClient httpClient, TelegramConfig config, IEventBus eventBus)
+        public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, HttpClient httpClient, TelegramConfig config, IMessageBus messageBus)
         {
             _logger = logger;
             _config = config;
-            _eventBus = eventBus;
+            _messageBus = messageBus;
             _bot = new TelegramBotClient(_config.ApiKey, httpClient);
         }
 
         private readonly ILogger<TelegramBotHostedService> _logger;
         private readonly TelegramConfig _config;
         private readonly TelegramBotClient _bot;
-        private readonly IEventBus _eventBus;
+        private readonly IMessageBus _messageBus;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -36,7 +36,7 @@ namespace SmartHomeWWW.Server.Telegram
             _bot.StartReceiving(HandleUpdateAsync, HandleErrorAsync, _receiverOptions, cancellationToken);
             //await _bot.SendTextMessageAsync(_config.OwnerId, "I'm online", cancellationToken: cancellationToken);
 
-            _eventBus.Subscribe<TelegramSendTextMessageCommand>(this);
+            _messageBus.Subscribe<TelegramSendTextMessageCommand>(this);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
@@ -76,9 +76,9 @@ namespace SmartHomeWWW.Server.Telegram
             return Task.CompletedTask;
         }
 
-        public async Task Handle(TelegramSendTextMessageCommand @event)
+        public async Task Handle(TelegramSendTextMessageCommand message)
         {
-            await _bot.SendTextMessageAsync(@event.ChatId, @event.Text, cancellationToken: _cancellationTokenSource.Token);
+            await _bot.SendTextMessageAsync(message.ChatId, message.Text, cancellationToken: _cancellationTokenSource.Token);
         }
     }
 }

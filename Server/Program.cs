@@ -5,9 +5,9 @@ using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Config;
-using SmartHomeWWW.Server.Events;
 using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
+using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Telegram;
 
@@ -24,7 +24,7 @@ internal static class Program
         builder.Services.AddMqttClientHostedService();
         builder.Services.AddTelegramBotHostedService();
 
-        builder.Services.AddSingleton<IEventBus, BasicEventBus>();
+        builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();
         builder.Services.AddSingleton<AddressBook>();
 
         var app = builder.Build();

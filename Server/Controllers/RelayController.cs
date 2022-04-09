@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.ViewModel;
-using SmartHomeWWW.Server.Events;
+using SmartHomeWWW.Server.Messages;
 
 namespace SmartHomeWWW.Server.Controllers
 {
@@ -11,19 +11,19 @@ namespace SmartHomeWWW.Server.Controllers
     [ApiController]
     public class RelayController : ControllerBase
     {
-        public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory, IEventBus eventBus, IServiceProvider sp)
+        public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory, IMessageBus messageBus, IServiceProvider sp)
         {
             _logger = logger;
             _dbContextFactory = dbContextFactory;
             _relayFactory = relayFactory;
-            _eventBus = eventBus;
+            _bus = messageBus;
             _sp = sp;
         }
 
         private readonly ILogger<RelayController> _logger;
         private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
         private readonly IRelayFactory _relayFactory;
-        private readonly IEventBus _eventBus;
+        private readonly IMessageBus _bus;
         private readonly IServiceProvider _sp;
 
         [HttpGet]
@@ -148,7 +148,7 @@ namespace SmartHomeWWW.Server.Controllers
             {
                 Text = $"Relay `{relayEntry.Name}` is {stateText}",
             };
-            _eventBus.Publish(msg);
+            _bus.Publish(msg);
 
             return Ok(new RelayStateViewModel
             {

@@ -1,5 +1,6 @@
 ﻿using MQTTnet.Client;
 using MQTTnet.Client.Options;
+using SmartHomeWWW.Server.Messages;
 using System.Text;
 
 namespace SmartHomeWWW.Server.Mqtt
