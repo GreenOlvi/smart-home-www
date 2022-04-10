@@ -41,7 +41,7 @@ namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps
         [JsonPropertyName("wind_deg")]
         public int WindDegree { get; init; }
 
-        public WeatherDescription[] Weather { get; init; }
+        public WeatherDescription[] Weather { get; init; } = Array.Empty<WeatherDescription>();
     }
 
 }

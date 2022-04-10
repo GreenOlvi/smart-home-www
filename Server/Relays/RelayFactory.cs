@@ -1,10 +1,10 @@
 ﻿using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.Relays;
+using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
-using System;
 using System.Text.Json;
 
-namespace SmartHomeWWW.Core.Infrastructure
+namespace SmartHomeWWW.Server.Relays
 {
     public class RelayFactory : IRelayFactory
     {

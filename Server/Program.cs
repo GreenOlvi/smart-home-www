@@ -10,6 +10,7 @@ using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
+using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Telegram;
 
 internal static class Program

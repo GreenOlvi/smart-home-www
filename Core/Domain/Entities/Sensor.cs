@@ -7,11 +7,11 @@ namespace SmartHomeWWW.Core.Domain.Entities
     {
         [Key]
         public Guid Id { get; init; }
-        public string Mac { get; init; }
-        public string Alias { get; set; }
-        public string ChipType { get; set; }
+        public string Mac { get; init; } = string.Empty;
+        public string Alias { get; set; } = string.Empty;
+        public string ChipType { get; set; } = string.Empty;
         public DateTime? LastContact { get; set; }
-        public string FirmwareVersion { get; set; }
+        public string FirmwareVersion { get; set; } = string.Empty;
 
         public override string ToString() => $"{ChipType} {Alias ?? Mac}";
     }

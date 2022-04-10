@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Net.Http;
+﻿using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
-namespace SmartHomeWWW.Core.Infrastructure.Tasmota
+namespace SmartHomeWWW.Server.Relays
 {
     public class TasmotaHttpClientFactory : ITasmotaClientFactory
     {

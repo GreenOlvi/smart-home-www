@@ -38,7 +38,7 @@ namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps
         [JsonPropertyName("wind_gust")]
         public float WindGust { get; init; }
 
-        public WeatherDescription[] Weather { get; init; }
+        public WeatherDescription[] Weather { get; init; } = Array.Empty<WeatherDescription>();
 
         [JsonPropertyName("pop")]
         public float ProbabilityOfPrecipitation { get; init; }

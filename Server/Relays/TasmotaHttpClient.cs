@@ -1,12 +1,9 @@
-﻿using System;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using CSharpFunctionalExtensions;
 using Flurl;
-using Microsoft.Extensions.Logging;
+using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
-namespace SmartHomeWWW.Core.Infrastructure.Tasmota
+namespace SmartHomeWWW.Server.Relays
 {
     public class TasmotaHttpClient : ITasmotaClient
     {

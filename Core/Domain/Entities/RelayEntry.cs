@@ -10,17 +10,17 @@ namespace SmartHomeWWW.Core.Domain.Entities
     {
         [Key]
         public Guid Id { get; init; }
-        public string Type { get; set; }
-        public string Name { get; set; }
+        public string Type { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
         [Column("Config")]
         public string ConfigSerialized
         {
             get => JsonSerializer.Serialize(Config);
-            set => Config = JsonSerializer.Deserialize<object>(value);
+            set => Config = JsonSerializer.Deserialize<object>(value) ?? new { };
         }
 
         [NotMapped]
-        public object Config { get; set; }
+        public object Config { get; set; } = new { };
     }
 }

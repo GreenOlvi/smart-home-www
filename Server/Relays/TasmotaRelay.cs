@@ -1,8 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
+using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
-using System.Threading.Tasks;
 
-namespace SmartHomeWWW.Core.Domain.Relays;
+namespace SmartHomeWWW.Server.Relays;
 
 public class TasmotaRelay : IRelay
 {

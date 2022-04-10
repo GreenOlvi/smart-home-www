@@ -7,9 +7,9 @@ namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps
     public record WeatherAlert
     {
         [JsonPropertyName("sender_name")]
-        public string SenderName { get; init; }
+        public string SenderName { get; init; } = string.Empty;
 
-        public string Event { get; init; }
+        public string Event { get; init; } = string.Empty;
 
         [JsonConverter(typeof(UnixEpochDateTimeConverter))]
         public DateTime Start { get; init; } = DateTime.UnixEpoch;
@@ -17,6 +17,6 @@ namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps
         [JsonConverter(typeof(UnixEpochDateTimeConverter))]
         public DateTime End { get; init; } = DateTime.UnixEpoch;
 
-        public string Description { get; init; }
+        public string Description { get; init; } = string.Empty;
     }
 }
