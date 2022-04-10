@@ -73,7 +73,7 @@ internal static class Program
 
         builder.Services.AddScoped<IFirmwareRepository, DiskFirmwareRepository>();
 
-        builder.Services.AddSingleton<ITasmotaClientFactory, TasmotaHttpClientFactory>();
+        builder.Services.AddSingleton<TasmotaClientFactory>();
         builder.Services.AddSingleton<IRelayFactory, RelayFactory>();
 
         builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>

@@ -8,12 +8,12 @@ namespace SmartHomeWWW.Server.Relays
 {
     public class RelayFactory : IRelayFactory
     {
-        public RelayFactory(ITasmotaClientFactory tasmotaFactory)
+        public RelayFactory(TasmotaClientFactory tasmotaFactory)
         {
             _tasmotaClientFactory = tasmotaFactory;
         }
 
-        private readonly ITasmotaClientFactory _tasmotaClientFactory;
+        private readonly TasmotaClientFactory _tasmotaClientFactory;
 
         public IRelay Create(RelayEntry entry) => entry.Type switch
         {
@@ -23,11 +23,34 @@ namespace SmartHomeWWW.Server.Relays
 
         private IRelay CreateTasmota(RelayEntry entry)
         {
-            var el = (JsonElement)entry.Config;
-            var host = el.GetProperty("Host").GetString();
-            var id = el.TryGetProperty("RelayId", out var idProp) ? idProp.GetInt32() : 1;
+            var config = ParseTasmotaConfig((JsonElement)entry.Config);
+            return new TasmotaRelay(_tasmotaClientFactory.CreateFor(config), config.RelayId);
+        }
 
-            return new TasmotaRelay(_tasmotaClientFactory.CreateFor(host), id);
+        private static ITasmotaClientConfig ParseTasmotaConfig(JsonElement config)
+        {
+            var kind = TasmotaClientKind.Http;
+            if (config.TryGetProperty("Kind", out var kindProperty))
+            {
+                if (!Enum.TryParse(kindProperty.GetString(), out kind))
+                {
+                    throw new InvalidOperationException("Could not parse tasmota config");
+                }
+            }
+
+            return kind switch
+            {
+                TasmotaClientKind.Http => new TasmotaHttpClientConfig
+                {
+                    Host = config.GetProperty("Host").GetString() ?? string.Empty,
+                    RelayId = config.TryGetProperty("RelayId", out var idProp)
+                        ? idProp.GetInt32()
+                        : 1,
+                },
+                TasmotaClientKind.Mqtt => throw new NotImplementedException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+            };
+
         }
     }
 }

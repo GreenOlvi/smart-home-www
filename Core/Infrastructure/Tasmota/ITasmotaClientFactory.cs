@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace SmartHomeWWW.Core.Infrastructure.Tasmota
+﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota
 {
     public interface ITasmotaClientFactory
     {
-        ITasmotaClient CreateFor(string baseUrl);
+        ITasmotaClient CreateFor(ITasmotaClientConfig config);
     }
 }
