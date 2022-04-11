@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.ViewModel;
+using SmartHomeWWW.Server.Messages;
 
 namespace SmartHomeWWW.Server.Controllers
 {
@@ -10,26 +11,33 @@ namespace SmartHomeWWW.Server.Controllers
     [ApiController]
     public class RelayController : ControllerBase
     {
-        public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory)
+        public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory, IMessageBus messageBus, IServiceProvider sp)
         {
             _logger = logger;
             _dbContextFactory = dbContextFactory;
             _relayFactory = relayFactory;
+            _bus = messageBus;
+            _sp = sp;
         }
 
         private readonly ILogger<RelayController> _logger;
         private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
         private readonly IRelayFactory _relayFactory;
+        private readonly IMessageBus _bus;
+        private readonly IServiceProvider _sp;
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RelayEntry>>> GetRelays()
+        public async Task<ActionResult<IEnumerable<RelayEntryViewModel>>> GetRelays()
         {
             using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            return await dbContext.Relays.ToArrayAsync();
+            var relays = await dbContext.Relays
+                .Select(r => RelayEntryViewModel.From(r))
+                .ToArrayAsync();
+            return Ok(relays);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<RelayEntry>> GetRelay(Guid id)
+        public async Task<ActionResult<RelayEntryViewModel>> GetRelay(Guid id)
         {
             using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             var relay = await dbContext.Relays.FindAsync(id);
@@ -39,7 +47,7 @@ namespace SmartHomeWWW.Server.Controllers
                 return NotFound();
             }
 
-            return relay;
+            return RelayEntryViewModel.From(relay);
         }
 
         public record struct RelayData

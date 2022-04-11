@@ -33,12 +33,15 @@ public class WeatherController : ControllerBase
             .OrderByDescending(w => w.Timestamp)
             .FirstOrDefaultAsync();
 
-        if (current == null)
+        if (current?.Data == null)
         {
             return NoContent();
         }
 
-        return JsonSerializer.Deserialize<WeatherReport>(current.Data);
+        var report = JsonSerializer.Deserialize<WeatherReport>(current.Data);
+        return report is null
+            ? NoContent()
+            : (ActionResult<WeatherReport>)report;
     }
 
     [HttpGet("{id}")]
@@ -51,7 +54,10 @@ public class WeatherController : ControllerBase
             return NotFound();
         }
 
-        return JsonSerializer.Deserialize<WeatherReport>(weather.Data);
+        var report = JsonSerializer.Deserialize<WeatherReport>(weather.Data);
+        return report is null
+            ? NoContent()
+            : (ActionResult<WeatherReport>)report;
     }
 
     [HttpPost("{type=current}")]

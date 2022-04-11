@@ -1,4 +1,5 @@
-﻿@inject RelaysHttpClient RelayClient
+﻿@using SmartHomeWWW.Core.ViewModel
+@inject RelaysHttpClient RelayClient
 
 <h3>Relay <i>@Name</i></h3>
 <p>@Type</p>
@@ -10,9 +11,8 @@
 <button type="button" class="btn btn-primary" @onclick="(async () => await Toggle())">Toggle</button>
 
 @code {
-
     [Parameter]
-    public RelayEntry Entry { get; init; }
+    public RelayEntryViewModel Entry { get; init; } = new RelayEntryViewModel();
 
     public string Name => Entry.Name;
     public string Type => Entry.Type;

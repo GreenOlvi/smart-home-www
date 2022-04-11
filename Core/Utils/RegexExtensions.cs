@@ -20,7 +20,7 @@ namespace SmartHomeWWW.Core.Utils
                 return true;
             }
 
-            value = null;
+            value = string.Empty;
             return false;
         }
     }

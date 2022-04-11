@@ -1,5 +1,4 @@
-﻿using SmartHomeWWW.Core.Domain.Entities;
-using SmartHomeWWW.Core.ViewModel;
+﻿using SmartHomeWWW.Core.ViewModel;
 using System.Net.Http.Json;
 using static SmartHomeWWW.Client.Shared.RelayBox;
 
@@ -14,9 +13,9 @@ namespace SmartHomeWWW.Client.HttpClients
 
         private readonly HttpClient _httpClient;
 
-        public async Task<IEnumerable<RelayEntry>> GetRelays() =>
-            await _httpClient.GetFromJsonAsync<IEnumerable<RelayEntry>>("api/relay")
-                ?? Enumerable.Empty<RelayEntry>();
+        public async Task<IEnumerable<RelayEntryViewModel>> GetRelays() =>
+            await _httpClient.GetFromJsonAsync<IEnumerable<RelayEntryViewModel>>("api/relay")
+                ?? Enumerable.Empty<RelayEntryViewModel>();
 
         public async Task<RelayState> ToggleRelay(Guid id)
         {

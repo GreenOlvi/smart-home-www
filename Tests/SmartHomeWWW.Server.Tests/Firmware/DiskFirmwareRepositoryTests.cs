@@ -1,9 +1,9 @@
 ﻿using NUnit.Framework;
 using FluentAssertions;
 using System;
-using SmartHomeWWW.Core.Firmwares;
+using SmartHomeWWW.Server.Firmwares;
 
-namespace SmartHomeWWW.Core.Tests.Firmware
+namespace SmartHomeWWW.Server.Tests.Firmware
 {
     [TestFixture]
     public class DiskFirmwareRepositoryTests

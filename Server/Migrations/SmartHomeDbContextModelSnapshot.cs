@@ -17,20 +17,23 @@ namespace SmartHomeWWW.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
 
-            modelBuilder.Entity("SmartHomeWWW.Core.Domain.RelayEntry", b =>
+            modelBuilder.Entity("SmartHomeWWW.Core.Domain.Entities.RelayEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConfigSerialized")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("Config");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -38,25 +41,29 @@ namespace SmartHomeWWW.Migrations
                     b.ToTable("Relays");
                 });
 
-            modelBuilder.Entity("SmartHomeWWW.Core.Domain.Sensor", b =>
+            modelBuilder.Entity("SmartHomeWWW.Core.Domain.Entities.Sensor", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Alias")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ChipType")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FirmwareVersion")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("LastContact")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mac")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -64,19 +71,21 @@ namespace SmartHomeWWW.Migrations
                     b.ToTable("Sensors");
                 });
 
-            modelBuilder.Entity("SmartHomeWWW.Core.Domain.WeatherCache", b =>
+            modelBuilder.Entity("SmartHomeWWW.Core.Domain.Entities.WeatherCache", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Data")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("Expires")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Timestamp")

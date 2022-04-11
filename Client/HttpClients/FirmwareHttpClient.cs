@@ -15,6 +15,6 @@ public class FirmwareHttpClient
     public async Task<IEnumerable<Firmware>> GetAllFirmwares() =>
         await _httpClient.GetFromJsonAsync<IEnumerable<Firmware>>("api/update") ?? Enumerable.Empty<Firmware>();
 
-    public async Task<Version?> GetCurrentVersion() =>
-        await _httpClient.GetFromJsonAsync<Version>("api/update/version/current");
+    public async Task<Version> GetCurrentVersion() =>
+        await _httpClient.GetFromJsonAsync<Version>("api/update/version/current") ?? new Version();
 }

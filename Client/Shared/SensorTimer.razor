@@ -22,16 +22,14 @@
 
     private Colour CurrentColour => _gradient.GetIntermediate(l);
 
-    private Timer _timer;
+    private Timer? _timer = null;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _timer = new(async (object? stateInfo) =>
-        {
-            await InvokeAsync(StateHasChanged);
-        }, new AutoResetEvent(false), 1000 - TimeSince.Milliseconds, 1000);
+        _timer = new(async (object? stateInfo) => await InvokeAsync(StateHasChanged),
+            new AutoResetEvent(false), 1000 - TimeSince.Milliseconds, 1000);
     }
 
     public async ValueTask DisposeAsync()

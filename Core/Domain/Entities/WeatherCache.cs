@@ -7,9 +7,9 @@ namespace SmartHomeWWW.Core.Domain.Entities
     {
         [Key]
         public Guid Id { get; init; }
-        public string Name { get; init; }
+        public string Name { get; init; } = string.Empty;
         public DateTime Timestamp { get; init; }
         public DateTime? Expires { get; init; }
-        public string Data { get; set; }
+        public string Data { get; set; } = string.Empty;
     }
 }

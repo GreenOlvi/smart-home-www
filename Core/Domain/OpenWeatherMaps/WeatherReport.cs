@@ -11,12 +11,12 @@ namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps
         [JsonPropertyName("lon")]
         public float Longitude { get; init; }
 
-        public string Timezone { get; init; }
+        public string Timezone { get; init; } = string.Empty;
 
         [JsonPropertyName("timezone_offset")]
         public long TimezoneOffset { get; init; }
 
-        public CurrentWeather Current { get; init; }
+        public CurrentWeather Current { get; init; } = new CurrentWeather();
 
         public MinutelyWeather[] Minutely { get; init; } = Array.Empty<MinutelyWeather>();
 
