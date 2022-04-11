@@ -35,17 +35,17 @@ public class UpdateController : ControllerBase
     [HttpGet("/Update/firmware.bin")]
     public async Task<IActionResult> Firmware()
     {
-        _logger.LogInformation(DumpHeaders(Request.Headers));
+        _logger.LogTrace("{headers}", DumpHeaders(Request.Headers));
 
         var userAgent = Request.Headers["User-Agent"];
         if (userAgent != "ESP8266-http-Update")
         {
-            _logger.LogInformation("Not ESP");
+            _logger.LogDebug("Not ESP");
             return new RedirectResult("/");
         }
 
         var mac = Request.Headers["x-ESP8266-STA-MAC"].Single().ToUpper();
-        _logger.LogInformation($"ESP8266 [{mac}] connected");
+        _logger.LogDebug("ESP8266 [{mac}] connected", mac);
 
         var deviceVersion = Request.Headers["x-ESP8266-version"].Single();
 
@@ -59,7 +59,7 @@ public class UpdateController : ControllerBase
 
         if (deviceVersion == currentVeresion.ToString())
         {
-            _logger.LogInformation($"ESP8266 [{mac}] nothing new");
+            _logger.LogDebug("ESP8266 [{mac}] nothing new", mac);
             return new StatusCodeResult(304);
         }
 
