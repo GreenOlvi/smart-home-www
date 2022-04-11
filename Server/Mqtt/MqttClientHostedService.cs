@@ -49,7 +49,15 @@ namespace SmartHomeWWW.Server.Mqtt
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Mqtt service started");
-            await _client.ConnectAsync(_options, cancellationToken);
+            try
+            {
+                await _client.ConnectAsync(_options, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while connecting to mqtt");
+                return;
+            }
 
             _bus.Subscribe<MqttPublishMessageCommand>(this);
             _bus.Subscribe<MqttSubscribeToTopicCommand>(this);
