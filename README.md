@@ -1,6 +1,6 @@
 # Smart Home WWW
 
-[![build and test](https://github.com/GreenOlvi/smart-home-www/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/GreenOlvi/smart-home-www/actions/workflows/build-and-test.yml)
+[![build and test](https://github.com/GreenOlvi/smart-home-www/actions/workflows/build-and-test.yml/badge.svg?branch=master)](https://github.com/GreenOlvi/smart-home-www/actions/workflows/build-and-test.yml)
 
 Small ASP.NET app to collect data about my home sensors and control some relays
 
