@@ -10,14 +10,16 @@ public class TasmotaRelay : IRelay
     {
         _tasmota = tasmota;
         _relayId = relayId;
+        _powerTopic = relayId == 1 ? "POWER" : $"POWER{_relayId}";
     }
 
     private readonly ITasmotaClient _tasmota;
     private readonly int _relayId;
+    private readonly string _powerTopic;
 
     public async Task<Maybe<bool>> GetStateAsync()
     {
-        var response = await _tasmota.GetValueAsync($"Power{_relayId}");
+        var response = await _tasmota.GetValueAsync(_powerTopic);
         if (!response.HasValue)
         {
             return Maybe.None;
@@ -38,8 +40,8 @@ public class TasmotaRelay : IRelay
     }
 
     public async Task<bool> SetStateAsync(bool state) =>
-        (await _tasmota.ExecuteCommandAsync($"Power{_relayId}", state ? "on" : "off")).HasValue;
+        (await _tasmota.ExecuteCommandAsync(_powerTopic, state ? "on" : "off")).HasValue;
 
     public async Task<bool> ToggleAsync() =>
-        (await _tasmota.ExecuteCommandAsync($"Power{_relayId}", "toggle")).HasValue;
+        (await _tasmota.ExecuteCommandAsync(_powerTopic, "toggle")).HasValue;
 }

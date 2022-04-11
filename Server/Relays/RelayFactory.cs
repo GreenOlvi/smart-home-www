@@ -47,7 +47,13 @@ namespace SmartHomeWWW.Server.Relays
                         ? idProp.GetInt32()
                         : 1,
                 },
-                TasmotaClientKind.Mqtt => throw new NotImplementedException(),
+                TasmotaClientKind.Mqtt => new TasmotaMqttClientConfig
+                {
+                    DeviceId = config.GetProperty("DeviceId").GetString() ?? string.Empty,
+                    RelayId = config.TryGetProperty("RelayId", out var idProp)
+                        ? idProp.GetInt32()
+                        : 1,
+                },
                 _ => throw new ArgumentOutOfRangeException(nameof(kind)),
             };
 

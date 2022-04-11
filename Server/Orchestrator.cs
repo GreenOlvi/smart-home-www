@@ -1,68 +1,42 @@
-﻿using SmartHomeWWW.Server.Messages;
+﻿using SmartHomeWWW.Server.Jobs;
+using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
 
 namespace SmartHomeWWW.Server
 {
-    public class Orchestrator : IHostedService, IAsyncDisposable,
-        IMessageHandler<MqttMessageReceivedEvent>
+    public class Orchestrator : IHostedService, IAsyncDisposable
     {
-        public Orchestrator(ILogger<Orchestrator> logger, IMessageBus bus)
+        public Orchestrator(ILogger<Orchestrator> logger, IMessageBus bus, IServiceProvider sp)
         {
             _logger = logger;
             _bus = bus;
+
+            _jobs = new()
+            {
+                new MqttTasmotaAdapter(
+                    sp.GetRequiredService<ILogger<MqttTasmotaAdapter>>(),
+                    sp.GetRequiredService<IMessageBus>()),
+            };
         }
 
         private readonly ILogger<Orchestrator> _logger;
         private readonly IMessageBus _bus;
+        private readonly List<IOrchestratorJob> _jobs;
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken) =>
+            Task.WhenAll(_jobs.Select(job => job.Start(cancellationToken)));
+
+        public Task StopAsync(CancellationToken cancellationToken) =>
+            Task.WhenAll(_jobs.Select(job => job.Stop(cancellationToken)));
+
+        public async ValueTask DisposeAsync()
         {
-            SubscribeToEvents();
-
-            _bus.Publish(new MqttSubscribeToTopicCommand { Topic = "stat/+/POWER" });
-
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        private void SubscribeToEvents()
-        {
-            _bus.Subscribe<MqttMessageReceivedEvent>(this);
-        }
-
-        public Task Handle(MqttMessageReceivedEvent message)
-        {
-            var parts = message.Topic.Split('/');
-            return parts[0] switch
+            foreach(var job in _jobs)
             {
-                "stat" => MqttStatMessage(parts[1], parts[2], message.Payload),
-                _ => MqttUnknownTopicType(message.Topic, message.Payload),
-            };
-        }
-
-        private Task MqttStatMessage(string device, string kind, string payload)
-        {
-            if (kind == "POWER")
-            {
-                _logger.LogInformation("{dev} changed power to {payload}", device, payload);
+                await job.DisposeAsync();
             }
-            return Task.CompletedTask;
         }
 
-        private Task MqttUnknownTopicType(string topic, string payload)
-        {
-            _logger.LogWarning("Unknown MQTT topic: '{topic}'", topic);
-            return Task.CompletedTask;
-        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MQTTnet.Client;
+﻿using MQTTnet;
+using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
@@ -71,7 +72,10 @@ namespace SmartHomeWWW.Server.Mqtt
 
         public Task Handle(MqttPublishMessageCommand message)
         {
-            return _client.PublishAsync(message.Topic, message.Payload);
+            var builder = new MqttApplicationMessageBuilder()
+                .WithTopic(message.Topic)
+                .WithPayload(message.Payload);
+            return _client.PublishAsync(builder.Build());
         }
 
         public Task Handle(MqttSubscribeToTopicCommand message)

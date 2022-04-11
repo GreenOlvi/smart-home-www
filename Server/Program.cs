@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
