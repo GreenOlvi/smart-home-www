@@ -5,16 +5,13 @@ namespace SmartHomeWWW.Server.Relays
 {
     public class TasmotaClientFactory
     {
-        public TasmotaClientFactory(ILogger<TasmotaClientFactory> logger, ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory,
-            IMessageBus bus)
+        public TasmotaClientFactory(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IMessageBus bus)
         {
-            _logger = logger;
             _loggerFactory = loggerFactory;
             _httpClientFactory = httpClientFactory;
             _bus = bus;
         }
 
-        private readonly ILogger<TasmotaClientFactory> _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMessageBus _bus;

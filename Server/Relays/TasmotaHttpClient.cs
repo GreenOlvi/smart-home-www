@@ -31,7 +31,7 @@ namespace SmartHomeWWW.Server.Relays
                 var response = await _httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogError($"Error from relay: {response.StatusCode}");
+                    _logger.LogError("Error from relay: {statusCode}", response.StatusCode);
                     return Maybe.None;
                 }
 
@@ -39,7 +39,7 @@ namespace SmartHomeWWW.Server.Relays
             }
             catch (Exception e)
             {
-                _logger.LogError($"Error while sending request to relay: {e.Message}");
+                _logger.LogError("Error while sending request to relay: {message}", e.Message);
                 _logger.LogDebug(e, "Exception caught");
             }
             return Maybe.None;

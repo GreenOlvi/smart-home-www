@@ -7,7 +7,7 @@ using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.Telegram
 {
-    public class TelegramBotHostedService : IHostedService, IAsyncDisposable,
+    public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
         IMessageHandler<TelegramSendTextMessageCommand>
     {
         public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, HttpClient httpClient, TelegramConfig config, IMessageBus messageBus)
@@ -66,11 +66,11 @@ namespace SmartHomeWWW.Server.Telegram
 
                 if (message.Text == "ping")
                 {
-                    await bot.SendTextMessageAsync(message.Chat, "pong", cancellationToken: cancellationToken);
+                    await bot.SendTextMessageAsync(message.Chat.Id, "pong", cancellationToken: cancellationToken);
                 }
                 else
                 {
-                    await bot.SendTextMessageAsync(message.Chat, "Hello", cancellationToken: cancellationToken);
+                    await bot.SendTextMessageAsync(message.Chat.Id, "Hello", cancellationToken: cancellationToken);
                 }
             }
         }

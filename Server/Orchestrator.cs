@@ -1,16 +1,13 @@
 ﻿using SmartHomeWWW.Server.Jobs;
 using SmartHomeWWW.Server.Messages;
-using SmartHomeWWW.Server.Messages.Commands;
-using SmartHomeWWW.Server.Messages.Events;
 
 namespace SmartHomeWWW.Server
 {
-    public class Orchestrator : IHostedService, IAsyncDisposable
+    public sealed class Orchestrator : IHostedService, IAsyncDisposable
     {
-        public Orchestrator(ILogger<Orchestrator> logger, IMessageBus bus, IServiceProvider sp)
+        public Orchestrator(ILogger<Orchestrator> logger, IServiceProvider sp)
         {
             _logger = logger;
-            _bus = bus;
 
             _jobs = new()
             {
@@ -21,14 +18,19 @@ namespace SmartHomeWWW.Server
         }
 
         private readonly ILogger<Orchestrator> _logger;
-        private readonly IMessageBus _bus;
         private readonly List<IOrchestratorJob> _jobs;
 
-        public Task StartAsync(CancellationToken cancellationToken) =>
-            Task.WhenAll(_jobs.Select(job => job.Start(cancellationToken)));
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Starting Orchestrator");
+            return Task.WhenAll(_jobs.Select(job => job.Start(cancellationToken)));
+        }
 
-        public Task StopAsync(CancellationToken cancellationToken) =>
-            Task.WhenAll(_jobs.Select(job => job.Stop(cancellationToken)));
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Stopping Orchestrator");
+            return Task.WhenAll(_jobs.Select(job => job.Stop(cancellationToken)));
+        }
 
         public async ValueTask DisposeAsync()
         {

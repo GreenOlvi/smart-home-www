@@ -9,8 +9,8 @@ namespace SmartHomeWWW.Core.Infrastructure
         {
         }
 
-        public DbSet<RelayEntry> Relays { get; init; }
-        public DbSet<Sensor> Sensors { get; init; }
-        public DbSet<WeatherCache> WeatherCaches { get; init; }
+        public DbSet<RelayEntry> Relays { get; init; } = null!;
+        public DbSet<Sensor> Sensors { get; init; } = null!;
+        public DbSet<WeatherCache> WeatherCaches { get; init; } = null!;
     }
 }

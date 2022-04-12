@@ -4,10 +4,9 @@ using SmartHomeWWW.Server.Messages.Events;
 
 namespace SmartHomeWWW.Server.Jobs
 {
-    public class MqttTasmotaAdapter : IOrchestratorJob,
+    public sealed class MqttTasmotaAdapter : IOrchestratorJob,
         IMessageHandler<MqttMessageReceivedEvent>,
         IMessageHandler<TasmotaRequestPowerStateCommand>
-
     {
         public MqttTasmotaAdapter(ILogger<MqttTasmotaAdapter> logger, IMessageBus bus)
         {

@@ -5,7 +5,6 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Server.Relays;
 using Moq;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Net.Http;
 using SmartHomeWWW.Server.Messages;
 
@@ -26,7 +25,6 @@ namespace SmartHomeWWW.Server.Tests.Relays
             };
 
             var tcf = new TasmotaClientFactory(
-                NullLogger<TasmotaClientFactory>.Instance,
                 new Mock<ILoggerFactory>().Object,
                 new Mock<IHttpClientFactory>().Object,
                 new Mock<IMessageBus>().Object);
@@ -50,7 +48,6 @@ namespace SmartHomeWWW.Server.Tests.Relays
             };
 
             var tcf = new TasmotaClientFactory(
-                NullLogger<TasmotaClientFactory>.Instance,
                 new Mock<ILoggerFactory>().Object,
                 new Mock<IHttpClientFactory>().Object,
                 new Mock<IMessageBus>().Object);

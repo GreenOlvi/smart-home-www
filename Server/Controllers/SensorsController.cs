@@ -38,7 +38,7 @@ namespace SmartHomeWWW.Server.Controllers
 
             db.Sensors.Remove(sensor);
             await db.SaveChangesAsync();
-            _logger.LogInformation($"Deleted {sensor}.");
+            _logger.LogInformation("Deleted {sensor}.", sensor);
             return Ok();
         }
     }

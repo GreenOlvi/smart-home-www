@@ -15,7 +15,7 @@ namespace SmartHomeWWW.Server.Hubs
 
         public async Task UpdateSensor(Sensor sensor)
         {
-            _logger.LogInformation($"Sent SensorUpdated with {sensor.Mac}");
+            _logger.LogInformation("Sent SensorUpdated with {mac}", sensor.Mac);
             await Clients.Others.SendAsync("SensorUpdated", sensor);
         }
     }

@@ -86,7 +86,7 @@ namespace SmartHomeWWW.Server.Controllers
 
             dbContext.Relays.Remove(relay);
             await dbContext.SaveChangesAsync();
-            _logger.LogInformation($"Deleted relay {relay.Id}");
+            _logger.LogInformation("Deleted relay {id}", relay.Id);
             return Ok();
         }
 

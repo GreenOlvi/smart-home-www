@@ -54,7 +54,7 @@ namespace SmartHomeWWW.Server.Relays
                         ? idProp.GetInt32()
                         : 1,
                 },
-                _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+                _ => throw new ArgumentOutOfRangeException(nameof(config)),
             };
 
         }

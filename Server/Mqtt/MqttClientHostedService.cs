@@ -8,7 +8,7 @@ using System.Text;
 
 namespace SmartHomeWWW.Server.Mqtt
 {
-    public class MqttClientHostedService : IHostedService, IAsyncDisposable,
+    public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         IMessageHandler<MqttPublishMessageCommand>,
         IMessageHandler<MqttSubscribeToTopicCommand>
     {
