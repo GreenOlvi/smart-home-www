@@ -7,6 +7,7 @@ using SmartHomeWWW.Server;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
+using SmartHomeWWW.Server.Jobs;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
@@ -97,6 +98,8 @@ internal static class Program
         builder.Services.AddSingleton<AddressBook>();
 
         builder.Services.AddHostedService<Orchestrator>();
+        builder.Services.AddTransient<MqttTasmotaAdapter>();
+        builder.Services.AddTransient<TelegramBotJob>();
     }
 
     private static void AddHttpClients(WebApplicationBuilder builder)

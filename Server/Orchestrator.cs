@@ -1,5 +1,4 @@
 ﻿using SmartHomeWWW.Server.Jobs;
-using SmartHomeWWW.Server.Messages;
 
 namespace SmartHomeWWW.Server
 {
@@ -11,9 +10,8 @@ namespace SmartHomeWWW.Server
 
             _jobs = new()
             {
-                new MqttTasmotaAdapter(
-                    sp.GetRequiredService<ILogger<MqttTasmotaAdapter>>(),
-                    sp.GetRequiredService<IMessageBus>()),
+                sp.GetRequiredService<MqttTasmotaAdapter>(),
+                sp.GetRequiredService<TelegramBotJob>(),
             };
         }
 
