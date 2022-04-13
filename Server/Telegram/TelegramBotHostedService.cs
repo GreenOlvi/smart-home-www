@@ -44,7 +44,6 @@ namespace SmartHomeWWW.Server.Telegram
             _logger.LogInformation("Starting {botname}...", me.Username);
 
             _bot.StartReceiving(HandleUpdateAsync, HandleErrorAsync, _receiverOptions, cancellationToken);
-            //await _bot.SendTextMessageAsync(_config.OwnerId, "I'm online", cancellationToken: cancellationToken);
 
             _messageBus.Subscribe<TelegramSendTextMessageCommand>(this);
 
@@ -59,7 +58,6 @@ namespace SmartHomeWWW.Server.Telegram
             _messageBus.Unsubscribe<TelegramSendTextMessageCommand>(this);
 
             _cancellationTokenSource.Cancel();
-            //await _bot.SendTextMessageAsync(_config.OwnerId, "Shutting down", cancellationToken: cancellationToken);
         }
 
         public ValueTask DisposeAsync()
@@ -100,9 +98,7 @@ namespace SmartHomeWWW.Server.Telegram
                 return Task.CompletedTask;
             }
 
-            _logger.LogInformation("Received text message from '{user}': '{message}'",
-                message.From.ToString() ?? "unknown",
-                message.Text ?? string.Empty);
+            _logger.LogDebug("Received text message from '{user}': '{message}'", message.From.ToString(), message.Text ?? string.Empty);
 
             _messageBus.Publish(new TelegramMessageReceivedEvent
             {
@@ -116,13 +112,19 @@ namespace SmartHomeWWW.Server.Telegram
 
         private Task HandleErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
         {
-            _logger.LogError(exception, "Caught an exception");
+            _logger.LogError(exception, "Caught an exception from TelegramBot");
             return Task.CompletedTask;
         }
 
-        public async Task Handle(TelegramSendTextMessageCommand message)
-        {
-            await _bot.SendTextMessageAsync(message.ChatId, message.Text, cancellationToken: _cancellationTokenSource.Token);
-        }
+        public Task Handle(TelegramSendTextMessageCommand message) =>
+            _bot.SendTextMessageAsync(
+                message.ChatId,
+                message.Text,
+                parseMode: message.ParseMode,
+                disableWebPagePreview: message.DisableWebPagePreview,
+                disableNotification: message.DisableNotification,
+                replyToMessageId: message.ReplyToMessageId,
+                allowSendingWithoutReply: message.AllowSendingWithoutReply,
+                cancellationToken: _cancellationTokenSource.Token);
     }
 }

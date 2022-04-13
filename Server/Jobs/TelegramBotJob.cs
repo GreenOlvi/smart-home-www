@@ -42,9 +42,11 @@ namespace SmartHomeWWW.Server.Jobs
             var text = message.Message.Text;
             if (text == "ping")
             {
-                _bus.Publish(new TelegramSendTextMessageCommand(message.ChatId)
+                _bus.Publish(new TelegramSendTextMessageCommand
                 {
-                    Text = "pong"
+                    ChatId = message.ChatId,
+                    ReplyToMessageId = message.Message.MessageId,
+                    Text = "pong",
                 });
             }
 
