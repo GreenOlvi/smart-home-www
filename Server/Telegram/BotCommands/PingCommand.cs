@@ -13,7 +13,7 @@ namespace SmartHomeWWW.Server.Telegram.BotCommands
 
         private readonly IMessageBus _bus;
 
-        public Task Run(Message message)
+        public Task Run(Message message, CancellationToken cancellationToken)
         {
             _bus.Publish(new TelegramSendTextMessageCommand
             {

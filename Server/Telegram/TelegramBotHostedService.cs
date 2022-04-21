@@ -91,7 +91,7 @@ namespace SmartHomeWWW.Server.Telegram
             var message = update.Message;
             if (message.From is null || !_allowedUsers.Contains(message.From.Id))
             {
-                _logger.LogError("Received text message from '{user}': '{message}'",
+                _logger.LogError("Received text message from unknown user '{user}': '{message}'",
                     message.From?.ToString() ?? "unknown",
                     message.Text ?? string.Empty);
 
