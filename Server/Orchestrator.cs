@@ -1,4 +1,5 @@
-﻿using SmartHomeWWW.Server.Jobs;
+﻿using SmartHomeWWW.Server.Mqtt;
+using SmartHomeWWW.Server.Telegram;
 
 namespace SmartHomeWWW.Server
 {

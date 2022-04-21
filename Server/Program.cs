@@ -7,7 +7,6 @@ using SmartHomeWWW.Server;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
-using SmartHomeWWW.Server.Jobs;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
