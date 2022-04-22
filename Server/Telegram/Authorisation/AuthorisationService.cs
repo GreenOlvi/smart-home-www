@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Infrastructure;
 
-namespace SmartHomeWWW.Server.Telegram.Authentication
+namespace SmartHomeWWW.Server.Telegram.Authorisation
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthorisationService : IAuthorisationService
     {
-        public AuthenticationService(IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+        public AuthorisationService(IDbContextFactory<SmartHomeDbContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }

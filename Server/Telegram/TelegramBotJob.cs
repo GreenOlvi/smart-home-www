@@ -3,7 +3,7 @@ using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
-using SmartHomeWWW.Server.Telegram.Authentication;
+using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Telegram.BotCommands;
 using Telegram.Bot.Types;
 
@@ -17,7 +17,7 @@ namespace SmartHomeWWW.Server.Telegram
         {
             _logger = logger;
             _bus = bus;
-            _authenticationService = new AuthenticationService(dbContextFactory);
+            _authService = new AuthorisationService(dbContextFactory);
             _commandRegistry = new(serviceProvider);
             RegisterCommands();
         }
@@ -25,7 +25,7 @@ namespace SmartHomeWWW.Server.Telegram
         private readonly ILogger<TelegramBotJob> _logger;
         private readonly IMessageBus _bus;
         private readonly CommandRegistry _commandRegistry;
-        private readonly IAuthenticationService _authenticationService;
+        private readonly IAuthorisationService _authService;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         private void RegisterCommands()
@@ -55,7 +55,7 @@ namespace SmartHomeWWW.Server.Telegram
             var text = message.Message.Text ?? string.Empty;
             var cmd = text.Split(' ')[0];
 
-            if (await _authenticationService.CanUserRunCommand(message.SenderId, cmd))
+            if (await _authService.CanUserRunCommand(message.SenderId, cmd))
             {
                 if (_commandRegistry.TryGetCommand(cmd, out var command))
                 {
