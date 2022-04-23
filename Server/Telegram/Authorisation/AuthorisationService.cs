@@ -25,9 +25,11 @@ namespace SmartHomeWWW.Server.Telegram.Authorisation
                 return false;
             }
 
+            var user = u.Value;
             return action switch
             {
-                AuthorizedActions.AddNewUser => u.Value.UserType == "Owner",
+                AuthorizedActions.AddNewUser => user.UserType == "Owner",
+                AuthorizedActions.ListUsers => user.UserType == "Owner",
                 _ => false,
             };
         }
@@ -52,8 +54,6 @@ namespace SmartHomeWWW.Server.Telegram.Authorisation
                 return Maybe<TelegramUser>.None;
             }
 
-            using var context = await _dbContextFactory.CreateDbContextAsync();
-
             var user = new TelegramUser
             {
                 TelegramId = contact.UserId.Value,
@@ -61,6 +61,7 @@ namespace SmartHomeWWW.Server.Telegram.Authorisation
                 UserType = "User",
             };
 
+            using var context = await _dbContextFactory.CreateDbContextAsync();
             await context.TelegramUsers.AddAsync(user);
             await context.SaveChangesAsync();
             return user;

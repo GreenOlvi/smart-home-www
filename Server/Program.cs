@@ -11,6 +11,7 @@ using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Telegram;
+using SmartHomeWWW.Server.Telegram.Authorisation;
 
 internal static class Program
 {
@@ -94,11 +95,12 @@ internal static class Program
         builder.Services.AddTelegramBotHostedService();
 
         builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();
-        builder.Services.AddSingleton<AddressBook>();
 
         builder.Services.AddHostedService<Orchestrator>();
         builder.Services.AddTransient<MqttTasmotaAdapter>();
         builder.Services.AddTransient<TelegramBotJob>();
+
+        builder.Services.AddScoped<IAuthorisationService, AuthorisationService>();
     }
 
     private static void AddHttpClients(WebApplicationBuilder builder)

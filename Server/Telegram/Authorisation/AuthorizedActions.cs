@@ -3,6 +3,6 @@
     public enum AuthorizedActions
     {
         Invalid = 0,
-        AddNewUser = 1,
+        AddNewUser,
     }
 }

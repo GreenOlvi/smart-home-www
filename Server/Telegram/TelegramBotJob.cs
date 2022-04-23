@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server.Messages;
+﻿using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
 using SmartHomeWWW.Server.Telegram.Authorisation;
@@ -12,12 +10,11 @@ namespace SmartHomeWWW.Server.Telegram
     public sealed class TelegramBotJob : IOrchestratorJob,
         IMessageHandler<TelegramMessageReceivedEvent>
     {
-        public TelegramBotJob(ILogger<TelegramBotJob> logger, IMessageBus bus, IDbContextFactory<SmartHomeDbContext> dbContextFactory,
-            IServiceProvider serviceProvider)
+        public TelegramBotJob(ILogger<TelegramBotJob> logger, IMessageBus bus, IAuthorisationService authorisationService, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _bus = bus;
-            _authService = new AuthorisationService(dbContextFactory);
+            _authService = authorisationService;
             _commandRegistry = new(serviceProvider);
             RegisterCommands();
         }
@@ -32,6 +29,7 @@ namespace SmartHomeWWW.Server.Telegram
         {
             _commandRegistry.AddCommand<PingCommand>("ping");
             _commandRegistry.AddCommand<DelayedPingCommand>("pingd");
+            _commandRegistry.AddCommand<UsersCommand>("users");
         }
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
