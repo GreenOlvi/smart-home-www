@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CSharpFunctionalExtensions;
+using Microsoft.EntityFrameworkCore;
+using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
+using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.Telegram.Authorisation
 {
@@ -12,17 +15,55 @@ namespace SmartHomeWWW.Server.Telegram.Authorisation
 
         private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
 
-        public async Task<bool> CanUserRunCommand(long userId, string cmd)
+        public async Task<bool> CanUserRunCommand(long userId, string cmd) => (await FetchUser(userId)).HasValue;
+
+        public async Task<bool> CanUserDo(long userId, AuthorizedActions action)
+        {
+            var u = await FetchUser(userId);
+            if (u.HasNoValue)
+            {
+                return false;
+            }
+
+            return action switch
+            {
+                AuthorizedActions.AddNewUser => u.Value.UserType == "Owner",
+                _ => false,
+            };
+        }
+
+        private async Task<Maybe<TelegramUser>> FetchUser(long userId)
         {
             using var context = await _dbContextFactory.CreateDbContextAsync();
             var user = await context.TelegramUsers.FirstOrDefaultAsync(u => u.TelegramId == userId);
 
             if (user == null)
             {
-                return false;
+                return Maybe<TelegramUser>.None;
             }
 
-            return true;
+            return user;
+        }
+
+        public async Task<Maybe<TelegramUser>> AddNewUser(Contact contact)
+        {
+            if (contact.UserId is null)
+            {
+                return Maybe<TelegramUser>.None;
+            }
+
+            using var context = await _dbContextFactory.CreateDbContextAsync();
+
+            var user = new TelegramUser
+            {
+                TelegramId = contact.UserId.Value,
+                Username = contact.FirstName,
+                UserType = "User",
+            };
+
+            await context.TelegramUsers.AddAsync(user);
+            await context.SaveChangesAsync();
+            return user;
         }
     }
 }

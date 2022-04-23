@@ -5,14 +5,14 @@ using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
 using Telegram.Bot;
-using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace SmartHomeWWW.Server.Telegram
 {
     public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
-        IMessageHandler<TelegramSendTextMessageCommand>
+        IMessageHandler<TelegramSendTextMessageCommand>,
+        IMessageHandler<TelegramRefreshAllowedUsersCommand>
     {
         public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, HttpClient httpClient, TelegramConfig config,
             IMessageBus messageBus, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
@@ -33,19 +33,15 @@ namespace SmartHomeWWW.Server.Telegram
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private readonly ReceiverOptions _receiverOptions = new()
-        {
-            AllowedUpdates = { },
-        };
-
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             var me = await _bot.GetMeAsync(cancellationToken);
             _logger.LogInformation("Starting {botname}...", me.Username);
 
-            _bot.StartReceiving(HandleUpdateAsync, HandleErrorAsync, _receiverOptions, cancellationToken);
+            _bot.StartReceiving(HandleUpdateAsync, HandleErrorAsync, cancellationToken: _cancellationTokenSource.Token);
 
             _messageBus.Subscribe<TelegramSendTextMessageCommand>(this);
+            _messageBus.Subscribe<TelegramRefreshAllowedUsersCommand>(this);
 
             await LoadAllowedUsers();
         }
@@ -85,6 +81,7 @@ namespace SmartHomeWWW.Server.Telegram
         {
             if (update.Type != UpdateType.Message || update.Message is null)
             {
+                _logger.LogInformation("Update {type} ignored", update.Type);
                 return Task.CompletedTask;
             }
 
@@ -126,5 +123,7 @@ namespace SmartHomeWWW.Server.Telegram
                 replyToMessageId: message.ReplyToMessageId,
                 allowSendingWithoutReply: message.AllowSendingWithoutReply,
                 cancellationToken: _cancellationTokenSource.Token);
+
+        public Task Handle(TelegramRefreshAllowedUsersCommand message) => LoadAllowedUsers();
     }
 }

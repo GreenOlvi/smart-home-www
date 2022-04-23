@@ -55,6 +55,12 @@ namespace SmartHomeWWW.Server.Telegram
             var text = message.Message.Text ?? string.Empty;
             var cmd = text.Split(' ')[0];
 
+            if (string.IsNullOrEmpty(cmd))
+            {
+                await HandleMessageWithoutText(message);
+                return;
+            }
+
             if (await _authService.CanUserRunCommand(message.SenderId, cmd))
             {
                 if (_commandRegistry.TryGetCommand(cmd, out var command))
@@ -69,6 +75,37 @@ namespace SmartHomeWWW.Server.Telegram
             else
             {
                 await HandleUnauthorizedCommand(cmd, message.Message);
+            }
+        }
+
+        private async Task HandleMessageWithoutText(TelegramMessageReceivedEvent message)
+        {
+            if (message.Message.Contact is not null)
+            {
+                if (await _authService.CanUserDo(message.SenderId, AuthorizedActions.AddNewUser))
+                {
+                    var contact = message.Message.Contact;
+                    var user = await _authService.AddNewUser(contact);
+                    if (user.HasValue)
+                    {
+                        _bus.Publish(new TelegramRefreshAllowedUsersCommand());
+                        _bus.Publish(new TelegramSendTextMessageCommand
+                        {
+                            ChatId = message.SenderId,
+                            ReplyToMessageId = message.Message.MessageId,
+                            Text = $"User '{user.Value.Username}' added",
+                        });
+                    }
+                    else
+                    {
+                        _bus.Publish(new TelegramSendTextMessageCommand
+                        {
+                            ChatId = message.SenderId,
+                            ReplyToMessageId = message.Message.MessageId,
+                            Text = $"User not added",
+                        });
+                    }
+                }
             }
         }
 
