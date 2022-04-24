@@ -29,7 +29,6 @@ namespace SmartHomeWWW.Server.Telegram.Authorisation
             return action switch
             {
                 AuthorizedActions.AddNewUser => user.UserType == "Owner",
-                AuthorizedActions.ListUsers => user.UserType == "Owner",
                 _ => false,
             };
         }
