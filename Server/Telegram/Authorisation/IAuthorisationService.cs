@@ -6,7 +6,7 @@ namespace SmartHomeWWW.Server.Telegram.Authorisation
 {
     public interface IAuthorisationService
     {
-        Task<bool> CanUserRunCommand(long userId, string cmd);
+        bool CanUserRunCommand(long userId, Type command);
         Task<bool> CanUserDo(long userId, AuthorizedActions action);
         Task<Maybe<TelegramUser>> AddNewUser(Contact contact);
     }

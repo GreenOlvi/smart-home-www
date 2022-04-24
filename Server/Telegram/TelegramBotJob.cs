@@ -44,36 +44,37 @@ namespace SmartHomeWWW.Server.Telegram
         public Task Stop(CancellationToken cancellationToken)
         {
             _logger.LogWarning("Stopping TelegramBotJob");
+            _bus.Unsubscribe(this);
             _cancellationTokenSource.Cancel();
             return Task.CompletedTask;
         }
 
-        public async Task Handle(TelegramMessageReceivedEvent message)
+        public Task Handle(TelegramMessageReceivedEvent message)
         {
             var text = message.Message.Text ?? string.Empty;
             var cmd = text.Split(' ')[0];
 
             if (string.IsNullOrEmpty(cmd))
             {
-                await HandleMessageWithoutText(message);
-                return;
+                return HandleMessageWithoutText(message);
             }
 
-            if (await _authService.CanUserRunCommand(message.SenderId, cmd))
+            if (!_commandRegistry.TryGetCommand(cmd, out var command))
             {
-                if (_commandRegistry.TryGetCommand(cmd, out var command))
-                {
-                    await command.Run(message.Message,  _cancellationTokenSource.Token);
-                }
-                else
-                {
-                    await HandleUnknownCommand(cmd, message.Message);
-                }
+                return HandleUnknownCommand(cmd, message.Message);
             }
-            else
+
+            if (!_authService.CanUserRunCommand(message.SenderId, command))
             {
-                await HandleUnauthorizedCommand(cmd, message.Message);
+                return HandleUnauthorizedCommand(cmd, message.Message);
             }
+
+            if (!_commandRegistry.TryCreateCommandInstance(command, out var instance))
+            {
+                return HandleCouldNotCreateCommandInstance(cmd, message.Message);
+            }
+
+            return instance.Run(message.Message, _cancellationTokenSource.Token);
         }
 
         private async Task HandleMessageWithoutText(TelegramMessageReceivedEvent message)
@@ -132,5 +133,19 @@ namespace SmartHomeWWW.Server.Telegram
             _logger.LogError("User '{user}' tried running unauthorized command '{cmd}'", message.From?.ToString(), cmd);
             return Task.CompletedTask;
         }
+
+        private Task HandleCouldNotCreateCommandInstance(string cmd, Message message)
+        {
+            _bus.Publish(new TelegramSendTextMessageCommand
+            {
+                ChatId = message.Chat.Id,
+                ReplyToMessageId = message.MessageId,
+                Text = $"Could not create instance of '{cmd}'",
+            });
+
+            _logger.LogError("Could not create instance of '{cmd}' for user '{user}'", cmd, message.From?.ToString());
+            return Task.CompletedTask;
+        }
+
     }
 }

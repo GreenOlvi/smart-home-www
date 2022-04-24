@@ -100,7 +100,7 @@ internal static class Program
         builder.Services.AddTransient<MqttTasmotaAdapter>();
         builder.Services.AddTransient<TelegramBotJob>();
 
-        builder.Services.AddScoped<IAuthorisationService, AuthorisationService>();
+        builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
     }
 
     private static void AddHttpClients(WebApplicationBuilder builder)

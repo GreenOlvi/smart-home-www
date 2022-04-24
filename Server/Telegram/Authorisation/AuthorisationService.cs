@@ -15,23 +15,45 @@ namespace SmartHomeWWW.Server.Telegram.Authorisation
 
         private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
 
-        public async Task<bool> CanUserRunCommand(long userId, string cmd) => (await FetchUser(userId)).HasValue;
-
-        public async Task<bool> CanUserDo(long userId, AuthorizedActions action)
+        public bool CanUserRunCommand(long userId, Type command)
         {
-            var u = await FetchUser(userId);
-            if (u.HasNoValue)
+            using var context = _dbContextFactory.CreateDbContext();
+            var user = context.TelegramUsers.FirstOrDefault(u => u.TelegramId == userId);
+            if (user is null)
             {
                 return false;
             }
 
-            var user = u.Value;
-            return action switch
+            if (!command.IsAssignableTo(typeof(ITelegramBotCommand)))
             {
-                AuthorizedActions.AddNewUser => user.UserType == "Owner",
-                _ => false,
-            };
+                return false;
+            }
+
+            if (!TryGetCommandAction(command, out var action))
+            {
+                return false;
+            }
+
+            return CanUserDoAction(user, action);
         }
+
+        private static bool TryGetCommandAction(Type command, out AuthorizedActions action) =>
+            Enum.TryParse($"Run_{command.Name}", out action);
+
+        public async Task<bool> CanUserDo(long userId, AuthorizedActions action)
+        {
+            var u = await FetchUser(userId);
+            return u.HasValue && CanUserDoAction(u.Value, action);
+        }
+
+        private static bool CanUserDoAction(TelegramUser user, AuthorizedActions action) => action switch
+        {
+            AuthorizedActions.Run_PingCommand => true,
+            AuthorizedActions.Run_DelayedPingCommand => true,
+            AuthorizedActions.Run_UsersCommand => user.UserType == "Owner",
+            AuthorizedActions.AddNewUser => user.UserType == "Owner",
+            _ => false,
+        };
 
         private async Task<Maybe<TelegramUser>> FetchUser(long userId)
         {
