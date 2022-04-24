@@ -18,4 +18,8 @@
     <ProjectReference Include="..\..\Server\SmartHomeWWW.Server.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
 </Project>

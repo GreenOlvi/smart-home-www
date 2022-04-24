@@ -1,4 +1,4 @@
-﻿namespace SmartHomeWWW.Server.Jobs
+﻿namespace SmartHomeWWW.Server
 {
     public interface IOrchestratorJob : IAsyncDisposable
     {

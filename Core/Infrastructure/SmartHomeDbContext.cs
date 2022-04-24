@@ -11,6 +11,7 @@ namespace SmartHomeWWW.Core.Infrastructure
 
         public DbSet<RelayEntry> Relays { get; init; } = null!;
         public DbSet<Sensor> Sensors { get; init; } = null!;
+        public DbSet<TelegramUser> TelegramUsers { get; init; } = null!;
         public DbSet<WeatherCache> WeatherCaches { get; init; } = null!;
     }
 }

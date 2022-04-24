@@ -2,7 +2,7 @@
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
 
-namespace SmartHomeWWW.Server.Jobs
+namespace SmartHomeWWW.Server.Mqtt
 {
     public sealed class MqttTasmotaAdapter : IOrchestratorJob,
         IMessageHandler<MqttMessageReceivedEvent>,
