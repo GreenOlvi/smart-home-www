@@ -1,0 +1,44 @@
+﻿@page "/weather"
+@using SmartHomeWWW.Core.Domain.OpenWeatherMaps
+@using Shared.Weather
+
+@inject WeatherHttpClient WeatherClient
+
+<main>
+    <div class="text-center">
+        <h1>Weather</h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="col align-content-center">
+            <span class="spinner-border text-primary" role="status"></span>
+        </div>
+    }
+    else
+    {
+        @if (CurrentReport is not null)
+        {
+            <SmartHomeWWW.Client.Shared.Weather.CurrentWeather Weather="@CurrentReport.Current" />
+        }
+    }
+
+</main>
+
+@code {
+    private WeatherReport? CurrentReport;
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadCurrentReport();
+    }
+
+    private async Task LoadCurrentReport()
+    {
+        _isLoading = true;
+        CurrentReport = await WeatherClient.GetCurrent();
+        _isLoading = false;
+    }
+}

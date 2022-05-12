@@ -1,0 +1,33 @@
+﻿@using Core.Domain.OpenWeatherMaps
+
+@if (Weather is not null)
+{
+    <pre>
+        State at @Weather.Timestamp.ToLocalTime()
+
+        Sunrise: @Weather.Sunrise.ToLocalTime()
+        Sunset: @Weather.Sunset.ToLocalTime()
+
+        Temperature: @Weather.Temperature°C
+        Feels like: @Weather.Temperature°C
+
+        Pressure: @Weather.Pressure
+        Humidity: @Weather.Humidity%
+        Dew point: @Weather.DewPoint
+        UVI: @Weather.Uvi
+        Clouds: @Weather.Clouds
+        Visibility: @Weather.Visibility
+        Wind speed: @Weather.WindSpeed
+        Wind degree: @Weather.WindDegree
+    </pre>
+
+    @foreach (var description in Weather.Weather)
+    {
+        <pre>[@description.Icon] @description.Main - @description.Description</pre>
+    }
+}
+
+@code {
+    [Parameter]
+    public Core.Domain.OpenWeatherMaps.CurrentWeather? Weather { get; init; }
+}
