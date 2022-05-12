@@ -1,0 +1,30 @@
+﻿@using SmartHomeWWW.Core.Domain.OpenWeatherMaps
+
+@if (Weather is not null)
+{
+    <pre>
+Timestamp: @Weather.Timestamp.ToLocalTime()
+Temperature: @Weather.Temperature°C
+Feels like: @Weather.FeelsLike°C
+Pressure: @Weather.Pressure
+Humidity: @Weather.Humidity%
+Dew point: @Weather.DewPoint
+UVI: @Weather.Uvi
+Clouds: @Weather.Clouds
+Visibility: @Weather.Visibility
+Wind speed: @Weather.WindSpeed
+Wind degree: @Weather.WindDegree
+Wind gust: @Weather.WindGust
+Probability of precipitation: @Weather.ProbabilityOfPrecipitation
+    </pre>
+    @foreach (var description in Weather.Weather)
+    {
+        <WeatherDescriptionComponent Description=@description />
+    }
+}
+
+@code {
+    [Parameter]
+    public HourlyWeather? Weather { get; init; }
+
+}
