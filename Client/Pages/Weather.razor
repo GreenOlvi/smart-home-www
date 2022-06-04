@@ -1,0 +1,85 @@
+﻿@page "/weather"
+@using SmartHomeWWW.Client.Shared.Weather
+@using SmartHomeWWW.Core.Domain.OpenWeatherMaps
+
+@inject WeatherHttpClient WeatherClient
+
+<main>
+    <div class="text-center">
+        <h1>Weather</h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="col align-content-center">
+            <span class="spinner-border text-primary" role="status"></span>
+        </div>
+    }
+    else
+    {
+        @if (CurrentReport is not null)
+        {
+            <pre>
+[@CurrentReport.Latitude; @CurrentReport.Longitude]
+Timezone: @CurrentReport.Timezone
+Timezone offset: @CurrentReport.TimezoneOffset
+            </pre>
+
+            @if (CurrentReport.Alerts.Any())
+            {
+                <div>
+                    <strong>Alerts:</strong>
+                    @foreach (var alert in CurrentReport.Alerts)
+                    {
+                        <WeatherAlertComponent Alert="@alert" />
+                    }
+                </div>
+            }
+
+            <CurrentWeatherComponent Weather="@CurrentReport.Current" />
+
+            <div>
+                <strong>Minutely:</strong>
+                @foreach (var min in CurrentReport.Minutely)
+                {
+                    <MinutelyWeatherComponent Weather="@min" />
+                }
+            </div>
+
+            <div>
+                <strong>Hourly:</strong>
+                @foreach (var hour in CurrentReport.Hourly)
+                {
+                    <HourlyWeatherComponent Weather="@hour" />
+                }
+            </div>
+
+            <div>
+                <strong>Daily:</strong>
+                @foreach (var daily in CurrentReport.Daily)
+                {
+                    <DailyWeatherComponent Weather="@daily" />
+                }
+            </div>
+        }
+    }
+
+</main>
+
+@code {
+    private WeatherReport? CurrentReport;
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadCurrentReport();
+    }
+
+    private async Task LoadCurrentReport()
+    {
+        _isLoading = true;
+        CurrentReport = await WeatherClient.GetCurrent();
+        _isLoading = false;
+    }
+}

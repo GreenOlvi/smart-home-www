@@ -1,0 +1,35 @@
+﻿@using Core.Domain.OpenWeatherMaps
+
+@if (Weather is not null)
+{
+    <pre>State at @Weather.Timestamp.ToLocalTime()
+Sunrise: @Weather.Sunrise.ToLocalTime()
+Sunset: @Weather.Sunset.ToLocalTime()
+Moonrise: @Weather.Moonrise.ToLocalTime()
+Moonset: @Weather.Moonset.ToLocalTime()
+Temperature: @DailyTempTemplate(Weather.Temperature)
+Feels like: @DailyFeelsLikeTemplate(Weather.FeelsLike)
+Pressure: @Weather.Pressure
+Humidity: @Weather.Humidity%
+Dew point: @Weather.DewPoint
+Wind speed: @Weather.WindSpeed
+Wind degree: @Weather.WindDegree
+Wind gust: @Weather.WindGust
+Probability of precipitation: @Weather.ProbabilityOfPrecipitation
+UVI: @Weather.Uvi
+Clouds: @Weather.Clouds</pre>
+    @foreach (var description in Weather.Weather)
+    {
+        <WeatherDescriptionComponent Description=@description />
+    }
+}
+
+@code {
+    [Parameter]
+    public DailyWeather? Weather { get; init; }
+
+    Func<DailyTemperature, string> DailyTempTemplate =
+        t => $"Day: {t.Day}°C; Min: {t.Min}°C; Max: {t.Max}°C; Night: {t.Night}°C; Evening: {t.Evening}°C; Morning: {t.Morning}°C";
+    Func<DailyFeelsLike, string> DailyFeelsLikeTemplate =
+        t => $"Day: {t.Day}°C; Night: {t.Night}°C; Evening: {t.Evening}°C; Morning: {t.Morning}°C";
+}

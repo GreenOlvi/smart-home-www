@@ -81,6 +81,6 @@ namespace SmartHomeWWW.Server.Firmwares
             return true;
         }
 
-        private static readonly Regex FirmwareVersionExtract = new(@"firmware\.(?<version>.+)\.bin", RegexOptions.Compiled);
+        private readonly static Regex FirmwareVersionExtract = new(@"firmware\.(?<version>.+)\.bin", RegexOptions.Compiled);
     }
 }

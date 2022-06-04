@@ -17,7 +17,7 @@ public class WeatherController : ControllerBase
         _dbContextFactory = dbContextFactory;
     }
 
-    private static readonly TimeSpan ExpireTime = TimeSpan.FromDays(1);
+    private readonly static TimeSpan ExpireTime = TimeSpan.FromDays(1);
 
     private readonly ILogger<WeatherController> _logger;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
