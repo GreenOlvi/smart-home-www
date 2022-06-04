@@ -24,6 +24,18 @@
 Timezone: @CurrentReport.Timezone
 Timezone offset: @CurrentReport.TimezoneOffset
             </pre>
+
+            @if (CurrentReport.Alerts.Any())
+            {
+                <div>
+                    <strong>Alerts:</strong>
+                    @foreach (var alert in CurrentReport.Alerts)
+                    {
+                        <WeatherAlertComponent Alert="@alert" />
+                    }
+                </div>
+            }
+
             <CurrentWeatherComponent Weather="@CurrentReport.Current" />
 
             <div>

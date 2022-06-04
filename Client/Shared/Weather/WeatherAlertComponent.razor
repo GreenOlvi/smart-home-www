@@ -1,0 +1,17 @@
+﻿@using Core.Domain.OpenWeatherMaps
+
+@if (Alert is not null)
+{
+    <pre>
+Event: @Alert.Event
+Sender: @Alert.SenderName
+From: @Alert.Start.ToLocalTime()
+To: @Alert.End.ToLocalTime()
+Description: @Alert.Description
+    </pre>
+}
+
+@code {
+    [Parameter]
+    public WeatherAlert? Alert { get; init; }
+}
