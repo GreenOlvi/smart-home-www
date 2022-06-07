@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SmartHomeWWW.Utils
+﻿namespace SmartHomeWWW.Utils
 {
     public class ColourGradient
     {

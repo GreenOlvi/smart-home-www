@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Server.Messages.Events;
 using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Controllers;
@@ -11,16 +13,18 @@ namespace SmartHomeWWW.Server.Controllers;
 [ApiController]
 public class WeatherController : ControllerBase
 {
-    public WeatherController(ILogger<WeatherController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+    public WeatherController(ILogger<WeatherController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IMessageBus bus)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
+        _bus = bus;
     }
 
     private readonly static TimeSpan ExpireTime = TimeSpan.FromDays(1);
 
     private readonly ILogger<WeatherController> _logger;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+    private readonly IMessageBus _bus;
 
     [HttpGet("current")]
     public async Task<ActionResult<WeatherReport>> GetCurrent(long after = 0)
@@ -91,6 +95,8 @@ public class WeatherController : ControllerBase
         db.WeatherCaches.RemoveRange(expired);
 
         await db.SaveChangesAsync();
+
+        _bus.Publish(new WeatherUpdatedEvent { Type = weather.Name, Weather = value });
 
         return CreatedAtAction(nameof(GetWeather), new { id = weather.Id }, weather);
     }

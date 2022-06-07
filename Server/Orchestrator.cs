@@ -13,6 +13,7 @@ namespace SmartHomeWWW.Server
             {
                 sp.GetRequiredService<MqttTasmotaAdapter>(),
                 sp.GetRequiredService<TelegramBotJob>(),
+                sp.GetRequiredService<WeatherAdapterJob>(),
             };
         }
 
@@ -38,6 +39,5 @@ namespace SmartHomeWWW.Server
                 await job.DisposeAsync();
             }
         }
-
     }
 }

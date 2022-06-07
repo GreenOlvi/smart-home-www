@@ -99,6 +99,7 @@ internal static class Program
         builder.Services.AddHostedService<Orchestrator>();
         builder.Services.AddTransient<MqttTasmotaAdapter>();
         builder.Services.AddTransient<TelegramBotJob>();
+        builder.Services.AddTransient<WeatherAdapterJob>();
 
         builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
     }

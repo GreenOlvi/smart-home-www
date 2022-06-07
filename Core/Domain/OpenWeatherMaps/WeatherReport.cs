@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps
 {
-    public class WeatherReport
+    public record WeatherReport
     {
         [JsonPropertyName("lat")]
         public float Latitude { get; init; }

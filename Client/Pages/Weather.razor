@@ -1,8 +1,12 @@
 ﻿@page "/weather"
+
+@using Microsoft.AspNetCore.SignalR.Client
 @using SmartHomeWWW.Client.Shared.Weather
 @using SmartHomeWWW.Core.Domain.OpenWeatherMaps
 
+@inject ILogger<Weather> Logger
 @inject WeatherHttpClient WeatherClient
+@inject HubConnection HubConnection
 
 <main>
     <div class="text-center">
@@ -74,6 +78,18 @@ Timezone offset: @CurrentReport.TimezoneOffset
     {
         await base.OnInitializedAsync();
         await LoadCurrentReport();
+
+        HubConnection.On<WeatherReport>("WeatherUpdated", weather =>
+        {
+            Logger.LogInformation("Received WeatherUpdated at {dt}", weather.Current.Timestamp.ToLocalTime().ToString());
+            CurrentReport = weather;
+            StateHasChanged();
+        });
+
+        if (HubConnection.State == HubConnectionState.Disconnected)
+        {
+            await HubConnection.StartAsync();
+        }
     }
 
     private async Task LoadCurrentReport()
