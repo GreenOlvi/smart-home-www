@@ -1,5 +1,5 @@
-﻿using CSharpFunctionalExtensions;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 
 namespace SmartHomeWWW.Core.Domain.Relays;
 

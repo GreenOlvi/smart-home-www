@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
-using System.Text;
 
 namespace SmartHomeWWW.Server.Controllers;
 
@@ -35,7 +35,7 @@ public class UpdateController : ControllerBase
     [HttpGet("/Update/firmware.bin")]
     public async Task<IActionResult> Firmware()
     {
-        _logger.LogTrace("{headers}", DumpHeaders(Request.Headers));
+        _logger.LogTrace("{Headers}", DumpHeaders(Request.Headers));
 
         var userAgent = Request.Headers["User-Agent"];
         if (userAgent != "ESP8266-http-Update")
@@ -44,8 +44,8 @@ public class UpdateController : ControllerBase
             return new RedirectResult("/");
         }
 
-        var mac = Request.Headers["x-ESP8266-STA-MAC"].Single().ToUpper();
-        _logger.LogDebug("ESP8266 [{mac}] connected", mac);
+        var mac = Request.Headers["x-ESP8266-STA-MAC"].Single().ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+        _logger.LogDebug("ESP8266 [{Mac}] connected", mac);
 
         var deviceVersion = Request.Headers["x-ESP8266-version"].Single();
 
@@ -59,7 +59,7 @@ public class UpdateController : ControllerBase
 
         if (deviceVersion == currentVeresion.ToString())
         {
-            _logger.LogDebug("ESP8266 [{mac}] nothing new", mac);
+            _logger.LogDebug("ESP8266 [{Mac}] nothing new", mac);
             return new StatusCodeResult(304);
         }
 
@@ -114,4 +114,3 @@ public class UpdateController : ControllerBase
         return sb.ToString();
     }
 }
-

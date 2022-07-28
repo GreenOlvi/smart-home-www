@@ -16,7 +16,7 @@ namespace SmartHomeWWW.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     TelegramId = table.Column<long>(type: "INTEGER", nullable: false),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
-                    UserType = table.Column<string>(type: "TEXT", nullable: false)
+                    UserType = table.Column<string>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {

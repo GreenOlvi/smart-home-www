@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
@@ -5,7 +6,6 @@ using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Events;
-using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Controllers;
 
@@ -20,7 +20,7 @@ public class WeatherController : ControllerBase
         _bus = bus;
     }
 
-    private readonly static TimeSpan ExpireTime = TimeSpan.FromDays(1);
+    private static readonly TimeSpan ExpireTime = TimeSpan.FromDays(1);
 
     private readonly ILogger<WeatherController> _logger;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
@@ -101,4 +101,3 @@ public class WeatherController : ControllerBase
         return CreatedAtAction(nameof(GetWeather), new { id = weather.Id }, weather);
     }
 }
-

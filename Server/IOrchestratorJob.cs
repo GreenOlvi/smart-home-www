@@ -1,8 +1,7 @@
-﻿namespace SmartHomeWWW.Server
+﻿namespace SmartHomeWWW.Server;
+
+public interface IOrchestratorJob : IAsyncDisposable
 {
-    public interface IOrchestratorJob : IAsyncDisposable
-    {
-        public Task Start(CancellationToken cancellationToken);
-        public Task Stop(CancellationToken cancellationToken);
-    }
+    public Task Start(CancellationToken cancellationToken);
+    public Task Stop(CancellationToken cancellationToken);
 }

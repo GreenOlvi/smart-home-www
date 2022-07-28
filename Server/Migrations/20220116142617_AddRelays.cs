@@ -16,7 +16,7 @@ namespace SmartHomeWWW.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Config = table.Column<string>(type: "TEXT", nullable: true)
+                    Config = table.Column<string>(type: "TEXT", nullable: true),
                 },
                 constraints: table =>
                 {

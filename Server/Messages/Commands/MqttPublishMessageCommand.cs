@@ -1,8 +1,7 @@
-﻿namespace SmartHomeWWW.Server.Messages.Commands
+﻿namespace SmartHomeWWW.Server.Messages.Commands;
+
+public record MqttPublishMessageCommand : IMessage
 {
-    public record MqttPublishMessageCommand : IMessage
-    {
-        public string Topic { get; init; } = string.Empty;
-        public string Payload { get; init; } = string.Empty;
-    }
+    public string Topic { get; init; } = string.Empty;
+    public string Payload { get; init; } = string.Empty;
 }

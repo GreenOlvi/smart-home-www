@@ -1,16 +1,14 @@
-﻿using SmartHomeWWW.Core.Utils;
-using System;
+﻿using System;
 using System.Text.Json.Serialization;
+using SmartHomeWWW.Core.Utils;
 
-namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps
+namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+
+public record MinutelyWeather
 {
-    public record MinutelyWeather
-    {
-        [JsonConverter(typeof(UnixEpochDateTimeConverter))]
-        [JsonPropertyName("dt")]
-        public DateTime Timestamp { get; init; } = DateTime.UnixEpoch;
+    [JsonConverter(typeof(UnixEpochDateTimeConverter))]
+    [JsonPropertyName("dt")]
+    public DateTime Timestamp { get; init; } = DateTime.UnixEpoch;
 
-        public float Precipitation { get; init; }
-    }
-
+    public float Precipitation { get; init; }
 }

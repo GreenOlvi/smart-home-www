@@ -1,5 +1,5 @@
-﻿using SmartHomeWWW.Core.Domain;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
+using SmartHomeWWW.Core.Domain;
 
 namespace SmartHomeWWW.Client.HttpClients;
 

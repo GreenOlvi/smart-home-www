@@ -1,8 +1,7 @@
-﻿namespace SmartHomeWWW.Server.Config
+﻿namespace SmartHomeWWW.Server.Config;
+
+public record TelegramConfig
 {
-    public record TelegramConfig
-    {
-        public string ApiKey { get; set; } = string.Empty;
-        public long OwnerId { get; set; }
-    }
+    public string ApiKey { get; set; } = string.Empty;
+    public long OwnerId { get; set; }
 }

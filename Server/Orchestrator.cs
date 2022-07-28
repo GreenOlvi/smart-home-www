@@ -1,43 +1,42 @@
 ﻿using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Telegram;
 
-namespace SmartHomeWWW.Server
+namespace SmartHomeWWW.Server;
+
+public sealed class Orchestrator : IHostedService, IAsyncDisposable
 {
-    public sealed class Orchestrator : IHostedService, IAsyncDisposable
+    public Orchestrator(ILogger<Orchestrator> logger, IServiceProvider sp)
     {
-        public Orchestrator(ILogger<Orchestrator> logger, IServiceProvider sp)
+        _logger = logger;
+
+        _jobs = new ()
         {
-            _logger = logger;
+            sp.GetRequiredService<MqttTasmotaAdapter>(),
+            sp.GetRequiredService<TelegramBotJob>(),
+            sp.GetRequiredService<WeatherAdapterJob>(),
+        };
+    }
 
-            _jobs = new()
-            {
-                sp.GetRequiredService<MqttTasmotaAdapter>(),
-                sp.GetRequiredService<TelegramBotJob>(),
-                sp.GetRequiredService<WeatherAdapterJob>(),
-            };
-        }
+    private readonly ILogger<Orchestrator> _logger;
+    private readonly List<IOrchestratorJob> _jobs;
 
-        private readonly ILogger<Orchestrator> _logger;
-        private readonly List<IOrchestratorJob> _jobs;
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Starting Orchestrator");
+        return Task.WhenAll(_jobs.Select(job => job.Start(cancellationToken)));
+    }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Stopping Orchestrator");
+        return Task.WhenAll(_jobs.Select(job => job.Stop(cancellationToken)));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var job in _jobs)
         {
-            _logger.LogDebug("Starting Orchestrator");
-            return Task.WhenAll(_jobs.Select(job => job.Start(cancellationToken)));
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogDebug("Stopping Orchestrator");
-            return Task.WhenAll(_jobs.Select(job => job.Stop(cancellationToken)));
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            foreach(var job in _jobs)
-            {
-                await job.DisposeAsync();
-            }
+            await job.DisposeAsync();
         }
     }
 }

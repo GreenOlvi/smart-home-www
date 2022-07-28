@@ -1,7 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Messages.Commands
+﻿namespace SmartHomeWWW.Server.Messages.Commands;
+
+public record TasmotaRequestPowerStateCommand : IMessage
 {
-    public record TasmotaRequestPowerStateCommand : IMessage
-    {
-        public string DeviceName { get; init; } = string.Empty;
-    }
+    public string DeviceName { get; init; } = string.Empty;
 }

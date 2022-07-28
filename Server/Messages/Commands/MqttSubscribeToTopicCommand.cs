@@ -1,7 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Messages.Commands
+﻿namespace SmartHomeWWW.Server.Messages.Commands;
+
+public record MqttSubscribeToTopicCommand : IMessage
 {
-    public record MqttSubscribeToTopicCommand : IMessage
-    {
-        public string Topic { get; init; } = string.Empty;
-    }
+    public string Topic { get; init; } = string.Empty;
 }

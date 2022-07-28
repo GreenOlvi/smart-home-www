@@ -1,6 +1,5 @@
-﻿namespace SmartHomeWWW.Server.Messages
+﻿namespace SmartHomeWWW.Server.Messages;
+
+public interface IMessage
 {
-    public interface IMessage
-    {
-    }
 }

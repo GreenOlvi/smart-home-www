@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using SmartHomeWWW.Core.Domain;
 
-namespace SmartHomeWWW.Core.Firmwares
+namespace SmartHomeWWW.Core.Firmwares;
+
+public interface IFirmwareRepository
 {
-    public interface IFirmwareRepository
-    {
-        IEnumerable<Firmware> GetAllFirmwares();
-        bool TryGetCurrentVersion(out Version version);
-        Version GetCurrentVersion();
-        Stream GetCurrentFirmware();
-    }
+    IEnumerable<Firmware> GetAllFirmwares();
+    bool TryGetCurrentVersion(out Version version);
+    Version GetCurrentVersion();
+    Stream GetCurrentFirmware();
 }

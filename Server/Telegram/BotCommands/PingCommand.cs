@@ -2,27 +2,26 @@
 using SmartHomeWWW.Server.Messages.Commands;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram.BotCommands
+namespace SmartHomeWWW.Server.Telegram.BotCommands;
+
+public class PingCommand : ITelegramBotCommand
 {
-    public class PingCommand : ITelegramBotCommand
+    public PingCommand(IMessageBus bus)
     {
-        public PingCommand(IMessageBus bus)
+        _bus = bus;
+    }
+
+    private readonly IMessageBus _bus;
+
+    public Task Run(Message message, CancellationToken cancellationToken)
+    {
+        _bus.Publish(new TelegramSendTextMessageCommand
         {
-            _bus = bus;
-        }
+            ChatId = message.Chat.Id,
+            ReplyToMessageId = message.MessageId,
+            Text = "pong",
+        });
 
-        private readonly IMessageBus _bus;
-
-        public Task Run(Message message, CancellationToken cancellationToken)
-        {
-            _bus.Publish(new TelegramSendTextMessageCommand
-            {
-                ChatId = message.Chat.Id,
-                ReplyToMessageId = message.MessageId,
-                Text = "pong",
-            });
-
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
     }
 }
