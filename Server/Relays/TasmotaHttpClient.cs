@@ -3,46 +3,45 @@ using CSharpFunctionalExtensions;
 using Flurl;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
-namespace SmartHomeWWW.Server.Relays
+namespace SmartHomeWWW.Server.Relays;
+
+public class TasmotaHttpClient : ITasmotaClient
 {
-    public class TasmotaHttpClient : ITasmotaClient
+    public TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl)
     {
-        public TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl)
+        _logger = logger;
+        _httpClient = httpClient;
+        _baseUrl = baseUrl;
+    }
+
+    private readonly ILogger<TasmotaHttpClient> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly Uri _baseUrl;
+
+    public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value) =>
+        GetUrl(_baseUrl.AppendPathSegment("cm").SetQueryParam("cmnd", $"{command} {value}"));
+
+    public Task<Maybe<JsonDocument>> GetValueAsync(string command) =>
+        GetUrl(_baseUrl.AppendPathSegment("cm").SetQueryParam("cmnd", command));
+
+    private async Task<Maybe<JsonDocument>> GetUrl(Url uri)
+    {
+        try
         {
-            _logger = logger;
-            _httpClient = httpClient;
-            _baseUrl = baseUrl;
+            var response = await _httpClient.GetAsync(uri);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Error from relay: {StatusCode}", response.StatusCode);
+                return Maybe.None;
+            }
+
+            return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         }
-
-        private readonly ILogger<TasmotaHttpClient> _logger;
-        private readonly HttpClient _httpClient;
-        private readonly Uri _baseUrl;
-
-        public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value) =>
-            GetUrl(_baseUrl.AppendPathSegment("cm").SetQueryParam("cmnd", $"{command} {value}"));
-
-        public Task<Maybe<JsonDocument>> GetValueAsync(string command) =>
-            GetUrl(_baseUrl.AppendPathSegment("cm").SetQueryParam("cmnd", command));
-
-        private async Task<Maybe<JsonDocument>> GetUrl(Url uri)
+        catch (Exception e)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync(uri);
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogError("Error from relay: {statusCode}", response.StatusCode);
-                    return Maybe.None;
-                }
-
-                return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
-            }
-            catch (Exception e)
-            {
-                _logger.LogError("Error while sending request to relay: {message}", e.Message);
-                _logger.LogDebug(e, "Exception caught");
-            }
-            return Maybe.None;
+            _logger.LogError("Error while sending request to relay: {Message}", e.Message);
+            _logger.LogDebug(e, "Exception caught");
         }
+        return Maybe.None;
     }
 }

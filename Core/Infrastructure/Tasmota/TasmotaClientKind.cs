@@ -1,8 +1,7 @@
-﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota
+﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota;
+
+public enum TasmotaClientKind
 {
-    public enum TasmotaClientKind
-    {
-        Http,
-        Mqtt,
-    }
+    Http,
+    Mqtt,
 }

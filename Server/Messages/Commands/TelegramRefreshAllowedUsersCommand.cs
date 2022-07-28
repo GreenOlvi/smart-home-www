@@ -1,6 +1,5 @@
-﻿namespace SmartHomeWWW.Server.Messages.Commands
+﻿namespace SmartHomeWWW.Server.Messages.Commands;
+
+public class TelegramRefreshAllowedUsersCommand : IMessage
 {
-    public class TelegramRefreshAllowedUsersCommand : IMessage
-    {
-    }
 }

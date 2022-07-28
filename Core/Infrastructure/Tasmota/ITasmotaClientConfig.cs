@@ -1,8 +1,7 @@
-﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota
+﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota;
+
+public interface ITasmotaClientConfig
 {
-    public interface ITasmotaClientConfig
-    {
-        TasmotaClientKind Kind { get; }
-        int RelayId { get; }
-    }
+    TasmotaClientKind Kind { get; }
+    int RelayId { get; }
 }

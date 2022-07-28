@@ -1,11 +1,10 @@
-﻿namespace SmartHomeWWW.Server.Telegram.Authorisation
+﻿namespace SmartHomeWWW.Server.Telegram.Authorisation;
+
+public enum AuthorizedActions
 {
-    public enum AuthorizedActions
-    {
-        Invalid = 0,
-        Run_PingCommand,
-        Run_DelayedPingCommand,
-        Run_UsersCommand,
-        AddNewUser,
-    }
+    Invalid = 0,
+    RunPingCommand,
+    RunDelayedPingCommand,
+    RunUsersCommand,
+    AddNewUser,
 }

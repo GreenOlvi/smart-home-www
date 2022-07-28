@@ -1,7 +1,6 @@
-﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota
+﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota;
+
+public interface ITasmotaClientFactory
 {
-    public interface ITasmotaClientFactory
-    {
-        ITasmotaClient CreateFor(ITasmotaClientConfig config);
-    }
+    ITasmotaClient CreateFor(ITasmotaClientConfig config);
 }

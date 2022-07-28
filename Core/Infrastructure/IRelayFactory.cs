@@ -1,10 +1,9 @@
 ﻿using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.Relays;
 
-namespace SmartHomeWWW.Core.Infrastructure
+namespace SmartHomeWWW.Core.Infrastructure;
+
+public interface IRelayFactory
 {
-    public interface IRelayFactory
-    {
-        IRelay Create(RelayEntry entry);
-    }
+    IRelay Create(RelayEntry entry);
 }

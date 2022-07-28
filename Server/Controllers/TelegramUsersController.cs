@@ -4,109 +4,108 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.ViewModel;
 
-namespace SmartHomeWWW.Server.Controllers
+namespace SmartHomeWWW.Server.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class TelegramUsersController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TelegramUsersController : ControllerBase
+    public TelegramUsersController(ILogger<TelegramUsersController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
     {
-        public TelegramUsersController(ILogger<TelegramUsersController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+        _logger = logger;
+        _dbContextFactory = dbContextFactory;
+    }
+
+    private readonly ILogger<TelegramUsersController> _logger;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+
+    [HttpGet]
+    public async Task<IEnumerable<TelegramUserViewModel>> Get()
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        return (await context.TelegramUsers.ToArrayAsync())
+            .Select(TelegramUserViewModel.From);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<TelegramUserViewModel>> Get(Guid id)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        var user = await context.TelegramUsers.FindAsync(id);
+        return user is not null ? Ok(user) : NotFound();
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> Post([FromBody] TelegramUserViewModel user)
+    {
+        if (user.Id is not null || user.TelegramId is null || user.Username is null)
         {
-            _logger = logger;
-            _dbContextFactory = dbContextFactory;
+            return new StatusCodeResult(422);
         }
 
-        private readonly ILogger<TelegramUsersController> _logger;
-        private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-
-        [HttpGet]
-        public async Task<IEnumerable<TelegramUserViewModel>> Get()
+        using var context = _dbContextFactory.CreateDbContext();
+        var newUser = await context.TelegramUsers.AddAsync(new TelegramUser
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            return (await context.TelegramUsers.ToArrayAsync())
-                .Select(TelegramUserViewModel.From);
+            Id = Guid.NewGuid(),
+            TelegramId = user.TelegramId.Value,
+            Username = user.Username,
+            UserType = user.UserType ?? string.Empty,
+        });
+        await context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(Get), new { id = newUser.Entity.Id }, TelegramUserViewModel.From(newUser.Entity));
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> Put(Guid id, [FromBody] TelegramUserViewModel changed)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        var user = await context.TelegramUsers.FindAsync(id);
+        if (user is null)
+        {
+            return NotFound();
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TelegramUserViewModel>> Get(Guid id)
+        var change = false;
+
+        if (changed.TelegramId is not null && changed.TelegramId != user.TelegramId)
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            var user = await context.TelegramUsers.FindAsync(id);
-            return user is not null ? Ok(user) : NotFound();
+            user.TelegramId = changed.TelegramId.Value;
+            change = true;
         }
 
-        [HttpPost]
-        public async Task<ActionResult> Post([FromBody] TelegramUserViewModel user)
+        if (changed.Username is not null && changed.Username != user.Username)
         {
-            if (user.Id is not null || user.TelegramId is null || user.Username is null)
-            {
-                return new StatusCodeResult(422);
-            }
+            user.Username = changed.Username;
+            change = true;
+        }
 
-            using var context = _dbContextFactory.CreateDbContext();
-            var newUser = await context.TelegramUsers.AddAsync(new TelegramUser
-            {
-                Id = Guid.NewGuid(),
-                TelegramId = user.TelegramId.Value,
-                Username = user.Username,
-                UserType = user.UserType ?? string.Empty,
-            });
+        if (changed.UserType is not null && changed.UserType != user.UserType)
+        {
+            user.UserType = changed.UserType;
+            change = true;
+        }
+
+        if (change)
+        {
+            context.TelegramUsers.Update(user);
             await context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(Get), new { id = newUser.Entity.Id }, TelegramUserViewModel.From(newUser.Entity));
         }
+        return Ok();
+    }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult> Put(Guid id, [FromBody] TelegramUserViewModel changed)
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        using var context = _dbContextFactory.CreateDbContext();
+        var user = await context.TelegramUsers.FindAsync(id);
+        if (user is null)
         {
-            using var context = _dbContextFactory.CreateDbContext();
-            var user = await context.TelegramUsers.FindAsync(id);
-            if (user is null)
-            {
-                return NotFound();
-            }
-
-            var change = false;
-
-            if (changed.TelegramId is not null && changed.TelegramId != user.TelegramId)
-            {
-                user.TelegramId = changed.TelegramId.Value;
-                change = true;
-            }
-
-            if (changed.Username is not null && changed.Username != user.Username)
-            {
-                user.Username = changed.Username;
-                change = true;
-            }
-
-            if (changed.UserType is not null && changed.UserType != user.UserType)
-            {
-                user.UserType = changed.UserType;
-                change = true;
-            }
-
-            if (change)
-            {
-                context.TelegramUsers.Update(user);
-                await context.SaveChangesAsync();
-            }
-            return Ok();
+            return NotFound();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(Guid id)
-        {
-            using var context = _dbContextFactory.CreateDbContext();
-            var user = await context.TelegramUsers.FindAsync(id);
-            if (user is null)
-            {
-                return NotFound();
-            }
-
-            context.TelegramUsers.Remove(user);
-            await context.SaveChangesAsync();
-            return Ok();
-        }
+        context.TelegramUsers.Remove(user);
+        await context.SaveChangesAsync();
+        return Ok();
     }
 }

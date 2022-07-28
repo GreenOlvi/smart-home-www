@@ -15,7 +15,7 @@ namespace SmartHomeWWW.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Expires = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Data = table.Column<string>(type: "TEXT", nullable: true)
+                    Data = table.Column<string>(type: "TEXT", nullable: true),
                 },
                 constraints: table =>
                 {

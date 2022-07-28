@@ -1,9 +1,8 @@
-﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota
+﻿namespace SmartHomeWWW.Core.Infrastructure.Tasmota;
+
+public record TasmotaHttpClientConfig : ITasmotaClientConfig
 {
-    public record TasmotaHttpClientConfig : ITasmotaClientConfig
-    {
-        public TasmotaClientKind Kind => TasmotaClientKind.Http;
-        public string Host { get; set; } = string.Empty;
-        public int RelayId { get; set; } = 1;
-    }
+    public TasmotaClientKind Kind => TasmotaClientKind.Http;
+    public string Host { get; set; } = string.Empty;
+    public int RelayId { get; set; } = 1;
 }

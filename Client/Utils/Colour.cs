@@ -1,11 +1,10 @@
-﻿namespace SmartHomeWWW.Utils
-{
-    public struct Colour
-    {
-        public int R { get; init; }
-        public int G { get; init; }
-        public int B { get; init; }
+﻿namespace SmartHomeWWW.Client.Utils;
 
-        public string ToCss() => $"rgb({R} {G} {B})";
-    }
+public struct Colour
+{
+    public int R { get; init; }
+    public int G { get; init; }
+    public int B { get; init; }
+
+    public string ToCss() => $"rgb({R} {G} {B})";
 }

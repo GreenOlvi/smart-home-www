@@ -1,7 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Messages
+﻿namespace SmartHomeWWW.Server.Messages;
+
+public interface IMessageHandler<T> where T : IMessage
 {
-    public interface IMessageHandler<T> where T : IMessage
-    {
-        public Task Handle(T message);
-    }
+    public Task Handle(T message);
 }

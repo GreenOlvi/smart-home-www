@@ -1,7 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Config
+﻿namespace SmartHomeWWW.Server.Config;
+
+public record FirmwaresConfig
 {
-    public record FirmwaresConfig
-    {
-        public string Path { get; set; } = string.Empty;
-    }
+    public string Path { get; set; } = string.Empty;
 }
