@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,14 @@ internal static class Program
         MapConfig(builder);
 
         AddServices(builder);
+
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.Configure<JsonOptions>(o =>
+            {
+                o.JsonSerializerOptions.WriteIndented = true;
+            });
+        }
 
         var app = builder.Build();
 
