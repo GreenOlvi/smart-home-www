@@ -34,7 +34,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         {
             var topic = e.ApplicationMessage.Topic;
             var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-            _logger.LogDebug("Mqtt message received:\n{topic}\n{payload}", topic, payload);
+            _logger.LogDebug("Mqtt message received:\n{Topic}\n{Payload}", topic, payload);
             _bus.Publish(new MqttMessageReceivedEvent { Topic = topic, Payload = payload });
         });
     }
