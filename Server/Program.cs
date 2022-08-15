@@ -113,6 +113,7 @@ internal static class Program
 
         builder.Services.AddHostedService<Orchestrator>();
         builder.Services.AddTransient<MqttTasmotaAdapter>();
+        builder.Services.AddTransient<TasmotaDeviceUpdaterService>();
         builder.Services.AddTransient<TelegramBotJob>();
         builder.Services.AddTransient<WeatherAdapterJob>();
 

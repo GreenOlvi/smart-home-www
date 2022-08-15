@@ -34,7 +34,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         {
             var topic = e.ApplicationMessage.Topic;
             var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-            _logger.LogDebug("Mqtt message received:\n{topic}\n{payload}", topic, payload);
+            _logger.LogDebug("Mqtt message received:\n{Topic}\n{Payload}", topic, payload);
             _bus.Publish(new MqttMessageReceivedEvent { Topic = topic, Payload = payload });
         });
     }
@@ -44,7 +44,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     private readonly IMqttClientOptions _options;
     private readonly IMessageBus _bus;
 
-    private readonly List<string> _subscribedTopics = new ();
+    private readonly List<string> _subscribedTopics = new();
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {

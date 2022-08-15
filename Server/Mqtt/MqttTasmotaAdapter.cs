@@ -1,21 +1,28 @@
 ﻿using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Mqtt;
 
-public sealed class MqttTasmotaAdapter : IOrchestratorJob,
+public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
     IMessageHandler<MqttMessageReceivedEvent>,
     IMessageHandler<TasmotaRequestPowerStateCommand>
 {
-    public MqttTasmotaAdapter(ILogger<MqttTasmotaAdapter> logger, IMessageBus bus)
+    private readonly ILogger<MqttTasmotaAdapter> _logger;
+    private readonly IMessageBus _bus;
+    private readonly TasmotaDeviceUpdaterService _updaterService;
+    private readonly List<(Func<string, bool> Match, Func<MqttMessageReceivedEvent, Task> Handler)> TopicHandlers = new();
+
+    public MqttTasmotaAdapter(ILogger<MqttTasmotaAdapter> logger, IMessageBus bus, TasmotaDeviceUpdaterService updaterService)
     {
         _logger = logger;
         _bus = bus;
-    }
+        _updaterService = updaterService;
 
-    private readonly ILogger<MqttTasmotaAdapter> _logger;
-    private readonly IMessageBus _bus;
+        TopicHandlers.Add((s => s.StartsWith("stat/", StringComparison.InvariantCultureIgnoreCase), MqttStatMessage));
+        TopicHandlers.Add((s => s.StartsWith("tasmota/discovery/", StringComparison.InvariantCultureIgnoreCase), MqttTasmotaDiscoveryMessage));
+    }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
@@ -25,6 +32,7 @@ public sealed class MqttTasmotaAdapter : IOrchestratorJob,
         _bus.Subscribe<TasmotaRequestPowerStateCommand>(this);
 
         _bus.Publish(new MqttSubscribeToTopicCommand { Topic = "stat/+/POWER" });
+        _bus.Publish(new MqttSubscribeToTopicCommand { Topic = "tasmota/discovery/+/config" });
 
         return Task.CompletedTask;
     }
@@ -35,29 +43,36 @@ public sealed class MqttTasmotaAdapter : IOrchestratorJob,
         return Task.CompletedTask;
     }
 
-    public Task Handle(MqttMessageReceivedEvent message)
+    public Task Handle(MqttMessageReceivedEvent message) =>
+        Task.WhenAll(TopicHandlers.Where(h => h.Match(message.Topic)).Select(h => h.Handler(message)));
+
+
+    private Task MqttStatMessage(MqttMessageReceivedEvent message)
     {
         var parts = message.Topic.Split('/');
-        return parts[0] switch
-        {
-            "stat" => MqttStatMessage(parts[1], parts[2], message.Payload, message),
-            _ => Task.CompletedTask,
-        };
-    }
+        var (device, kind) = (parts[1], parts[2]);
 
-    private Task MqttStatMessage(string device, string kind, string payload, IMessage message)
-    {
         if (kind == "POWER")
         {
-            _logger.LogInformation("{dev} changed power to {payload}", device, payload);
+            _logger.LogInformation("{Dev} changed power to {Payload}", device, message.Payload);
             _bus.Publish(new TasmotaPowerUpdateEvent
             {
                 ParentEvent = message,
                 DeviceName = device,
-                PowerState = payload,
+                PowerState = message.Payload,
             });
         }
         return Task.CompletedTask;
+    }
+
+    private async Task MqttTasmotaDiscoveryMessage(MqttMessageReceivedEvent message)
+    {
+        var data = JsonSerializer.Deserialize<TasmotaDiscoveryMessage>(message.Payload);
+        if (data is not null)
+        {
+            _logger.LogInformation("Discovered device {Name}, ip: {Ip}, mac: {Mac}, topic: {Topic}", data.DeviceName, data.Ip, data.Mac, data.Topic);
+            await _updaterService.UpdateDevice(data);
+        }
     }
 
     public Task Handle(TasmotaRequestPowerStateCommand message)
