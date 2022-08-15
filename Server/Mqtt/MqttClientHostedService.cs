@@ -44,7 +44,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     private readonly IMqttClientOptions _options;
     private readonly IMessageBus _bus;
 
-    private readonly List<string> _subscribedTopics = new ();
+    private readonly List<string> _subscribedTopics = new();
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {

@@ -11,12 +11,14 @@ public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
 {
     private readonly ILogger<MqttTasmotaAdapter> _logger;
     private readonly IMessageBus _bus;
+    private readonly TasmotaDeviceUpdaterService _updaterService;
     private readonly List<(Func<string, bool> Match, Func<MqttMessageReceivedEvent, Task> Handler)> TopicHandlers = new();
 
-    public MqttTasmotaAdapter(ILogger<MqttTasmotaAdapter> logger, IMessageBus bus)
+    public MqttTasmotaAdapter(ILogger<MqttTasmotaAdapter> logger, IMessageBus bus, TasmotaDeviceUpdaterService updaterService)
     {
         _logger = logger;
         _bus = bus;
+        _updaterService = updaterService;
 
         TopicHandlers.Add((s => s.StartsWith("stat/", StringComparison.InvariantCultureIgnoreCase), MqttStatMessage));
         TopicHandlers.Add((s => s.StartsWith("tasmota/discovery/", StringComparison.InvariantCultureIgnoreCase), MqttTasmotaDiscoveryMessage));
@@ -63,14 +65,14 @@ public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
         return Task.CompletedTask;
     }
 
-    private Task MqttTasmotaDiscoveryMessage(MqttMessageReceivedEvent message)
+    private async Task MqttTasmotaDiscoveryMessage(MqttMessageReceivedEvent message)
     {
         var data = JsonSerializer.Deserialize<TasmotaDiscoveryMessage>(message.Payload);
         if (data is not null)
         {
             _logger.LogInformation("Discovered device {Name}, ip: {Ip}, mac: {Mac}, topic: {Topic}", data.DeviceName, data.Ip, data.Mac, data.Topic);
+            await _updaterService.UpdateDevice(data);
         }
-        return Task.CompletedTask;
     }
 
     public Task Handle(TasmotaRequestPowerStateCommand message)

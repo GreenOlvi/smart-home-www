@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
             {
                 opt.WithClientId(config.ClientId);
             }
+            opt.WithKeepAlivePeriod(TimeSpan.FromMinutes(1));
         });
 
     public static IServiceCollection AddMqttClientHostedService(this IServiceCollection services)

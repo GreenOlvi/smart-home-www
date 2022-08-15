@@ -5,6 +5,7 @@ namespace SmartHomeWWW.Server.Mqtt;
 
 public record TasmotaDiscoveryMessage
 {
+    [JsonPropertyName("ip")]
     public string Ip { get; init; } = string.Empty;
 
     [JsonPropertyName("dn")]
@@ -30,4 +31,7 @@ public record TasmotaDiscoveryMessage
 
     [JsonPropertyName("t")]
     public string Topic { get; init; } = string.Empty;
+
+    [JsonPropertyName("rl")]
+    public int[] Relays { get; init; } = Array.Empty<int>();
 }
