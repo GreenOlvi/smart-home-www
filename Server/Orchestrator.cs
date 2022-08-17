@@ -13,6 +13,7 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
         {
             sp.GetRequiredService<MqttTasmotaAdapter>(),
             sp.GetRequiredService<TelegramBotJob>(),
+            sp.GetRequiredService<TelegramLogForwarder>(),
             sp.GetRequiredService<WeatherAdapterJob>(),
         };
     }

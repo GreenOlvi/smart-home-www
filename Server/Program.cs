@@ -8,6 +8,7 @@ using SmartHomeWWW.Server;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
+using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
@@ -35,6 +36,9 @@ internal static class Program
         }
 
         var app = builder.Build();
+
+        var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+        loggerFactory.AddProvider(new MessageBusLoggerProvider(app.Services.GetRequiredService<IMessageBus>()));
 
         // Configure the HTTP request pipeline.
         app.UseResponseCompression();
@@ -115,6 +119,8 @@ internal static class Program
         builder.Services.AddTransient<MqttTasmotaAdapter>();
         builder.Services.AddTransient<TasmotaDeviceUpdaterService>();
         builder.Services.AddTransient<TelegramBotJob>();
+        builder.Services.AddTransient<TelegramLogForwarder>(sp =>
+        new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), sp.GetRequiredService<TelegramConfig>().OwnerId));
         builder.Services.AddTransient<WeatherAdapterJob>();
 
         builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();

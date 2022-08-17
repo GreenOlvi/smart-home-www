@@ -36,7 +36,7 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var me = await _bot.GetMeAsync(cancellationToken);
-        _logger.LogInformation("Starting {botname}...", me.Username);
+        _logger.LogInformation("Starting {Botname}...", me.Username);
 
         _bot.StartReceiving(HandleUpdateAsync, HandleErrorAsync, cancellationToken: _cancellationTokenSource.Token);
 
@@ -49,7 +49,7 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         var me = await _bot.GetMeAsync(cancellationToken);
-        _logger.LogInformation("Stopping {botname}...", me.Username);
+        _logger.LogInformation("Stopping {Botname}...", me.Username);
 
         _messageBus.Unsubscribe<TelegramSendTextMessageCommand>(this);
 
@@ -81,21 +81,21 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     {
         if (update.Type != UpdateType.Message || update.Message is null)
         {
-            _logger.LogInformation("Update {type} ignored", update.Type);
+            _logger.LogInformation("Update {Type} ignored", update.Type);
             return Task.CompletedTask;
         }
 
         var message = update.Message;
         if (message.From is null || !_allowedUsers.Contains(message.From.Id))
         {
-            _logger.LogError("Received text message from unknown user '{user}': '{message}'",
+            _logger.LogError("Received text message from unknown user '{User}': '{Message}'",
                 message.From?.ToString() ?? "unknown",
                 message.Text ?? string.Empty);
 
             return Task.CompletedTask;
         }
 
-        _logger.LogDebug("Received text message from '{user}': '{message}'", message.From.ToString(), message.Text ?? string.Empty);
+        _logger.LogDebug("Received text message from '{User}': '{Message}'", message.From.ToString(), message.Text ?? string.Empty);
 
         _messageBus.Publish(new TelegramMessageReceivedEvent
         {
@@ -113,8 +113,10 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
         return Task.CompletedTask;
     }
 
-    public Task Handle(TelegramSendTextMessageCommand message) =>
-        _bot.SendTextMessageAsync(
+    public Task Handle(TelegramSendTextMessageCommand message)
+    {
+        _logger.LogDebug("Sending message to {Id} with text '{Text}'", message.ChatId, message.Text);
+        return _bot.SendTextMessageAsync(
             message.ChatId,
             message.Text,
             parseMode: message.ParseMode,
@@ -123,6 +125,7 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
             replyToMessageId: message.ReplyToMessageId,
             allowSendingWithoutReply: message.AllowSendingWithoutReply,
             cancellationToken: _cancellationTokenSource.Token);
+    }
 
     public Task Handle(TelegramRefreshAllowedUsersCommand message) => LoadAllowedUsers();
 }
