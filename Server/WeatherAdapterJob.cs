@@ -1,6 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+using SmartHomeWWW.Server.Config;
+using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
+using Telegram.Bot.Types.Enums;
 
 namespace SmartHomeWWW.Server;
 
@@ -8,17 +13,26 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
 {
     private readonly IMessageBus _bus;
     private readonly HubConnection _hubConnection;
+    private readonly TelegramConfig _telegramConfig;
+    private readonly IKeyValueStore _cache;
 
-    public WeatherAdapterJob(IMessageBus bus, HubConnection hubConnection)
+    public WeatherAdapterJob(IMessageBus bus, HubConnection hubConnection, TelegramConfig telegramConfig, IKeyValueStore cache)
     {
         _bus = bus;
         _hubConnection = hubConnection;
+        _telegramConfig = telegramConfig;
+        _cache = cache;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     public async Task Handle(WeatherUpdatedEvent message)
     {
+        if (message.Weather?.Alerts.Any() ?? false)
+        {
+            await NotifyAlerts(message.Weather.Alerts);
+        }
+
         if (_hubConnection.State == HubConnectionState.Disconnected)
         {
             await _hubConnection.StartAsync();
@@ -26,6 +40,27 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
 
         await _hubConnection.SendAsync("UpdateWeather", message.Weather);
     }
+
+    private async Task NotifyAlerts(WeatherAlert[] alerts)
+    {
+        foreach (var alert in alerts)
+        {
+            var key = $"WeatherAlertNotified_{alert.GetHashCode()}";
+            var cacheVal = await _cache.TryGetValueAsync<WeatherAlert>(key);
+            if (cacheVal.HasNoValue)
+            {
+                _bus.Publish(FormatAlert(alert));
+                await _cache.AddValueAsync(key, alert);
+            }
+        }
+    }
+
+    private TelegramSendTextMessageCommand FormatAlert(WeatherAlert alert) => new()
+    {
+        ChatId = _telegramConfig.OwnerId,
+        Text = $"{alert.Event}\r\n{alert.SenderName}\r\n{alert.Start.ToLocalTime()} - {alert.End.ToLocalTime()}\r\n{alert.Description}",
+        ParseMode = ParseMode.Html,
+    };
 
     public Task Start(CancellationToken cancellationToken)
     {
