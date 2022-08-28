@@ -119,9 +119,10 @@ internal static class Program
         builder.Services.AddTransient<MqttTasmotaAdapter>();
         builder.Services.AddTransient<TasmotaDeviceUpdaterService>();
         builder.Services.AddTransient<TelegramBotJob>();
-        builder.Services.AddTransient<TelegramLogForwarder>(sp =>
-        new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), sp.GetRequiredService<TelegramConfig>().OwnerId));
+        builder.Services.AddTransient(sp => new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), sp.GetRequiredService<TelegramConfig>().OwnerId));
         builder.Services.AddTransient<WeatherAdapterJob>();
+
+        builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
 
         builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
     }

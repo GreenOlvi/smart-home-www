@@ -16,13 +16,13 @@ public class SensorsHub : Hub
 
     public async Task UpdateSensor(Sensor sensor)
     {
-        _logger.LogDebug("Sent SensorUpdated with {mac}", sensor.Mac);
+        _logger.LogDebug("Sent SensorUpdated with {Mac}", sensor.Mac);
         await Clients.Others.SendAsync("SensorUpdated", sensor);
     }
 
     public async Task UpdateWeather(WeatherReport weather)
     {
-        _logger.LogDebug("Updated current weather at {dt}.", weather.Current.Timestamp.ToLocalTime().ToString());
+        _logger.LogDebug("Updated current weather at {Dt}.", weather.Current.Timestamp.ToLocalTime().ToString());
         await Clients.Others.SendAsync("WeatherUpdated", weather);
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartHomeWWW.Core.Infrastructure;
 
@@ -10,9 +11,10 @@ using SmartHomeWWW.Core.Infrastructure;
 namespace SmartHomeWWW.Migrations
 {
     [DbContext(typeof(SmartHomeDbContext))]
-    partial class SmartHomeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220828124028_AddCacheStore")]
+    partial class AddCacheStore
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
