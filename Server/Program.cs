@@ -122,7 +122,7 @@ internal static class Program
         builder.Services.AddTransient(sp => new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), sp.GetRequiredService<TelegramConfig>().OwnerId));
         builder.Services.AddTransient<WeatherAdapterJob>();
 
-        builder.Services.AddSingleton<IKeyValueStore, MemoryKeyValueStore>();
+        builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
 
         builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
     }

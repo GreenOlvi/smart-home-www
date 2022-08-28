@@ -9,6 +9,7 @@ public class SmartHomeDbContext : DbContext
     {
     }
 
+    public DbSet<CacheStoreEntry> CacheEntries { get; init; } = null!;
     public DbSet<RelayEntry> Relays { get; init; } = null!;
     public DbSet<Sensor> Sensors { get; init; } = null!;
     public DbSet<TelegramUser> TelegramUsers { get; init; } = null!;

@@ -11,13 +11,15 @@ namespace SmartHomeWWW.Server;
 
 public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<WeatherUpdatedEvent>
 {
+    private readonly ILogger<WeatherAdapterJob> _logger;
     private readonly IMessageBus _bus;
     private readonly HubConnection _hubConnection;
     private readonly TelegramConfig _telegramConfig;
     private readonly IKeyValueStore _cache;
 
-    public WeatherAdapterJob(IMessageBus bus, HubConnection hubConnection, TelegramConfig telegramConfig, IKeyValueStore cache)
+    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, HubConnection hubConnection, TelegramConfig telegramConfig, IKeyValueStore cache)
     {
+        _logger = logger;
         _bus = bus;
         _hubConnection = hubConnection;
         _telegramConfig = telegramConfig;
@@ -46,11 +48,15 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
         foreach (var alert in alerts)
         {
             var key = $"WeatherAlertNotified_{alert.GetHashCode()}";
-            var cacheVal = await _cache.TryGetValueAsync<WeatherAlert>(key);
-            if (cacheVal.HasNoValue)
+            if (await _cache.ContainsKeyAsync(key))
             {
+                _logger.LogInformation("New weather alert. Sending notification.");
                 _bus.Publish(FormatAlert(alert));
-                await _cache.AddValueAsync(key, alert);
+                await _cache.AddValueAsync(key, alert, TimeSpan.FromDays(7));
+            }
+            else
+            {
+                _logger.LogDebug("Weather alert notification already sent. Skipping.");
             }
         }
     }
