@@ -109,7 +109,7 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
 
     private Task HandleErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "Caught an exception from TelegramBot");
+        _logger.LogError(exception, "Caught an exception from TelegramBot: {Message}", exception.Message);
         return Task.CompletedTask;
     }
 
