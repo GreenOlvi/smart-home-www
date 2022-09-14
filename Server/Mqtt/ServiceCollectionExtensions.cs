@@ -1,6 +1,5 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Options;
 using SmartHomeWWW.Server.Config;
 
 namespace SmartHomeWWW.Server.Mqtt;
@@ -16,7 +15,7 @@ public static class ServiceCollectionExtensions
             return optionsBuilder.Build();
         });
 
-        services.AddSingleton<IMqttClientFactory, MqttFactory>();
+        services.AddSingleton<MqttFactory>();
         services.AddHostedService<MqttClientHostedService>();
         return services;
     }
@@ -46,7 +45,7 @@ public static class ServiceCollectionExtensions
             return opt.Build();
         });
 
-        services.AddSingleton<IMqttClientFactory, MqttFactory>();
+        services.AddSingleton<MqttFactory>();
         services.AddHostedService<MqttClientHostedService>();
         return services;
     }
