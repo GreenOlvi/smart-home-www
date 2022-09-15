@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
   
 env:
-  IMAGE_NAME: www:$GITHUB_SHA
+  IMAGE_NAME: www:latest
 
 jobs:
 
@@ -16,15 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
-    - name: debug 1
-      run: echo "Image name $env.IMAGE_NAME"
 
     - name: Build the Docker image
       run: docker build . --file Server/Dockerfile --tag ${{ env.IMAGE_NAME }}
   
-    - name: Docker Image Artifact Upload
-      uses: ishworkh/docker-image-artifact-upload@v1
-      with:
-        image: ${{ env.IMAGE_NAME }}
-        retention_days: 0
+    - name: Build Docker image of DB updater
+      run: docker build . --file db-updater.dockerfile --tag db-updater:latest
