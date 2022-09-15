@@ -16,6 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: debug 1
+      run: echo "Image name $env.IMAGE_NAME"
 
     - name: Build the Docker image
       run: docker build . --file Server/Dockerfile --tag ${{ env.IMAGE_NAME }}
@@ -23,5 +26,5 @@ jobs:
     - name: Docker Image Artifact Upload
       uses: ishworkh/docker-image-artifact-upload@v1
       with:
-        image: $IMAGE_NAME
+        image: ${{ env.IMAGE_NAME }}
         retention_days: 0
