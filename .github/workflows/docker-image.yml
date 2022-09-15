@@ -5,14 +5,23 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  
+env:
+  IMAGE_NAME: www:$(date +%s)
 
 jobs:
 
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Build the Docker image
-      run: docker build . --file Server/Dockerfile --tag www:$(date +%s)
+      run: docker build . --file Server/Dockerfile --tag $IMAGE_NAME
+  
+    - name: Docker Image Artifact Upload
+      uses: ishworkh/docker-image-artifact-upload@v1
+      with:
+        image: $IMAGE_NAME
+        retention_days: 0
