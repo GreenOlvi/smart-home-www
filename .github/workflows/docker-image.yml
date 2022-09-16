@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  
+env:
+  IMAGE_NAME: www:latest
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build the Docker image
+      run: docker build . --file Server/Dockerfile --tag ${{ env.IMAGE_NAME }}
+  
+    - name: Build Docker image of DB updater
+      run: docker build . --file db-updater.dockerfile --tag db-updater:latest
