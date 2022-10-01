@@ -4,6 +4,7 @@ namespace SmartHomeWWW.Server.Messages;
 
 public class BasicMessageBus : IMessageBus
 {
+    // TODO: use concurrent collections
     private readonly Dictionary<string, IList> _handlers = new ();
 
     public void Publish<T>(T message) where T : IMessage
