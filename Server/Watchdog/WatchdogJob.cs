@@ -12,6 +12,8 @@ public sealed class WatchdogJob : IOrchestratorJob
     public WatchdogJob(ILogger<WatchdogJob> logger, ILoggerFactory loggerFactory, IMessageBus bus)
     {
         _logger = logger;
+
+        // TODO: load list from settings
         _jobs = new List<WatchJob>
         {
             new MqttWatchJob(loggerFactory.CreateLogger<MqttWatchJob>(),
