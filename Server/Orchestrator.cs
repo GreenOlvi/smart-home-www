@@ -1,5 +1,6 @@
 ﻿using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Telegram;
+using SmartHomeWWW.Server.Watchdog;
 
 namespace SmartHomeWWW.Server;
 
@@ -15,6 +16,7 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
             sp.GetRequiredService<TelegramBotJob>(),
             sp.GetRequiredService<TelegramLogForwarder>(),
             sp.GetRequiredService<WeatherAdapterJob>(),
+            sp.GetRequiredService<WatchdogJob>(),
         };
     }
 

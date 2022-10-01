@@ -14,6 +14,7 @@ using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
+using SmartHomeWWW.Server.Watchdog;
 
 namespace SmartHomeWWW.Server;
 
@@ -121,6 +122,7 @@ internal static class Program
         builder.Services.AddTransient<TelegramBotJob>();
         builder.Services.AddTransient(sp => new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), sp.GetRequiredService<TelegramConfig>().OwnerId));
         builder.Services.AddTransient<WeatherAdapterJob>();
+        builder.Services.AddTransient<WatchdogJob>();
 
         builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
 
