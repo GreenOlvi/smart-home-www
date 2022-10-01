@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Options;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
@@ -12,14 +11,14 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<MqttPublishMessageCommand>,
     IMessageHandler<MqttSubscribeToTopicCommand>
 {
-    public MqttClientHostedService(ILogger<MqttClientHostedService> logger, IMqttClientFactory clientFactory, IMqttClientOptions options, IMessageBus bus)
+    public MqttClientHostedService(ILogger<MqttClientHostedService> logger, MqttFactory clientFactory, MqttClientOptions options, IMessageBus bus)
     {
         _logger = logger;
         _client = clientFactory.CreateMqttClient();
         _options = options;
         _bus = bus;
 
-        _client.UseConnectedHandler(async e =>
+        _client.ConnectedAsync += async e =>
         {
             _logger.LogDebug("Mqtt client connected");
 
@@ -27,21 +26,27 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
             {
                 await _client.SubscribeAsync(topic);
             }
-        });
+        };
 
-        _client.UseDisconnectedHandler(e => _logger.LogDebug("Mqtt client disconnected"));
-        _client.UseApplicationMessageReceivedHandler(e =>
+        _client.DisconnectedAsync += e =>
+        {
+            _logger.LogDebug("Mqtt client disconnected");
+            return Task.CompletedTask;
+        };
+
+        _client.ApplicationMessageReceivedAsync += e =>
         {
             var topic = e.ApplicationMessage.Topic;
             var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             _logger.LogDebug("Mqtt message received:\n{Topic}\n{Payload}", topic, payload);
             _bus.Publish(new MqttMessageReceivedEvent { Topic = topic, Payload = payload });
-        });
+            return Task.CompletedTask;
+        };
     }
 
     private readonly ILogger<MqttClientHostedService> _logger;
     private readonly IMqttClient _client;
-    private readonly IMqttClientOptions _options;
+    private readonly MqttClientOptions _options;
     private readonly IMessageBus _bus;
 
     private readonly List<string> _subscribedTopics = new();
@@ -69,7 +74,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         _bus.Unsubscribe<MqttSubscribeToTopicCommand>(this);
 
         _logger.LogInformation("Mqtt service stopped");
-        await _client.DisconnectAsync(cancellationToken: cancellationToken);
+        await _client.DisconnectAsync(new MqttClientDisconnectOptions(), cancellationToken: cancellationToken);
     }
 
     public ValueTask DisposeAsync()
