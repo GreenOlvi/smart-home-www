@@ -3,7 +3,7 @@ using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Messages;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBot;
 
 public static class ServiceCollectionExtensions
 {

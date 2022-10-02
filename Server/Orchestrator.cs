@@ -1,5 +1,5 @@
 ﻿using SmartHomeWWW.Server.Mqtt;
-using SmartHomeWWW.Server.Telegram;
+using SmartHomeWWW.Server.TelegramBot;
 using SmartHomeWWW.Server.Watchdog;
 
 namespace SmartHomeWWW.Server;

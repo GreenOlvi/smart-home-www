@@ -1,4 +1,4 @@
-﻿namespace SmartHomeWWW.Server.Telegram.Authorisation;
+﻿namespace SmartHomeWWW.Server.TelegramBot.Authorisation;
 
 public enum AuthorizedActions
 {
@@ -7,4 +7,5 @@ public enum AuthorizedActions
     RunDelayedPingCommand,
     RunUsersCommand,
     AddNewUser,
+    RunUrlStore,
 }

@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram.BotCommands;
+namespace SmartHomeWWW.Server.TelegramBot.BotCommands;
 
 public class NullCommand : ITelegramBotCommand
 {

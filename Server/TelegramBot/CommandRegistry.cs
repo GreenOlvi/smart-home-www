@@ -1,6 +1,6 @@
-﻿using SmartHomeWWW.Server.Telegram.BotCommands;
+﻿using SmartHomeWWW.Server.TelegramBot.BotCommands;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBot;
 
 public class CommandRegistry
 {

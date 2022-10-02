@@ -2,7 +2,7 @@
 using SmartHomeWWW.Server.Messages.Commands;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram.BotCommands;
+namespace SmartHomeWWW.Server.TelegramBot.BotCommands;
 
 public class DelayedPingCommand : ITelegramBotCommand
 {

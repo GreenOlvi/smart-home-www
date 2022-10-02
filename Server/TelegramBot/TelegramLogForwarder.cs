@@ -4,7 +4,7 @@ using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
 using Telegram.Bot.Types.Enums;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBot;
 
 public sealed class TelegramLogForwarder : IOrchestratorJob, IMessageHandler<LogEvent>
 {

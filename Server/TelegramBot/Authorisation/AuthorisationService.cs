@@ -4,7 +4,7 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram.Authorisation;
+namespace SmartHomeWWW.Server.TelegramBot.Authorisation;
 
 public class AuthorisationService : IAuthorisationService
 {
@@ -64,7 +64,7 @@ public class AuthorisationService : IAuthorisationService
     }
 
     private static bool TryGetCommandAction(Type command, out AuthorizedActions action) =>
-        Enum.TryParse($"Run_{command.Name}", out action);
+        Enum.TryParse($"Run{command.Name}", out action);
 
     private static bool CanUserDoAction(TelegramUser user, AuthorizedActions action) => action switch
     {
@@ -72,6 +72,7 @@ public class AuthorisationService : IAuthorisationService
         AuthorizedActions.RunDelayedPingCommand => true,
         AuthorizedActions.RunUsersCommand => user.UserType == "Owner",
         AuthorizedActions.AddNewUser => user.UserType == "Owner",
+        AuthorizedActions.RunUrlStore => true,
         _ => false,
     };
 

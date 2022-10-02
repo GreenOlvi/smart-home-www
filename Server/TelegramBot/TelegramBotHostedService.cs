@@ -8,7 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBot;
 
 public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<TelegramSendTextMessageCommand>,

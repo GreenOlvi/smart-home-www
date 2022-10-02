@@ -12,8 +12,8 @@ using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
-using SmartHomeWWW.Server.Telegram;
-using SmartHomeWWW.Server.Telegram.Authorisation;
+using SmartHomeWWW.Server.TelegramBot;
+using SmartHomeWWW.Server.TelegramBot.Authorisation;
 using SmartHomeWWW.Server.Watchdog;
 
 namespace SmartHomeWWW.Server;

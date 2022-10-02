@@ -1,11 +1,11 @@
 ﻿using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
-using SmartHomeWWW.Server.Telegram.Authorisation;
-using SmartHomeWWW.Server.Telegram.BotCommands;
+using SmartHomeWWW.Server.TelegramBot.Authorisation;
+using SmartHomeWWW.Server.TelegramBot.BotCommands;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBot;
 
 public sealed class TelegramBotJob : IOrchestratorJob,
     IMessageHandler<TelegramMessageReceivedEvent>
@@ -15,7 +15,7 @@ public sealed class TelegramBotJob : IOrchestratorJob,
         _logger = logger;
         _bus = bus;
         _authService = authorisationService;
-        _commandRegistry = new (serviceProvider);
+        _commandRegistry = new(serviceProvider);
         RegisterCommands();
     }
 
@@ -23,7 +23,7 @@ public sealed class TelegramBotJob : IOrchestratorJob,
     private readonly IMessageBus _bus;
     private readonly CommandRegistry _commandRegistry;
     private readonly IAuthorisationService _authService;
-    private readonly CancellationTokenSource _cancellationTokenSource = new ();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private void RegisterCommands()
     {
@@ -59,7 +59,8 @@ public sealed class TelegramBotJob : IOrchestratorJob,
             return HandleMessageWithoutText(message);
         }
 
-        if (!_commandRegistry.TryGetCommand(cmd, out var command))
+        Type command;
+        if (!TryMatchCommand(message.Message, out command))
         {
             return HandleUnknownCommand(cmd, message.Message);
         }
@@ -76,6 +77,30 @@ public sealed class TelegramBotJob : IOrchestratorJob,
 
         return instance.Run(message.Message, _cancellationTokenSource.Token);
     }
+
+    private bool TryMatchCommand(Message message, out Type command)
+    {
+        var text = message.Text ?? string.Empty;
+        var cmd = text.Split(' ')[0];
+        if (_commandRegistry.TryGetCommand(cmd, out command))
+        {
+            return true;
+        }
+
+        // Maybe it's an url
+        if (message.Entities?.Any() ?? false)
+        {
+            var entity = message.Entities[0];
+            if (entity.Type == Telegram.Bot.Types.Enums.MessageEntityType.Url)
+            {
+                command = typeof(UrlStore);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
     private async Task HandleMessageWithoutText(TelegramMessageReceivedEvent message)
     {
