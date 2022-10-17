@@ -14,7 +14,7 @@ using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Controllers;
 using SmartHomeWWW.Server.Messages;
 
-namespace SmartHomeWWW.Server.Tests;
+namespace SmartHomeWWW.Server.Tests.Controllers;
 
 public sealed class WeatherControllerTests : IDisposable
 {

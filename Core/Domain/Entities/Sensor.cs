@@ -12,6 +12,7 @@ public class Sensor
     public string ChipType { get; set; } = string.Empty;
     public DateTime? LastContact { get; set; }
     public string FirmwareVersion { get; set; } = string.Empty;
+    public string? UpdateChannel { get; set; }
 
     public override string ToString() => $"{ChipType} {Alias ?? Mac}";
 }

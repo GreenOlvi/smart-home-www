@@ -35,8 +35,8 @@
 
 @code {
 
-    private IReadOnlyList<Firmware> Firmwares = Array.Empty<Firmware>();
-    private Version CurrentVersion = new Version();
+    private IReadOnlyList<IFirmware> Firmwares = Array.Empty<IFirmware>();
+    private FirmwareVersion CurrentVersion = new FirmwareVersion();
 
     protected override async Task OnInitializedAsync()
     {
