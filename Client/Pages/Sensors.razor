@@ -21,6 +21,7 @@
             <th scope="col">Chip type</th>
             <th scope="col">Last contact</th>
             <th scope="col">Firmware version</th>
+            <th scope="col">Update channel</th>
             <th scope="col"></th>
         </tr>
     </thead>
@@ -39,6 +40,7 @@
                 }
             </td>
             <td>@sensor.FirmwareVersion</td>
+            <td>@sensor.UpdateChannel</td>
             <td><button type="button" class="btn btn-danger" @onclick="(() => DeleteSensor(sensor))">Delete</button></td>
         </tr>
         }

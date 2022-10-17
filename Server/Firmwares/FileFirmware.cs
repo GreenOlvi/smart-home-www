@@ -24,7 +24,7 @@ public class FileFirmware : IFirmware
     public FirmwareVersion Version { get; } = new FirmwareVersion();
     public long Size { get; init; }
     public UpdateChannel Channel { get; init; } = UpdateChannel.Stable;
-    public Stream Data => _dataStreamFactory.Invoke();
+    public Stream GetData() => _dataStreamFactory.Invoke();
 
     public static readonly FileFirmware NullFirmware = new();
 }

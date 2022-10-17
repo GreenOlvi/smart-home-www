@@ -78,7 +78,7 @@ public class UpdateControllerTests
     [Test]
     public async Task UpdateFirmwareAsNewEspSensorCurrentFirmwareTest()
     {
-        using var repo = new MemoryFirmwareRepository
+        var repo = new MemoryFirmwareRepository
         {
             new MemoryFirmware(new Version("0.0.9")),
             new MemoryFirmware(new Version("0.9.0")),
@@ -119,7 +119,7 @@ public class UpdateControllerTests
     [Test]
     public async Task UpdateFirmwareAsNewEspSensorOldFirmwareTest()
     {
-        using var repo = new MemoryFirmwareRepository
+        var repo = new MemoryFirmwareRepository
         {
             new MemoryFirmware(new Version("0.0.9")),
             new MemoryFirmware(new Version("0.9.0")),
@@ -172,7 +172,7 @@ public class UpdateControllerTests
         });
         await _db.SaveChangesAsync();
 
-        using var repo = new MemoryFirmwareRepository
+        var repo = new MemoryFirmwareRepository
         {
             new MemoryFirmware(FirmwareVersion.Parse("0.9.0-alpha"), UpdateChannel.Alpha),
             new MemoryFirmware(FirmwareVersion.Parse("1.0.0-alpha"), UpdateChannel.Alpha),
@@ -214,7 +214,7 @@ public class UpdateControllerTests
         sensor.UpdateChannel.Should().Be("alpha");
     }
 
-    private sealed class MemoryFirmwareRepository : IFirmwareRepository, IEnumerable<IFirmware>, IDisposable
+    private sealed class MemoryFirmwareRepository : IFirmwareRepository, IEnumerable<IFirmware>
     {
         private readonly List<IFirmware> _firmwares = new();
 
@@ -232,10 +232,9 @@ public class UpdateControllerTests
         public void Add(IFirmware firmware) => _firmwares.Add(firmware);
         public IEnumerator<IFirmware> GetEnumerator() => _firmwares.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => _firmwares.GetEnumerator();
-        public void Dispose() => _firmwares.OfType<IDisposable>().ToList().ForEach(d => d.Dispose());
     }
 
-    private sealed record MemoryFirmware : IFirmware, IDisposable
+    private sealed record MemoryFirmware : IFirmware
     {
         public MemoryFirmware()
         {
@@ -260,8 +259,6 @@ public class UpdateControllerTests
 
         public string Content { get; init; } = string.Empty;
 
-        public Stream Data => new MemoryStream(Encoding.UTF8.GetBytes(Content));
-
-        public void Dispose() => Data.Dispose();
+        public Stream GetData() => new MemoryStream(Encoding.UTF8.GetBytes(Content));
     }
 }

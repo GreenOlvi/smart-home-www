@@ -1,12 +1,13 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
-using SmartHomeWWW.Core.Domain;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Core.ViewModel;
 using SmartHomeWWW.Server.Hubs;
+using System.Linq;
+using System.Text;
 
 namespace SmartHomeWWW.Server.Controllers;
 
@@ -28,10 +29,19 @@ public class UpdateController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<IFirmware>> GetFirmwares() => Ok(_firmwareRepository.GetAllFirmwares().ToArray());
+    public ActionResult<IEnumerable<IFirmware>> GetFirmwares() =>
+        Ok(_firmwareRepository.GetAllFirmwares().Select(FirmwareViewModel.From).ToArray());
 
     [HttpGet("version/current")]
-    public ActionResult<FirmwareVersion?> GetCurrentVersion() => Ok(_firmwareRepository.GetCurrentFirmware()?.Version);
+    public ActionResult<IDictionary<UpdateChannel, FirmwareVersion>> GetCurrentVersion()
+    {
+        var versions = Enum.GetValues<UpdateChannel>()
+            .Select(c => (c, _firmwareRepository.GetCurrentFirmware(c)))
+            .Where(cf => cf.Item2 is not null)
+            .Select(cf => (cf.c, cf.Item2?.Version))
+            .ToDictionary(cf => cf.c, cf => cf.Version);
+        return Ok(versions);
+    }
 
     [HttpGet("/Update/firmware.bin")]
     public async Task<IActionResult> Firmware()
@@ -74,7 +84,7 @@ public class UpdateController : ControllerBase
 
         var filename = $"firmware.{firmware.Version}.bin";
         _logger.LogDebug("Sending '{Filename}' to the device", filename);
-        return new FileStreamResult(firmware.Data, "application/octet-stream")
+        return new FileStreamResult(firmware.GetData(), "application/octet-stream")
         {
             FileDownloadName = filename,
         };

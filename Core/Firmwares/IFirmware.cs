@@ -7,5 +7,5 @@ public interface IFirmware
     public FirmwareVersion Version { get; }
     public long Size { get; }
     public UpdateChannel Channel { get; }
-    Stream Data { get; }
+    Stream GetData();
 }
