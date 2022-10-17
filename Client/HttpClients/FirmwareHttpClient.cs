@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Json;
 using SmartHomeWWW.Core.Domain;
+using SmartHomeWWW.Core.Firmwares;
+using SmartHomeWWW.Core.ViewModel;
 
 namespace SmartHomeWWW.Client.HttpClients;
 
@@ -12,9 +14,11 @@ public class FirmwareHttpClient
 
     private readonly HttpClient _httpClient;
 
-    public async Task<IEnumerable<Firmware>> GetAllFirmwares() =>
-        await _httpClient.GetFromJsonAsync<IEnumerable<Firmware>>("api/update") ?? Enumerable.Empty<Firmware>();
+    public async Task<IEnumerable<FirmwareViewModel>> GetAllFirmwares() =>
+        await _httpClient.GetFromJsonAsync<IEnumerable<FirmwareViewModel>>("api/update")
+            ?? Enumerable.Empty<FirmwareViewModel>();
 
-    public async Task<Version> GetCurrentVersion() =>
-        await _httpClient.GetFromJsonAsync<Version>("api/update/version/current") ?? new Version();
+    public async Task<IDictionary<UpdateChannel, FirmwareVersion>> GetCurrentVersion() =>
+        await _httpClient.GetFromJsonAsync<IDictionary<UpdateChannel, FirmwareVersion>>("api/update/version/current")
+            ?? new Dictionary<UpdateChannel, FirmwareVersion>();
 }

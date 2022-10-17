@@ -13,6 +13,7 @@
         <tr>
             <th scope="col">Version</th>
             <th scope="col">Size</th>
+            <th scope="col">Channel</th>
         </tr>
     </thead>
     <tbody>
@@ -21,6 +22,7 @@
         <tr>
             <td>@firmware.Version</td>
             <td>@firmware.Size</td>
+            <td>@firmware.Channel</td>
         </tr>
         }
     </tbody>
@@ -30,18 +32,22 @@
     {
     <div class="alert alert-warning" role="alert">No firmwares found</div>
     }
-    <div>Current version: <strong>@CurrentVersion</strong></div>
+    @foreach (var channel in CurrentVersion.Keys.OrderBy(k => k))
+    {
+        <div>Current <i>@channel</i> version: <strong>@CurrentVersion[channel]</strong></div>
+    }
 </div>
 
 @code {
 
-    private IReadOnlyList<Firmware> Firmwares = Array.Empty<Firmware>();
-    private Version CurrentVersion = new Version();
+    private IReadOnlyList<FirmwareViewModel> Firmwares = Array.Empty<FirmwareViewModel>();
+    private IDictionary<UpdateChannel, FirmwareVersion> CurrentVersion = new Dictionary<UpdateChannel, FirmwareVersion>();
 
     protected override async Task OnInitializedAsync()
     {
         Firmwares = (await FirmwareHttpClient.GetAllFirmwares())
-            .OrderByDescending(f => f.Version)
+            .OrderByDescending(f => f.Version.Prefix)
+            .ThenByDescending(f => f.Version.Suffix)
             .ToList();
 
         CurrentVersion = await FirmwareHttpClient.GetCurrentVersion();

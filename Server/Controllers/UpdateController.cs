@@ -1,11 +1,13 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
-using SmartHomeWWW.Core.Domain;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Core.ViewModel;
+using SmartHomeWWW.Server.Hubs;
+using System.Linq;
+using System.Text;
 
 namespace SmartHomeWWW.Server.Controllers;
 
@@ -16,9 +18,9 @@ public class UpdateController : ControllerBase
     private readonly ILogger<UpdateController> _logger;
     private readonly IFirmwareRepository _firmwareRepository;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly HubConnection _hubConnection;
+    private readonly IHubConnection _hubConnection;
 
-    public UpdateController(ILogger<UpdateController> logger, HubConnection hubConnection, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+    public UpdateController(ILogger<UpdateController> logger, IHubConnection hubConnection, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
     {
         _logger = logger;
         _hubConnection = hubConnection;
@@ -27,10 +29,19 @@ public class UpdateController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Firmware>> GetFirmwares() => Ok(_firmwareRepository.GetAllFirmwares().ToArray());
+    public ActionResult<IEnumerable<IFirmware>> GetFirmwares() =>
+        Ok(_firmwareRepository.GetAllFirmwares().Select(FirmwareViewModel.From).ToArray());
 
     [HttpGet("version/current")]
-    public ActionResult<Version> GetCurrentVersion() => Ok(_firmwareRepository.GetCurrentVersion());
+    public ActionResult<IDictionary<UpdateChannel, FirmwareVersion>> GetCurrentVersion()
+    {
+        var versions = Enum.GetValues<UpdateChannel>()
+            .Select(c => (c, _firmwareRepository.GetCurrentFirmware(c)))
+            .Where(cf => cf.Item2 is not null)
+            .Select(cf => (cf.c, cf.Item2?.Version))
+            .ToDictionary(cf => cf.c, cf => cf.Version);
+        return Ok(versions);
+    }
 
     [HttpGet("/Update/firmware.bin")]
     public async Task<IActionResult> Firmware()
@@ -44,33 +55,44 @@ public class UpdateController : ControllerBase
             return new RedirectResult("/");
         }
 
-        var mac = Request.Headers["x-ESP8266-STA-MAC"].Single().ToUpper(System.Globalization.CultureInfo.InvariantCulture);
+        var mac = Request.Headers["x-ESP8266-STA-MAC"].Single().ToUpperInvariant();
         _logger.LogDebug("ESP8266 [{Mac}] connected", mac);
 
         var deviceVersion = Request.Headers["x-ESP8266-version"].Single();
 
-        await UpdateSensorInfo(mac, deviceVersion);
+        using var db = _dbContextFactory.CreateDbContext();
+        var sensor = await GetAndUpdateSensor(db, mac, deviceVersion);
+        await db.SaveChangesAsync();
 
-        if (!_firmwareRepository.TryGetCurrentVersion(out var currentVeresion))
+        await NotifySensorsHub(sensor);
+
+        var channel = GetSensorUpdateChannel(sensor);
+        _logger.LogDebug("Sensor uses [{Channel}] update channel", channel);
+
+        var firmware = _firmwareRepository.GetCurrentFirmware(channel);
+        if (firmware is null)
         {
-            _logger.LogWarning($"No current version found");
+            _logger.LogWarning("No current {Channel} version found", channel);
             return new StatusCodeResult(304);
         }
 
-        if (deviceVersion == currentVeresion.ToString())
+        if (deviceVersion == firmware.Version.ToString())
         {
             _logger.LogDebug("ESP8266 [{Mac}] nothing new", mac);
             return new StatusCodeResult(304);
         }
 
-        return new FileStreamResult(_firmwareRepository.GetCurrentFirmware(), "application/octet-stream");
+        var filename = $"firmware.{firmware.Version}.bin";
+        _logger.LogDebug("Sending '{Filename}' to the device", filename);
+        return new FileStreamResult(firmware.GetData(), "application/octet-stream")
+        {
+            FileDownloadName = filename,
+        };
     }
 
-    private async Task UpdateSensorInfo(string mac, string firmwareVersion)
+    private static async Task<Sensor> GetAndUpdateSensor(SmartHomeDbContext db, string mac, string firmwareVersion)
     {
-        using var _dbContext = _dbContextFactory.CreateDbContext();
-
-        var sensor = await _dbContext.Sensors
+        var sensor = await db.Sensors
             .FirstOrDefaultAsync(s => s.Mac == mac);
 
         if (sensor is null)
@@ -79,19 +101,25 @@ public class UpdateController : ControllerBase
             {
                 Id = Guid.NewGuid(),
                 Mac = mac,
+                ChipType = "ESP8266",
             };
 
-            _dbContext.Sensors.Add(sensor);
+            db.Sensors.Add(sensor);
         }
 
-        sensor.ChipType = "ESP8266";
-        sensor.LastContact = DateTime.UtcNow;
         sensor.FirmwareVersion = firmwareVersion;
+        sensor.LastContact = DateTime.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
-
-        await NotifySensorsHub(sensor);
+        return sensor;
     }
+
+    private static UpdateChannel GetSensorUpdateChannel(Sensor sensor) =>
+        sensor.UpdateChannel switch
+        {
+            "alpha" => UpdateChannel.Alpha,
+            "beta" => UpdateChannel.Beta,
+            _ => UpdateChannel.Stable,
+        };
 
     private async Task NotifySensorsHub(Sensor sensor)
     {

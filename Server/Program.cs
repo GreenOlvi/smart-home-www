@@ -15,6 +15,7 @@ using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Watchdog;
+using System.IO.Abstractions;
 
 namespace SmartHomeWWW.Server;
 
@@ -91,7 +92,7 @@ internal static class Program
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
         });
 
-        builder.Services.AddScoped<IFirmwareRepository, DiskFirmwareRepository>();
+        builder.Services.AddScoped<IFirmwareRepository, FileFirmwareRepository>();
 
         builder.Services.AddSingleton<TasmotaClientFactory>();
         builder.Services.AddSingleton<IRelayFactory, RelayFactory>();
@@ -101,19 +102,18 @@ internal static class Program
                 builder.Configuration.GetConnectionString("SmartHomeSqliteContext"),
                 o => o.MigrationsAssembly("SmartHomeWWW.Server")));
 
-        builder.Services.AddSingleton(sp =>
-        {
-            return new HubConnectionBuilder()
-                .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
-                .WithAutomaticReconnect()
-                .Build();
-        });
+        builder.Services.AddTransient<IHubConnection, HubConnectionWrapper>();
+        builder.Services.AddSingleton(sp => new HubConnectionBuilder()
+            .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
+            .WithAutomaticReconnect()
+            .Build());
 
         AddHttpClients(builder);
 
         builder.Services.AddMqttClientHostedService();
         builder.Services.AddTelegramBotHostedService();
 
+        builder.Services.AddSingleton<IFileSystem, FileSystem>();
         builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();
 
         builder.Services.AddHostedService<Orchestrator>();

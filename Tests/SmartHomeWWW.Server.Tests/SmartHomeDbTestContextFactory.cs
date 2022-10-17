@@ -3,11 +3,11 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Infrastructure;
 
-namespace SmartHomeWWW.Core.Tests;
+namespace SmartHomeWWW.Server.Tests;
 
 internal static class SmartHomeDbTestContextFactory
 {
-    public static async Task<SmartHomeDbContext> CreateInMemoryAsync(string? name = null)
+    public static Task<SmartHomeDbContext> CreateInMemoryAsync(string? name = null)
     {
         var dbName = name ?? Guid.NewGuid().ToString();
         var builder = new SqliteConnectionStringBuilder()
@@ -16,9 +16,13 @@ internal static class SmartHomeDbTestContextFactory
             Mode = SqliteOpenMode.Memory,
             Cache = SqliteCacheMode.Shared,
         };
+        return CreateAsync(builder.ConnectionString);
+    }
 
+    private static async Task<SmartHomeDbContext> CreateAsync(string connectionString)
+    {
         var opts = new DbContextOptionsBuilder<SmartHomeDbContext>()
-            .UseSqlite(builder.ConnectionString, o => o.MigrationsAssembly("SmartHomeWWW.Server"))
+            .UseSqlite(connectionString, o => o.MigrationsAssembly("SmartHomeWWW.Server"))
             .EnableSensitiveDataLogging()
             .Options;
 
