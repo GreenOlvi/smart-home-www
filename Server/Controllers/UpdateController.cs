@@ -72,11 +72,17 @@ public class UpdateController : ControllerBase
         var firmware = _firmwareRepository.GetCurrentFirmware(channel);
         if (firmware is null)
         {
-            _logger.LogWarning("No current {Channel} version found", channel);
+            _logger.LogInformation("No current {Channel} version found", channel);
             return new StatusCodeResult(304);
         }
 
-        if (deviceVersion == firmware.Version.ToString())
+        if (!FirmwareVersion.TryParse(deviceVersion, out var devVersion))
+        {
+            _logger.LogWarning("Could not parse device firmware version '{DeviceVersion}'", deviceVersion);
+            return new StatusCodeResult(304);
+        }
+
+        if (devVersion.Prefix >= firmware.Version.Prefix)
         {
             _logger.LogDebug("ESP8266 [{Mac}] nothing new", mac);
             return new StatusCodeResult(304);

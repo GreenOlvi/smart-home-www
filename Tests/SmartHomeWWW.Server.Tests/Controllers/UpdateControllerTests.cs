@@ -159,6 +159,47 @@ public class UpdateControllerTests
     }
 
     [Test]
+    public async Task UpdateFirmwareAsNewEspSensorNewerFirmwareTest()
+    {
+        var repo = new MemoryFirmwareRepository
+        {
+            new MemoryFirmware(new Version("0.0.9")),
+            new MemoryFirmware(new Version("0.9.0")),
+            new MemoryFirmware(new Version("1.0.0")),
+        };
+
+        var context = new DefaultHttpContext();
+        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
+        context.Request.Headers["x-ESP8266-version"] = "1.0.1";
+
+        var controller = new UpdateController(
+            _sp.GetRequiredService<ILogger<UpdateController>>(),
+            _sp.GetRequiredService<IHubConnection>(),
+            repo,
+            _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
+        {
+            ControllerContext = new ControllerContext()
+            {
+                HttpContext = context,
+            },
+        };
+
+        var result = await controller.Firmware();
+        result.Should().BeOfType<StatusCodeResult>();
+        ((StatusCodeResult)result).StatusCode.Should().Be(304);
+
+        var sensors = await _db!.Sensors.ToArrayAsync();
+        sensors.Should().HaveCount(1);
+
+        var sensor = sensors[0];
+        sensor.ChipType.Should().Be("ESP8266");
+        sensor.Mac.Should().Be("DE:AD:BE:EF:00:01");
+        sensor.FirmwareVersion.Should().Be("1.0.1");
+        sensor.UpdateChannel.Should().BeNull();
+    }
+
+    [Test]
     public async Task UpdateFirmwareChannelSensorOldFirmwareTest()
     {
         _db!.Sensors.Add(new Core.Domain.Entities.Sensor
@@ -212,6 +253,88 @@ public class UpdateControllerTests
         sensor.Mac.Should().Be("DE:AD:BE:EF:00:01");
         sensor.FirmwareVersion.Should().Be("0.7.0-alpha"); // Will be updated on next contact
         sensor.UpdateChannel.Should().Be("alpha");
+    }
+
+    [Test]
+    public async Task UpdateFirmwareChannelSensorNewerFirmwareTest()
+    {
+        var repo = new MemoryFirmwareRepository
+        {
+            new MemoryFirmware(new Version("0.0.9")),
+            new MemoryFirmware(new Version("0.9.0")),
+            new MemoryFirmware(FirmwareVersion.Parse("1.0.0-alpha")),
+        };
+
+        var context = new DefaultHttpContext();
+        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
+        context.Request.Headers["x-ESP8266-version"] = "1.0.1-alpha";
+
+        var controller = new UpdateController(
+            _sp.GetRequiredService<ILogger<UpdateController>>(),
+            _sp.GetRequiredService<IHubConnection>(),
+            repo,
+            _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
+        {
+            ControllerContext = new ControllerContext()
+            {
+                HttpContext = context,
+            },
+        };
+
+        var result = await controller.Firmware();
+        result.Should().BeOfType<StatusCodeResult>();
+        ((StatusCodeResult)result).StatusCode.Should().Be(304);
+
+        var sensors = await _db!.Sensors.ToArrayAsync();
+        sensors.Should().HaveCount(1);
+
+        var sensor = sensors[0];
+        sensor.ChipType.Should().Be("ESP8266");
+        sensor.Mac.Should().Be("DE:AD:BE:EF:00:01");
+        sensor.FirmwareVersion.Should().Be("1.0.1-alpha");
+        sensor.UpdateChannel.Should().BeNull();
+    }
+
+    [Test]
+    public async Task UpdateFirmwareChannelSensorInvalidFirmwareTest()
+    {
+        var repo = new MemoryFirmwareRepository
+        {
+            new MemoryFirmware(new Version("0.0.9")),
+            new MemoryFirmware(new Version("0.9.0")),
+            new MemoryFirmware(FirmwareVersion.Parse("1.0.0-alpha")),
+        };
+
+        var context = new DefaultHttpContext();
+        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
+        context.Request.Headers["x-ESP8266-version"] = "some-nonsense";
+
+        var controller = new UpdateController(
+            _sp.GetRequiredService<ILogger<UpdateController>>(),
+            _sp.GetRequiredService<IHubConnection>(),
+            repo,
+            _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
+        {
+            ControllerContext = new ControllerContext()
+            {
+                HttpContext = context,
+            },
+        };
+
+        var result = await controller.Firmware();
+        result.Should().BeOfType<StatusCodeResult>();
+        ((StatusCodeResult)result).StatusCode.Should().Be(304);
+
+        var sensors = await _db!.Sensors.ToArrayAsync();
+        sensors.Should().HaveCount(1);
+
+        var sensor = sensors[0];
+        sensor.ChipType.Should().Be("ESP8266");
+        sensor.Mac.Should().Be("DE:AD:BE:EF:00:01");
+        sensor.FirmwareVersion.Should().Be("some-nonsense");
+        sensor.UpdateChannel.Should().BeNull();
     }
 
     private sealed class MemoryFirmwareRepository : IFirmwareRepository, IEnumerable<IFirmware>

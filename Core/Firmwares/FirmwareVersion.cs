@@ -28,6 +28,22 @@ public record FirmwareVersion
         return new FirmwareVersion { Prefix = prefix, Suffix = suffix };
     }
 
+    public static bool TryParse(string text, out FirmwareVersion result)
+    {
+        var match = CombinedVersionPattern.Match(text);
+        if (!match.Success)
+        {
+            result = new FirmwareVersion();
+            return false;
+        }
+
+        var prefix = new Version(match.Groups["prefix"].Value);
+        var suffix = match.Groups["suffix"].Success ? match.Groups["suffix"].Value : null;
+        result = new FirmwareVersion { Prefix = prefix, Suffix = suffix };
+
+        return true;
+    }
+
     public static bool operator ==(FirmwareVersion version, string other) => version.ToString() == other;
     public static bool operator !=(FirmwareVersion version, string other) => version.ToString() != other;
 }
