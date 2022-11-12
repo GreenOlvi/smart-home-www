@@ -59,8 +59,6 @@ internal static class Program
             app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
-
         app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
 
