@@ -182,6 +182,8 @@ dotnet_diagnostic.IDE0161.severity = suggestion
 
 # IDE0052: Remove unread private members
 dotnet_diagnostic.IDE0052.severity = warning
+csharp_style_prefer_top_level_statements = true:silent
+csharp_style_prefer_utf8_string_literals = true:suggestion
 
 [*.{cs,vb}]
 end_of_line= lf
@@ -270,3 +272,4 @@ dotnet_diagnostic.CA1305.severity = silent
 dotnet_diagnostic.CA1716.severity = silent
 dotnet_diagnostic.CA1727.severity = suggestion
 dotnet_diagnostic.SA0001.severity = silent
+dotnet_diagnostic.CA1852.severity = warning
