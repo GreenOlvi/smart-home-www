@@ -27,14 +27,14 @@ public sealed class MessageBusLoggerProvider : ILoggerProvider
             _category = category;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => new NoopDisposable();
+        public IDisposable BeginScope<TState>(TState state) where TState : notnull => new NoopDisposable();
 
         public bool IsEnabled(LogLevel logLevel) => true;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
             _messageBus.Publish(LogEvent.Log(_category, logLevel, eventId, formatter(state, exception)));
 
-        private class NoopDisposable : IDisposable
+        private sealed class NoopDisposable : IDisposable
         {
             public void Dispose()
             {

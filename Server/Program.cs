@@ -64,10 +64,7 @@ internal static class Program
 
         app.UseRouting();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapHub<SensorsHub>(SensorsHub.RelativePath);
-        });
+        app.MapHub<SensorsHub>(SensorsHub.RelativePath);
 
         app.MapRazorPages();
         app.MapControllers();

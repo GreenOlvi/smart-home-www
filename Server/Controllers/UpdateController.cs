@@ -6,7 +6,6 @@ using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.ViewModel;
 using SmartHomeWWW.Server.Hubs;
-using System.Linq;
 using System.Text;
 
 namespace SmartHomeWWW.Server.Controllers;
@@ -55,10 +54,20 @@ public class UpdateController : ControllerBase
             return new RedirectResult("/");
         }
 
-        var mac = Request.Headers["x-ESP8266-STA-MAC"].Single().ToUpperInvariant();
+        var mac = Request.Headers["x-ESP8266-STA-MAC"].Single()?.ToUpperInvariant();
+        if (mac is null)
+        {
+            _logger.LogWarning("Missing x-ESP8266-STA-MAC header");
+            return new RedirectResult("/");
+        }
         _logger.LogDebug("ESP8266 [{Mac}] connected", mac);
 
         var deviceVersion = Request.Headers["x-ESP8266-version"].Single();
+        if (deviceVersion is null)
+        {
+            _logger.LogWarning("Missing x-ESP8266-version header");
+            return new RedirectResult("/");
+        }
 
         using var db = _dbContextFactory.CreateDbContext();
         var sensor = await GetAndUpdateSensor(db, mac, deviceVersion);
@@ -142,7 +151,7 @@ public class UpdateController : ControllerBase
         foreach (var header in headers)
         {
             sb.Append($"{header.Key}: ");
-            sb.AppendJoin("; ", header.Value);
+            sb.AppendJoin("; ", header.Value.AsEnumerable());
             sb.AppendLine();
         }
         return sb.ToString();
