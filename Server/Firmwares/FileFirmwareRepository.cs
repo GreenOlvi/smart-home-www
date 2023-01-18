@@ -41,7 +41,7 @@ public class FileFirmwareRepository : IFirmwareRepository
 
     private bool TryGetFromFile(string filename, out IFirmware firmware)
     {
-        var file = _fileSystem.FileInfo.FromFileName(filename);
+        var file = _fileSystem.FileInfo.New(filename);
         if (!TryExtractVersionFromFileName(file.Name, out var version))
         {
             firmware = FileFirmware.NullFirmware;
