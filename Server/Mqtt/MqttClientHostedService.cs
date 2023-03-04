@@ -60,7 +60,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
 
         ConnectPolicy = Policy
             .Handle<MqttCommunicationException>()
-            .WaitAndRetryAsync(Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(1), 10),
+            .WaitAndRetryAsync(Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(2), 10),
                 (ex, timeout) =>
                 {
                     _logger.LogWarning("Mqtt connection failed. Retrying in {Timeout}", timeout);
@@ -76,7 +76,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     private bool _connecting;
     private readonly AsyncPolicy ConnectPolicy;
 
-    private Timer? RetryTimer;
+    private Task? _connectTask;
 
     private readonly List<string> _subscribedTopics = new();
     private readonly Queue<MqttPublishMessageCommand> _queuedMessages = new();
@@ -124,38 +124,45 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         }
 
         _connecting = true;
-        RetryTimer = new Timer(ReconnectCallback, this, initialDelay ?? TimeSpan.Zero, Timeout.InfiniteTimeSpan);
+        _connectTask = Task.Run(() => ConnectAsync(initialDelay ?? TimeSpan.Zero));
     }
 
-    private void ReconnectCallback(object? state)
+    private async ValueTask ConnectAsync(TimeSpan initialDelay)
     {
-        RetryTimer?.Dispose();
-        RetryTimer = null;
-        _connecting = false;
-
-        if (_client.IsConnected)
+        if (initialDelay > TimeSpan.Zero)
         {
-            return;
+            using (var timer = new PeriodicTimer(initialDelay))
+            {
+                await timer.WaitForNextTickAsync();
+            }
         }
 
-        var result = ConnectPolicy.ExecuteAndCaptureAsync(() => _client.ConnectAsync(_options)).GetAwaiter().GetResult();
-        if (result.Outcome == OutcomeType.Successful)
+        while (true)
         {
-            return;
-        }
+            if (_client.IsConnected)
+            {
+                _connecting = false;
+                return;
+            }
 
-        _connecting = true;
-        RetryTimer = new Timer(ReconnectCallback, this, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+            var result = ConnectPolicy.ExecuteAndCaptureAsync(() => _client.ConnectAsync(_options)).GetAwaiter().GetResult();
+            if (result.Outcome == OutcomeType.Successful)
+            {
+                _connecting = false;
+                return;
+            }
+
+            using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+            await timer.WaitForNextTickAsync();
+        }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _stayConnected = false;
         _client.Dispose();
-        if (RetryTimer is not null)
-        {
-            await RetryTimer.DisposeAsync();
-        }
+        _connectTask?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     public Task Handle(MqttPublishMessageCommand message)
