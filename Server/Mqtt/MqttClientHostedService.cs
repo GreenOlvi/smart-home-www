@@ -29,6 +29,14 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
             {
                 await _client.SubscribeAsync(topic);
             }
+
+            while (_queuedMessages.TryDequeue(out var message))
+            {
+                var builder = new MqttApplicationMessageBuilder()
+                    .WithTopic(message.Topic)
+                    .WithPayload(message.Payload);
+                await _client.PublishAsync(builder.Build());
+            }
         };
 
         _client.DisconnectedAsync += e =>
@@ -36,7 +44,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
             _logger.LogInformation("Mqtt client disconnected");
             if (_stayConnected)
             {
-                StartReconnect();
+                StartConnecting(TimeSpan.FromMinutes(1));
             }
             return Task.CompletedTask;
         };
@@ -65,27 +73,25 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     private readonly MqttClientOptions _options;
     private readonly IMessageBus _bus;
     private bool _stayConnected;
-    private bool _reconnecting;
+    private bool _connecting;
     private readonly AsyncPolicy ConnectPolicy;
 
     private Timer? RetryTimer;
 
     private readonly List<string> _subscribedTopics = new();
+    private readonly Queue<MqttPublishMessageCommand> _queuedMessages = new();
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _stayConnected = true;
         _logger.LogInformation("Mqtt service started");
 
-        var success = await TryConnect(cancellationToken);
-        if (!success)
-        {
-            StartReconnect();
-            return;
-        }
+        StartConnecting();
 
         _bus.Subscribe<MqttPublishMessageCommand>(this);
         _bus.Subscribe<MqttSubscribeToTopicCommand>(this);
+
+        return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -110,22 +116,22 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         return false;
     }
 
-    private void StartReconnect()
+    private void StartConnecting(TimeSpan? initialDelay = null)
     {
-        if (_reconnecting)
+        if (_connecting)
         {
             return;
         }
 
-        _reconnecting = true;
-        RetryTimer = new Timer(ReconnectCallback, this, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+        _connecting = true;
+        RetryTimer = new Timer(ReconnectCallback, this, initialDelay ?? TimeSpan.Zero, Timeout.InfiniteTimeSpan);
     }
 
     private void ReconnectCallback(object? state)
     {
         RetryTimer?.Dispose();
         RetryTimer = null;
-        _reconnecting = false;
+        _connecting = false;
 
         if (_client.IsConnected)
         {
@@ -138,7 +144,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
             return;
         }
 
-        _reconnecting = true;
+        _connecting = true;
         RetryTimer = new Timer(ReconnectCallback, this, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
     }
 
@@ -156,7 +162,8 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     {
         if (!_client.IsConnected)
         {
-            _logger.LogWarning("Mqtt message not sent. Client not connected.");
+            _logger.LogWarning("Mqtt client not connected. Message queued.");
+            _queuedMessages.Enqueue(message);
             return Task.CompletedTask;
         }
 
