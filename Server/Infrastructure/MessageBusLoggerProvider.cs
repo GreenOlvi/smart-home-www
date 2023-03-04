@@ -14,7 +14,9 @@ public sealed class MessageBusLoggerProvider : ILoggerProvider
 
     public ILogger CreateLogger(string categoryName) => new MessageBusLogger(_messageBus, categoryName);
 
-    public void Dispose() => throw new NotImplementedException();
+    public void Dispose()
+    {
+    }
 
     public class MessageBusLogger : ILogger
     {

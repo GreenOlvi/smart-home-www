@@ -1,6 +1,9 @@
 ﻿using System.Text;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Exceptions;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
@@ -30,7 +33,11 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
 
         _client.DisconnectedAsync += e =>
         {
-            _logger.LogDebug("Mqtt client disconnected");
+            _logger.LogInformation("Mqtt client disconnected");
+            if (_stayConnected)
+            {
+                StartReconnect();
+            }
             return Task.CompletedTask;
         };
 
@@ -42,25 +49,38 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
             _bus.Publish(new MqttMessageReceivedEvent { Topic = topic, Payload = payload });
             return Task.CompletedTask;
         };
+
+        ConnectPolicy = Policy
+            .Handle<MqttCommunicationException>()
+            .WaitAndRetryAsync(Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(1), 10),
+                (ex, timeout) =>
+                {
+                    _logger.LogWarning("Mqtt connection failed. Retrying in {Timeout}", timeout);
+                    _logger.LogDebug(ex, "Mqtt connection failed");
+                });
     }
 
     private readonly ILogger<MqttClientHostedService> _logger;
     private readonly IMqttClient _client;
     private readonly MqttClientOptions _options;
     private readonly IMessageBus _bus;
+    private bool _stayConnected;
+    private bool _reconnecting;
+    private readonly AsyncPolicy ConnectPolicy;
+
+    private Timer? RetryTimer;
 
     private readonly List<string> _subscribedTopics = new();
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        _stayConnected = true;
         _logger.LogInformation("Mqtt service started");
-        try
+
+        var success = await TryConnect(cancellationToken);
+        if (!success)
         {
-            await _client.ConnectAsync(_options, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while connecting to mqtt");
+            StartReconnect();
             return;
         }
 
@@ -70,6 +90,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        _stayConnected = false;
         _bus.Unsubscribe<MqttPublishMessageCommand>(this);
         _bus.Unsubscribe<MqttSubscribeToTopicCommand>(this);
 
@@ -77,14 +98,68 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         await _client.DisconnectAsync(new MqttClientDisconnectOptions(), cancellationToken: cancellationToken);
     }
 
-    public ValueTask DisposeAsync()
+    private async Task<bool> TryConnect(CancellationToken cancellationToken)
     {
+        var result = await ConnectPolicy.ExecuteAndCaptureAsync(ct => _client.ConnectAsync(_options, ct), cancellationToken);
+
+        if (result.Outcome == OutcomeType.Successful)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void StartReconnect()
+    {
+        if (_reconnecting)
+        {
+            return;
+        }
+
+        _reconnecting = true;
+        RetryTimer = new Timer(ReconnectCallback, this, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+    }
+
+    private void ReconnectCallback(object? state)
+    {
+        RetryTimer?.Dispose();
+        RetryTimer = null;
+        _reconnecting = false;
+
+        if (_client.IsConnected)
+        {
+            return;
+        }
+
+        var result = ConnectPolicy.ExecuteAndCaptureAsync(() => _client.ConnectAsync(_options)).GetAwaiter().GetResult();
+        if (result.Outcome == OutcomeType.Successful)
+        {
+            return;
+        }
+
+        _reconnecting = true;
+        RetryTimer = new Timer(ReconnectCallback, this, TimeSpan.FromMinutes(5), Timeout.InfiniteTimeSpan);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _stayConnected = false;
         _client.Dispose();
-        return ValueTask.CompletedTask;
+        if (RetryTimer is not null)
+        {
+            await RetryTimer.DisposeAsync();
+        }
     }
 
     public Task Handle(MqttPublishMessageCommand message)
     {
+        if (!_client.IsConnected)
+        {
+            _logger.LogWarning("Mqtt message not sent. Client not connected.");
+            return Task.CompletedTask;
+        }
+
         var builder = new MqttApplicationMessageBuilder()
             .WithTopic(message.Topic)
             .WithPayload(message.Payload);
