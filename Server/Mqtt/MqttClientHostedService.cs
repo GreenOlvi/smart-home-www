@@ -3,7 +3,6 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Exceptions;
 using Polly;
-using Polly.Contrib.WaitAndRetry;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
@@ -44,7 +43,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
             _logger.LogInformation("Mqtt client disconnected");
             if (_stayConnected)
             {
-                StartConnecting(TimeSpan.FromMinutes(1));
+                StartConnecting();
             }
             return Task.CompletedTask;
         };
@@ -60,7 +59,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
 
         ConnectPolicy = Policy
             .Handle<MqttCommunicationException>()
-            .WaitAndRetryAsync(Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(2), 10),
+            .WaitAndRetryForeverAsync(retryCount => retryCount < 10 ? TimeSpan.FromSeconds(Math.Pow(2, retryCount)) : TimeSpan.FromMinutes(10),
                 (ex, timeout) =>
                 {
                     _logger.LogWarning("Mqtt connection failed. Retrying in {Timeout}", timeout);
@@ -116,7 +115,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         return false;
     }
 
-    private void StartConnecting(TimeSpan? initialDelay = null)
+    private void StartConnecting()
     {
         if (_connecting)
         {
@@ -124,37 +123,14 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         }
 
         _connecting = true;
-        _connectTask = Task.Run(() => ConnectAsync(initialDelay ?? TimeSpan.Zero));
-    }
-
-    private async ValueTask ConnectAsync(TimeSpan initialDelay)
-    {
-        if (initialDelay > TimeSpan.Zero)
+        _connectTask = Task.Run(async () =>
         {
-            using (var timer = new PeriodicTimer(initialDelay))
-            {
-                await timer.WaitForNextTickAsync();
-            }
-        }
-
-        while (true)
-        {
-            if (_client.IsConnected)
+            var success = await TryConnect(CancellationToken.None);
+            if (success)
             {
                 _connecting = false;
-                return;
             }
-
-            var result = ConnectPolicy.ExecuteAndCaptureAsync(() => _client.ConnectAsync(_options)).GetAwaiter().GetResult();
-            if (result.Outcome == OutcomeType.Successful)
-            {
-                _connecting = false;
-                return;
-            }
-
-            using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
-            await timer.WaitForNextTickAsync();
-        }
+        });
     }
 
     public ValueTask DisposeAsync()
