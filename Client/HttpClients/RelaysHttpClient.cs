@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
+using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.ViewModel;
-using static SmartHomeWWW.Client.Shared.RelayBox;
 
 namespace SmartHomeWWW.Client.HttpClients;
 
@@ -27,20 +27,13 @@ public class RelaysHttpClient
         var result = await _httpClient.PostAsync($"api/relay/{id}/state", content);
         var state = await result.Content.ReadFromJsonAsync<RelayStateViewModel>();
 
-        if (!state.State.HasValue)
-        {
-            return RelayState.Unknown;
-        }
-        return state.State.Value ? RelayState.On : RelayState.Off;
+        return state.State;
     }
 
     public async Task<RelayState> GetState(Guid id)
     {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
         var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state");
-        if (!result.State.HasValue)
-        {
-            return RelayState.Unknown;
-        }
-        return result.State.Value ? RelayState.On : RelayState.Off;
+        return result.State;
     }
 }

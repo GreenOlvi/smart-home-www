@@ -1,10 +1,11 @@
-﻿@using SmartHomeWWW.Core.ViewModel
+﻿@using SmartHomeWWW.Core.Domain.Relays;
+@using SmartHomeWWW.Core.ViewModel
 @inject RelaysHttpClient RelayClient
 
 <h3>Relay <i>@Name</i></h3>
 <p>@Type</p>
 <div class="btn @StateClass">
-    <span class="spinner-border @(StateClass)" hidden="@(State != RelayState.Fetching)" role="status"></span>
+    <span class="spinner-border @(StateClass)" hidden="@(State != RelayViewState.Fetching)" role="status"></span>
     @StateText
 </div>
 
@@ -17,23 +18,25 @@
     public string Name => Entry.Name;
     public string Type => Entry.Type;
 
-    public RelayState State { get; private set; } = RelayState.Unknown;
+    public RelayViewState State { get; private set; } = RelayViewState.Unknown;
 
     private string StateClass =>
         State switch
         {
-            RelayState.Fetching => "btn-secondary",
-            RelayState.On => "btn-success",
-            RelayState.Off => "btn-danger",
+            RelayViewState.Fetching => "btn-secondary",
+            RelayViewState.On => "btn-success",
+            RelayViewState.Off => "btn-danger",
+            RelayViewState.Error => "btn-warning",
             _ => "btn-secondary",
         };
 
     private string StateText =>
         State switch
         {
-            RelayState.Fetching => string.Empty,
-            RelayState.On => "On",
-            RelayState.Off => "Off",
+            RelayViewState.Fetching => string.Empty,
+            RelayViewState.On => "On",
+            RelayViewState.Off => "Off",
+            RelayViewState.Error => "Error",
             _ => "?",
         };
 
@@ -45,21 +48,32 @@
 
     private async ValueTask Toggle()
     {
-        State = RelayState.Fetching;
-        State = await RelayClient.ToggleRelay(Entry.Id);
+        State = RelayViewState.Fetching;
+        State = ToViewState(await RelayClient.ToggleRelay(Entry.Id));
     }
 
     private async ValueTask FetchState()
     {
-        State = RelayState.Fetching;
-        State = await RelayClient.GetState(Entry.Id);
+        State = RelayViewState.Fetching;
+        State = ToViewState(await RelayClient.GetState(Entry.Id));
     }
 
-    public enum RelayState
+    private RelayViewState ToViewState(RelayState state) =>
+        state switch
+        {
+            RelayState.Unknown => RelayViewState.Unknown,
+            RelayState.On => RelayViewState.On,
+            RelayState.Off => RelayViewState.Off,
+            RelayState.Error => RelayViewState.Error,
+            _ => RelayViewState.Unknown,
+        };
+
+    public enum RelayViewState
     {
         Unknown,
         Fetching,
         On,
         Off,
+        Error,
     }
 }

@@ -63,11 +63,18 @@ public class TasmotaMqttClient : ITasmotaClient,
             return Task.CompletedTask;
         }
 
-        _logger.LogDebug("Waiting for result: {count}", _waiting.Count);
+        _logger.LogDebug("Waiting for result: {Count}", _waiting.Count);
         if (_waiting.TryDequeue(out var tcs))
         {
-            var doc = JsonDocument.Parse(message.Payload);
-            tcs.SetResult(doc);
+            try
+            {
+                var doc = JsonDocument.Parse(message.Payload);
+                tcs.SetResult(doc);
+            }
+            catch(Exception ex)
+            {
+                tcs.SetException(ex);
+            }
         }
 
         return Task.CompletedTask;

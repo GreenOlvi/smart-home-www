@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using SmartHomeWWW.Core.Domain.Relays;
+﻿using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
 namespace SmartHomeWWW.Server.Relays;
@@ -17,12 +16,12 @@ public class TasmotaRelay : IRelay
     private readonly int _relayId;
     private readonly string _powerTopic;
 
-    public async Task<Maybe<bool>> GetStateAsync()
+    public async Task<RelayState> GetStateAsync()
     {
         var response = await _tasmota.GetValueAsync(_powerTopic);
         if (!response.HasValue)
         {
-            return Maybe.None;
+            return RelayState.Error;
         }
 
         var obj = response.Value.RootElement;
@@ -31,12 +30,12 @@ public class TasmotaRelay : IRelay
         {
             if (cmd.GetString()?.ToLowerInvariant() == "error")
             {
-                return Maybe.None;
+                return RelayState.Error;
             }
         }
 
         var value = obj.GetProperty("POWER").GetString()?.ToLowerInvariant();
-        return value == "on";
+        return value == "on" ? RelayState.On : RelayState.Off;
     }
 
     public async Task<bool> SetStateAsync(bool state) =>

@@ -1,7 +1,6 @@
 ﻿using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
-using Telegram.Bot.Requests;
 
 namespace SmartHomeWWW.Server.Watchdog;
 
