@@ -18,7 +18,9 @@
     public string Name => Entry.Name;
     public string Type => Entry.Type;
 
-    public RelayViewState State { get; private set; } = RelayViewState.Unknown;
+    private RelayViewState State { get; set; } = RelayViewState.Unknown;
+
+    private static TimeSpan RelayClientTimeout = TimeSpan.FromSeconds(5);
 
     private string StateClass =>
         State switch
@@ -37,7 +39,7 @@
             RelayViewState.On => "On",
             RelayViewState.Off => "Off",
             RelayViewState.Error => "Error",
-            _ => "?",
+            _ => string.Empty,
         };
 
     protected override async Task OnInitializedAsync()
@@ -49,26 +51,30 @@
     private async ValueTask Toggle()
     {
         State = RelayViewState.Fetching;
-        State = ToViewState(await RelayClient.ToggleRelay(Entry.Id));
+        using var cts = new CancellationTokenSource(RelayClientTimeout);
+        var state = await RelayClient.ToggleRelay(Entry.Id);
+        State = ToViewState(state);
     }
 
     private async ValueTask FetchState()
     {
         State = RelayViewState.Fetching;
-        State = ToViewState(await RelayClient.GetState(Entry.Id));
+        using var cts = new CancellationTokenSource(RelayClientTimeout);
+        var state = await RelayClient.GetState(Entry.Id, cts.Token);
+        State = ToViewState(state);
     }
 
     private RelayViewState ToViewState(RelayState state) =>
         state switch
         {
-            RelayState.Unknown => RelayViewState.Unknown,
+            RelayState.Unknown => RelayViewState.Fetching,
             RelayState.On => RelayViewState.On,
             RelayState.Off => RelayViewState.Off,
             RelayState.Error => RelayViewState.Error,
             _ => RelayViewState.Unknown,
         };
 
-    public enum RelayViewState
+    private enum RelayViewState
     {
         Unknown,
         Fetching,

@@ -3,6 +3,6 @@
 public interface IRelay
 {
     public Task<RelayState> GetStateAsync();
-    public Task<bool> SetStateAsync(bool state);
-    public Task<bool> ToggleAsync();
+    public Task<RelayState> SetStateAsync(bool state);
+    public Task<RelayState> ToggleAsync();
 }

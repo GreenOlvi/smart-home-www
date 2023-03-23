@@ -1,5 +1,7 @@
-﻿using SmartHomeWWW.Core.Domain.Relays;
+﻿using CSharpFunctionalExtensions;
+using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Relays;
 
@@ -16,16 +18,23 @@ public class TasmotaRelay : IRelay
     private readonly int _relayId;
     private readonly string _powerTopic;
 
-    public async Task<RelayState> GetStateAsync()
+    public async Task<RelayState> GetStateAsync() =>
+        GetValueFromResponse(await _tasmota.GetValueAsync(_powerTopic));
+
+    public async Task<RelayState> SetStateAsync(bool state) =>
+        GetValueFromResponse(await _tasmota.ExecuteCommandAsync(_powerTopic, state ? "on" : "off"));
+
+    public async Task<RelayState> ToggleAsync() =>
+        GetValueFromResponse(await _tasmota.ExecuteCommandAsync(_powerTopic, "toggle"));
+
+    private static RelayState GetValueFromResponse(Maybe<JsonDocument> response)
     {
-        var response = await _tasmota.GetValueAsync(_powerTopic);
         if (!response.HasValue)
         {
-            return RelayState.Error;
+            return RelayState.Unknown;
         }
 
         var obj = response.Value.RootElement;
-
         if (obj.TryGetProperty("Command", out var cmd))
         {
             if (cmd.GetString()?.ToLowerInvariant() == "error")
@@ -38,9 +47,4 @@ public class TasmotaRelay : IRelay
         return value == "on" ? RelayState.On : RelayState.Off;
     }
 
-    public async Task<bool> SetStateAsync(bool state) =>
-        (await _tasmota.ExecuteCommandAsync(_powerTopic, state ? "on" : "off")).HasValue;
-
-    public async Task<bool> ToggleAsync() =>
-        (await _tasmota.ExecuteCommandAsync(_powerTopic, "toggle")).HasValue;
 }

@@ -1,8 +1,8 @@
 ﻿namespace SmartHomeWWW.Server.Messages.Events;
 
-public record TasmotaPowerUpdateEvent : IMessage
+public readonly record struct TasmotaPowerUpdateEvent : IMessage
 {
     public IMessage? ParentEvent { get; init; }
-    public string DeviceName { get; init; } = string.Empty;
-    public string PowerState { get; init; } = string.Empty;
+    public string DeviceName { get; init; }
+    public string PowerState { get; init; }
 }

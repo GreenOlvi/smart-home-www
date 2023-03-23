@@ -24,16 +24,16 @@ public class RelaysHttpClient
             new KeyValuePair<string, string>("value", "toggle"),
         });
 
-        var result = await _httpClient.PostAsync($"api/relay/{id}/state", content);
-        var state = await result.Content.ReadFromJsonAsync<RelayStateViewModel>();
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(4));
+        var result = await _httpClient.PostAsync($"api/relay/{id}/state", content, cts.Token);
+        var state = await result.Content.ReadFromJsonAsync<RelayStateViewModel>(cancellationToken: cts.Token);
 
         return state.State;
     }
 
-    public async Task<RelayState> GetState(Guid id)
+    public async Task<RelayState> GetState(Guid id, CancellationToken? cancellationToken = null)
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-        var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state");
+        var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state", cancellationToken ?? CancellationToken.None);
         return result.State;
     }
 }
