@@ -62,15 +62,6 @@ public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
             Value = value,
         });
 
-        if (property == "POWER")
-        {
-            _bus.Publish(new TasmotaPowerUpdateEvent
-            {
-                ParentEvent = message,
-                DeviceName = deviceId,
-                PowerState = value,
-            });
-        }
         return Task.CompletedTask;
     }
 

@@ -11,6 +11,7 @@ public class RelayEntry
 {
     [Key]
     public Guid Id { get; init; }
+    // TODO: Add Kind property
     public string Type { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
 

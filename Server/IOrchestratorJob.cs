@@ -2,6 +2,6 @@
 
 public interface IOrchestratorJob : IAsyncDisposable
 {
-    public Task Start(CancellationToken cancellationToken);
-    public Task Stop(CancellationToken cancellationToken);
+    public Task Start(CancellationToken cancellationToken = default);
+    public Task Stop(CancellationToken cancellationToken = default);
 }
