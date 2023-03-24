@@ -13,8 +13,25 @@ public class HubConnectionWrapper : IHubConnection
 
     public HubConnectionState State => _hubConnection.State;
 
-    public Task SendAsync(string methodName, object? arg1, CancellationToken cancellationToken = default) =>
-        _hubConnection.SendAsync(methodName, arg1, cancellationToken);
+    public async Task SendAsync(string methodName, object? arg1, CancellationToken cancellationToken = default)
+    {
+        if (State == HubConnectionState.Disconnected)
+        {
+            await StartAsync(cancellationToken);
+        }
 
-    public Task StartAsync(CancellationToken cancellationToken = default) => _hubConnection.StartAsync(cancellationToken);
+        await _hubConnection.SendAsync(methodName, arg1, cancellationToken);
+    }
+
+    public async Task SendAsync(string methodName, object? arg1, object? arg2, CancellationToken cancellationToken = default)
+    {
+        if (State == HubConnectionState.Disconnected)
+        {
+            await StartAsync(cancellationToken);
+        }
+
+        await _hubConnection.SendAsync(methodName, arg1, arg2, cancellationToken);
+    }
+
+    private Task StartAsync(CancellationToken cancellationToken = default) => _hubConnection.StartAsync(cancellationToken);
 }

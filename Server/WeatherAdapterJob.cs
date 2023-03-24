@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+﻿using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Server.Config;
+using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
@@ -13,11 +13,11 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
 {
     private readonly ILogger<WeatherAdapterJob> _logger;
     private readonly IMessageBus _bus;
-    private readonly HubConnection _hubConnection;
+    private readonly IHubConnection _hubConnection;
     private readonly TelegramConfig _telegramConfig;
     private readonly IKeyValueStore _cache;
 
-    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, HubConnection hubConnection, TelegramConfig telegramConfig, IKeyValueStore cache)
+    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, TelegramConfig telegramConfig, IKeyValueStore cache)
     {
         _logger = logger;
         _bus = bus;
@@ -33,11 +33,6 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
         if (message.Weather?.Alerts.Any() ?? false)
         {
             await NotifyAlerts(message.Weather.Alerts);
-        }
-
-        if (_hubConnection.State == HubConnectionState.Disconnected)
-        {
-            await _hubConnection.StartAsync();
         }
 
         await _hubConnection.SendAsync("UpdateWeather", message.Weather);
