@@ -5,7 +5,7 @@
 @inject ILogger<Sensors> Logger
 @inject NavigationManager NavigationManager
 @inject SensorsHttpClient SensorsClient
-@inject HubConnection HubConnection
+@inject ISensorsHub HubConnection
 
 <div class="text-center">
     <h1 class="display-4">Sensors</h1>
@@ -61,17 +61,14 @@
 
         await LoadSensors();
 
-        HubConnection.On<Sensor>("SensorUpdated", async sensor =>
+        HubConnection.OnSensorUpdated(async sensor =>
         {
             Logger.LogInformation($"Received SensorUpdated on {sensor.Mac}");
             await LoadSensors();
             StateHasChanged();
         });
 
-        if (HubConnection.State == HubConnectionState.Disconnected)
-        {
-            await HubConnection.StartAsync();
-        }
+        await HubConnection.StartIfNotConnectedAsync();
     }
 
     private async Task LoadSensors()
@@ -87,7 +84,7 @@
 
     public ValueTask DisposeAsync()
     {
-        HubConnection.Remove("SensorUpdated");
+        HubConnection.RemoveOnSensorUpdated();
         return ValueTask.CompletedTask;
     }
 }

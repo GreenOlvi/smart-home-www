@@ -4,7 +4,7 @@
 
 @inject ILogger<Relays> Logger
 @inject RelaysHttpClient RelaysClient
-@inject HubConnection HubConnection
+@inject ISensorsHub HubConnection
 
 <main>
     <div class="text-center">
@@ -46,7 +46,7 @@
         await base.OnInitializedAsync();
         await LoadRelays();
 
-        HubConnection.On<Guid, RelayState>("RelayStateUpdated", (id, state) =>
+        HubConnection.OnRelayStateUpdated((id, state) =>
         {
             Logger.LogInformation("Received RelayStateUpdated for {Id} to '{State}'", id, state);
             foreach (var relay in RelayList.Where(r => r.Id == id))
@@ -56,10 +56,7 @@
             StateHasChanged();
         });
 
-        if (HubConnection.State == HubConnectionState.Disconnected)
-        {
-            await HubConnection.StartAsync();
-        }
+        await HubConnection.StartIfNotConnectedAsync();
     }
 
     private async Task LoadRelays()
@@ -67,5 +64,11 @@
         _isLoading = true;
         RelayList = (await RelaysClient.GetRelays()).Select(r => new RelayProxy(r, RelaysClient)).ToList();
         _isLoading = false;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        HubConnection.RemoveOnRelayStateUpdated();
+        return ValueTask.CompletedTask;
     }
 }

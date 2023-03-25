@@ -5,7 +5,7 @@
 
 @inject ILogger<Weather> Logger
 @inject WeatherHttpClient WeatherClient
-@inject HubConnection HubConnection
+@inject ISensorsHub HubConnection
 
 <main>
     <div class="text-center">
@@ -78,17 +78,14 @@ Timezone offset: @CurrentReport.TimezoneOffset
         await base.OnInitializedAsync();
         await LoadCurrentReport();
 
-        HubConnection.On<WeatherReport>("WeatherUpdated", weather =>
+        HubConnection.OnWeatherUpdated(weather =>
         {
             Logger.LogInformation("Received WeatherUpdated at {dt}", weather.Current.Timestamp.ToLocalTime().ToString());
             CurrentReport = weather;
             StateHasChanged();
         });
 
-        if (HubConnection.State == HubConnectionState.Disconnected)
-        {
-            await HubConnection.StartAsync();
-        }
+        await HubConnection.StartIfNotConnectedAsync();
     }
 
     private async Task LoadCurrentReport()
@@ -96,5 +93,11 @@ Timezone offset: @CurrentReport.TimezoneOffset
         _isLoading = true;
         CurrentReport = await WeatherClient.GetCurrent();
         _isLoading = false;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        HubConnection.RemoveOnWeatherUpdated();
+        return ValueTask.CompletedTask;
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.SignalR.Client;
 using SmartHomeWWW.Client;
 using SmartHomeWWW.Client.HttpClients;
+using SmartHomeWWW.Client.Infrastructure;
 
 internal sealed class Program
 {
@@ -29,6 +30,8 @@ internal sealed class Program
                 .WithAutomaticReconnect()
                 .Build();
         });
+
+        builder.Services.AddScoped<ISensorsHub, HubConnectionWrapper>();
 
         await builder.Build().RunAsync();
     }
