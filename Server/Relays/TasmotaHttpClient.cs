@@ -15,7 +15,7 @@ public class TasmotaHttpClient : ITasmotaClient
     }
 
     private readonly ILogger<TasmotaHttpClient> _logger;
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient;    // TODO: HttpClient is not disposed
     private readonly Uri _baseUrl;
 
     public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value) =>

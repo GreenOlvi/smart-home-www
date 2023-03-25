@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SmartHomeWWW.Core.Domain.Relays;
 
 namespace SmartHomeWWW.Core.ViewModel;
 
-public record struct RelayStateViewModel
+public readonly record struct RelayStateViewModel
 {
     public Guid RelayId { get; init; }
-    public bool? State { get; init; }
+    public RelayState State { get; init; }
 }

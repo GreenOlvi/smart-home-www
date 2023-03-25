@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net.Http;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using SmartHomeWWW.Core.Domain.Entities;
@@ -25,7 +23,7 @@ public class RelayFactoryTests
         };
 
         var tcf = new TasmotaClientFactory(
-            new Mock<ILoggerFactory>().Object,
+            NullLoggerFactory.Instance,
             new Mock<IHttpClientFactory>().Object,
             new Mock<IMessageBus>().Object);
 
@@ -48,7 +46,7 @@ public class RelayFactoryTests
         };
 
         var tcf = new TasmotaClientFactory(
-            new Mock<ILoggerFactory>().Object,
+            NullLoggerFactory.Instance,
             new Mock<IHttpClientFactory>().Object,
             new Mock<IMessageBus>().Object);
 

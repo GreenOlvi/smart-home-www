@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+using SmartHomeWWW.Core.Domain.Relays;
 
 namespace SmartHomeWWW.Server.Hubs;
 
@@ -24,5 +25,11 @@ public class SensorsHub : Hub
     {
         _logger.LogDebug("Updated current weather at {Dt}.", weather.Current.Timestamp.ToLocalTime().ToString());
         await Clients.Others.SendAsync("WeatherUpdated", weather);
+    }
+
+    public async Task UpdateRelayState(string deviceId, RelayState state)
+    {
+        _logger.LogDebug("Updated relay {Device} state to '{State}'", deviceId, state.ToString());
+        await Clients.Others.SendAsync("RelayStateUpdated", deviceId, state);
     }
 }

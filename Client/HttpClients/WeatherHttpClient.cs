@@ -12,6 +12,6 @@ public class WeatherHttpClient
 
     private readonly HttpClient _httpClient;
 
-    public async Task<WeatherReport?> GetCurrent() =>
-        await _httpClient.GetFromJsonAsync<WeatherReport>("api/weather/current");
+    public async Task<WeatherReport?> GetCurrent(CancellationToken cancellationToken = default) =>
+        await _httpClient.GetFromJsonAsync<WeatherReport>("api/weather/current", cancellationToken);
 }

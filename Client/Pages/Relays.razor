@@ -1,7 +1,10 @@
 ﻿@page "/relays"
+@using SmartHomeWWW.Client.Models;
+@using SmartHomeWWW.Core.Domain.Relays;
 
 @inject ILogger<Relays> Logger
 @inject RelaysHttpClient RelaysClient
+@inject ISensorsHub HubConnection
 
 <main>
     <div class="text-center">
@@ -35,19 +38,37 @@
 </main>
 
 @code {
-    private IReadOnlyList<RelayEntryViewModel> RelayList = Array.Empty<RelayEntryViewModel>();
+    private IReadOnlyList<RelayProxy> RelayList = Array.Empty<RelayProxy>();
     private bool _isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await LoadRelays();
+
+        HubConnection.OnRelayStateUpdated((id, state) =>
+        {
+            Logger.LogInformation("Received RelayStateUpdated for {Id} to '{State}'", id, state);
+            foreach (var relay in RelayList.Where(r => r.Id == id))
+            {
+                relay.UpdateState(state);
+            }
+            StateHasChanged();
+        });
+
+        await HubConnection.StartIfNotConnectedAsync();
     }
 
     private async Task LoadRelays()
     {
         _isLoading = true;
-        RelayList = (await RelaysClient.GetRelays()).ToList();
+        RelayList = (await RelaysClient.GetRelays()).Select(r => new RelayProxy(r, RelaysClient)).ToList();
         _isLoading = false;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        HubConnection.RemoveOnRelayStateUpdated();
+        return ValueTask.CompletedTask;
     }
 }

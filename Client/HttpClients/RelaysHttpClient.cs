@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
+using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.ViewModel;
-using static SmartHomeWWW.Client.Shared.RelayBox;
 
 namespace SmartHomeWWW.Client.HttpClients;
 
@@ -13,34 +13,26 @@ public class RelaysHttpClient
 
     private readonly HttpClient _httpClient;
 
-    public async Task<IEnumerable<RelayEntryViewModel>> GetRelays() =>
-        await _httpClient.GetFromJsonAsync<IEnumerable<RelayEntryViewModel>>("api/relay")
+    public async Task<IEnumerable<RelayEntryViewModel>> GetRelays(CancellationToken cancellationToken = default) =>
+        await _httpClient.GetFromJsonAsync<IEnumerable<RelayEntryViewModel>>("api/relay", cancellationToken)
             ?? Enumerable.Empty<RelayEntryViewModel>();
 
-    public async Task<RelayState> ToggleRelay(Guid id)
+    public async Task<RelayState> ToggleRelay(Guid id, CancellationToken cancellationToken = default)
     {
         var content = new FormUrlEncodedContent(new[]
         {
             new KeyValuePair<string, string>("value", "toggle"),
         });
 
-        var result = await _httpClient.PostAsync($"api/relay/{id}/state", content);
-        var state = await result.Content.ReadFromJsonAsync<RelayStateViewModel>();
+        var result = await _httpClient.PostAsync($"api/relay/{id}/state", content, cancellationToken);
+        var state = await result.Content.ReadFromJsonAsync<RelayStateViewModel>(cancellationToken: cancellationToken);
 
-        if (!state.State.HasValue)
-        {
-            return RelayState.Unknown;
-        }
-        return state.State.Value ? RelayState.On : RelayState.Off;
+        return state.State;
     }
 
-    public async Task<RelayState> GetState(Guid id)
+    public async Task<RelayState> GetState(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state");
-        if (!result.State.HasValue)
-        {
-            return RelayState.Unknown;
-        }
-        return result.State.Value ? RelayState.On : RelayState.Off;
+        var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state", cancellationToken);
+        return result.State;
     }
 }

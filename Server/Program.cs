@@ -116,6 +116,7 @@ internal static class Program
         builder.Services.AddTransient<TasmotaDeviceUpdaterService>();
         builder.Services.AddTransient<TelegramBotJob>();
         builder.Services.AddTransient(sp => new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), sp.GetRequiredService<TelegramConfig>().OwnerId));
+        builder.Services.AddTransient<TasmotaRelayHubAdapterJob>();
         builder.Services.AddTransient<WeatherAdapterJob>();
         builder.Services.AddTransient<WatchdogJob>();
 

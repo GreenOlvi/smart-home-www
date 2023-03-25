@@ -31,7 +31,7 @@ public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
         _bus.Subscribe<MqttMessageReceivedEvent>(this);
         _bus.Subscribe<TasmotaRequestPowerStateCommand>(this);
 
-        _bus.Publish(new MqttSubscribeToTopicCommand { Topic = "stat/+/POWER" });
+        _bus.Publish(new MqttSubscribeToTopicCommand { Topic = "stat/+/+" });
         _bus.Publish(new MqttSubscribeToTopicCommand { Topic = "tasmota/discovery/+/config" });
 
         return Task.CompletedTask;
@@ -50,18 +50,18 @@ public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
     private Task MqttStatMessage(MqttMessageReceivedEvent message)
     {
         var parts = message.Topic.Split('/');
-        var (device, kind) = (parts[1], parts[2]);
+        var (deviceId, property) = (parts[1], parts[2].ToUpperInvariant());
+        var value = message.Payload;
 
-        if (kind == "POWER")
+        _logger.LogInformation("Device {DeviceId} changed {Property} to '{Value}'", deviceId, property, value);
+        _bus.Publish(new TasmotaPropertyUpdateEvent
         {
-            _logger.LogInformation("{Dev} changed power to {Payload}", device, message.Payload);
-            _bus.Publish(new TasmotaPowerUpdateEvent
-            {
-                ParentEvent = message,
-                DeviceName = device,
-                PowerState = message.Payload,
-            });
-        }
+            ParentEvent = message,
+            DeviceId = deviceId,
+            PropertyName = property,
+            Value = value,
+        });
+
         return Task.CompletedTask;
     }
 

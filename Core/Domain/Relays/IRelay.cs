@@ -1,11 +1,8 @@
-﻿using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
-
-namespace SmartHomeWWW.Core.Domain.Relays;
+﻿namespace SmartHomeWWW.Core.Domain.Relays;
 
 public interface IRelay
 {
-    public Task<Maybe<bool>> GetStateAsync();
-    public Task<bool> SetStateAsync(bool state);
-    public Task<bool> ToggleAsync();
+    public Task<RelayState> GetStateAsync();
+    public Task<RelayState> SetStateAsync(bool state);
+    public Task<RelayState> ToggleAsync();
 }

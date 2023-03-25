@@ -50,7 +50,7 @@ public class RelayController : ControllerBase
         return RelayEntryViewModel.From(relay);
     }
 
-    public record struct RelayData
+    public readonly record struct NewRelayData
     {
         public string Type { get; init; }
         public string Name { get; init; }
@@ -58,7 +58,7 @@ public class RelayController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> AddRelay([FromBody] RelayData relayInput)
+    public async Task<ActionResult> AddRelay([FromBody] NewRelayData relayInput)
     {
         var relay = new RelayEntry
         {
@@ -107,7 +107,7 @@ public class RelayController : ControllerBase
         return new RelayStateViewModel
         {
             RelayId = id,
-            State = status.HasValue ? status.Value : null,
+            State = status,
         };
     }
 
@@ -144,7 +144,7 @@ public class RelayController : ControllerBase
         return Ok(new RelayStateViewModel
         {
             RelayId = id,
-            State = state.HasValue ? state.Value : null,
+            State = state,
         });
     }
 }

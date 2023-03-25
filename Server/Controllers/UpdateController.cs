@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Firmwares;
@@ -136,14 +135,7 @@ public class UpdateController : ControllerBase
             _ => UpdateChannel.Stable,
         };
 
-    private async Task NotifySensorsHub(Sensor sensor)
-    {
-        if (_hubConnection.State == HubConnectionState.Disconnected)
-        {
-            await _hubConnection.StartAsync();
-        }
-        await _hubConnection.SendAsync("UpdateSensor", sensor);
-    }
+    private async Task NotifySensorsHub(Sensor sensor) => await _hubConnection.SendAsync("UpdateSensor", sensor);
 
     private static string DumpHeaders(IHeaderDictionary headers)
     {
