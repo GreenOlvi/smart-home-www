@@ -13,27 +13,26 @@ public class RelaysHttpClient
 
     private readonly HttpClient _httpClient;
 
-    public async Task<IEnumerable<RelayEntryViewModel>> GetRelays() =>
-        await _httpClient.GetFromJsonAsync<IEnumerable<RelayEntryViewModel>>("api/relay")
+    public async Task<IEnumerable<RelayEntryViewModel>> GetRelays(CancellationToken cancellationToken = default) =>
+        await _httpClient.GetFromJsonAsync<IEnumerable<RelayEntryViewModel>>("api/relay", cancellationToken)
             ?? Enumerable.Empty<RelayEntryViewModel>();
 
-    public async Task<RelayState> ToggleRelay(Guid id)
+    public async Task<RelayState> ToggleRelay(Guid id, CancellationToken cancellationToken = default)
     {
         var content = new FormUrlEncodedContent(new[]
         {
             new KeyValuePair<string, string>("value", "toggle"),
         });
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(4));
-        var result = await _httpClient.PostAsync($"api/relay/{id}/state", content, cts.Token);
-        var state = await result.Content.ReadFromJsonAsync<RelayStateViewModel>(cancellationToken: cts.Token);
+        var result = await _httpClient.PostAsync($"api/relay/{id}/state", content, cancellationToken);
+        var state = await result.Content.ReadFromJsonAsync<RelayStateViewModel>(cancellationToken: cancellationToken);
 
         return state.State;
     }
 
-    public async Task<RelayState> GetState(Guid id, CancellationToken? cancellationToken = null)
+    public async Task<RelayState> GetState(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state", cancellationToken ?? CancellationToken.None);
+        var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state", cancellationToken);
         return result.State;
     }
 }
