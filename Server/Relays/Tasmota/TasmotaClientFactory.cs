@@ -1,7 +1,7 @@
 ﻿using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Messages;
 
-namespace SmartHomeWWW.Server.Relays;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public class TasmotaClientFactory
 {
@@ -31,5 +31,5 @@ public class TasmotaClientFactory
     }
 
     private TasmotaMqttClient CreateMqtt(TasmotaMqttClientConfig mqtt) =>
-        new (_loggerFactory.CreateLogger<TasmotaMqttClient>(), _bus, mqtt.DeviceId);
+        new(_loggerFactory.CreateLogger<TasmotaMqttClient>(), _bus, mqtt.DeviceId);
 }

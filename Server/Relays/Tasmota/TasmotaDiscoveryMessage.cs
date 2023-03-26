@@ -1,7 +1,6 @@
-﻿using System.Net;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace SmartHomeWWW.Server.Mqtt;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public record TasmotaDiscoveryMessage
 {

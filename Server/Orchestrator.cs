@@ -1,5 +1,4 @@
-﻿using SmartHomeWWW.Server.Mqtt;
-using SmartHomeWWW.Server.Relays;
+﻿using SmartHomeWWW.Server.Relays.Tasmota;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Watchdog;
 

@@ -4,7 +4,7 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
-namespace SmartHomeWWW.Server.Mqtt;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public class TasmotaDeviceUpdaterService
 {

@@ -3,7 +3,7 @@ using CSharpFunctionalExtensions;
 using Flurl;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
-namespace SmartHomeWWW.Server.Relays;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public class TasmotaHttpClient : ITasmotaClient
 {

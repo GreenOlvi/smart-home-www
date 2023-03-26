@@ -1,15 +1,11 @@
-﻿using NUnit.Framework;
-using SmartHomeWWW.Server.Relays;
-using Moq;
-using SmartHomeWWW.Server.Messages;
-using Microsoft.EntityFrameworkCore;
+﻿using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Domain.Entities;
-using static SmartHomeWWW.Server.Tests.SmartHomeDbTestContextFactory;
+using SmartHomeWWW.Server.Relays.Tasmota;
 
-namespace SmartHomeWWW.Server.Tests.Relays;
+namespace SmartHomeWWW.Server.Tests.Relays.Tasmota;
 
 [TestFixture]
 public class TasmotaRelayHubAdapterJobTests

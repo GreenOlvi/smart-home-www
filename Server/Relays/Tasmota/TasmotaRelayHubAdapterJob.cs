@@ -7,7 +7,7 @@ using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Events;
 using System.Text.Json;
 
-namespace SmartHomeWWW.Server.Relays;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandler<TasmotaPropertyUpdateEvent>
 {
@@ -46,7 +46,7 @@ public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandle
 
     public async Task Handle(TasmotaPropertyUpdateEvent message)
     {
-        if  (message.PropertyName != "POWER")
+        if (message.PropertyName != "POWER")
         {
             return;
         }

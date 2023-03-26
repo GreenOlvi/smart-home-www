@@ -12,6 +12,7 @@ using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
+using SmartHomeWWW.Server.Relays.Tasmota;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Watchdog;

@@ -1,19 +1,8 @@
-﻿using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
-using NUnit.Framework;
-using SmartHomeWWW.Core.Firmwares;
+﻿using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Controllers;
 using SmartHomeWWW.Server.Hubs;
 using System.Collections;
-using System.Text;
 
 namespace SmartHomeWWW.Server.Tests.Controllers;
 
@@ -32,10 +21,10 @@ public class UpdateControllerTests
         var dbName = Guid.NewGuid().ToString();
         var contextFactoryMock = new Mock<IDbContextFactory<SmartHomeDbContext>>(MockBehavior.Strict);
         contextFactoryMock.Setup(factory => factory.CreateDbContext())
-            .Returns(() => SmartHomeDbTestContextFactory.CreateInMemoryAsync(dbName).Result);
+            .Returns(() => CreateInMemoryAsync(dbName).Result);
         sc.AddSingleton(sp => contextFactoryMock.Object);
 
-        sc.AddTransient(sp => SmartHomeDbTestContextFactory.CreateInMemoryAsync(dbName).Result);
+        sc.AddTransient(sp => CreateInMemoryAsync(dbName).Result);
 
         var hubConn = new Mock<IHubConnection>(MockBehavior.Strict);
         hubConn.Setup(h => h.State).Returns(HubConnectionState.Connected);

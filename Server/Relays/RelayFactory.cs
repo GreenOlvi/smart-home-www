@@ -3,6 +3,7 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Server.Relays.Tasmota;
 
 namespace SmartHomeWWW.Server.Relays;
 

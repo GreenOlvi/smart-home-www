@@ -4,7 +4,7 @@ using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 
-namespace SmartHomeWWW.Server.Relays;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public class TasmotaMqttClient : ITasmotaClient
 {

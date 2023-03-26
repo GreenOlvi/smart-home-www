@@ -1,10 +1,7 @@
-﻿using FluentAssertions;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
-using NUnit.Framework;
-using SmartHomeWWW.Core.Domain.Entities;
+﻿using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Relays;
+using SmartHomeWWW.Server.Relays.Tasmota;
 
 namespace SmartHomeWWW.Server.Tests.Relays;
 
