@@ -27,8 +27,10 @@ public class TasmotaDeviceUpdaterService
             .Select(t => t.Item2)
             .ToArray();
 
-        var updatedHttp = TryUpdateHttpRelays(pairs.Where(p => p.kind == TasmotaClientKind.Http).Select(p => p.r), data, db);
-        var updatedMqtt = TryUpdateMqttRelays(pairs.Where(p => p.kind == TasmotaClientKind.Mqtt).Select(p => p.r), data, db);
+        var updatedHttp = TryUpdateRelays<TasmotaHttpClientConfig>(pairs.Where(p => p.kind == TasmotaClientKind.Http).Select(p => p.r),
+            data, db, GetHttpEntriesFromData, HttpRelayMatches, UpdateHttpRelayWithDevice);
+        var updatedMqtt = TryUpdateRelays<TasmotaMqttClientConfig>(pairs.Where(p => p.kind == TasmotaClientKind.Mqtt).Select(p => p.r),
+            data, db, GetMqttEntriesFromData, MqttRelayMatches, UpdateMqttRelayWithDevice);
 
         if (updatedMqtt || updatedHttp)
         {
@@ -36,89 +38,106 @@ public class TasmotaDeviceUpdaterService
         }
     }
 
-    private bool TryUpdateMqttRelays(IEnumerable<RelayEntry> mqttRelays, TasmotaDiscoveryMessage data, SmartHomeDbContext db)
+    private bool TryUpdateRelays<TConfig>(IEnumerable<RelayEntry> relays, TasmotaDiscoveryMessage data, SmartHomeDbContext db,
+        Func<TasmotaDiscoveryMessage, IEnumerable<RelayEntry>> getEntriesFromData,
+        Func<(RelayEntry, TConfig), (RelayEntry, TConfig), bool> relayMatches,
+        Func<(RelayEntry, TConfig), (RelayEntry, TConfig), bool> updateRelayWithDevice)
     {
-        var found = false;
         var changed = false;
-        foreach (var relay in mqttRelays)
+        (RelayEntry Relay, TConfig Config)[] devices = getEntriesFromData(data)
+            .Select(d => (d, Resolve<TConfig>(d.Config)))
+            .ToArray();
+
+        var relaysWithConfigs = relays.Select(r => (r, Resolve<TConfig>(r.Config))).ToArray();
+
+        foreach (var device in devices)
         {
-            var config = ((JsonElement)relay.Config).Deserialize<TasmotaMqttClientConfig>();
-            if (config is not null && config.DeviceId == data.Topic)
+            var matched = relaysWithConfigs.Where(r => relayMatches(r, device)).ToArray();
+            if (matched.Length > 0)
             {
-                found = true;
-
-                var name = $"{data.FriendlyName} MQTT";
-                if (relay.Name != name)
+                foreach (var matchedRelay in matched)
                 {
-                    relay.Name = name;
-                    changed = true;
-
-                    _logger.LogDebug("Updater {Name} relay", name);
+                    if (updateRelayWithDevice(matchedRelay, device))
+                    {
+                        changed = true;
+                        _logger.LogInformation("Relay updated ({Name})", device.Relay.Name);
+                    }
                 }
-
-                break;
+            }
+            else
+            {
+                db.Relays.Add(device.Relay);
+                changed = true;
+                _logger.LogInformation("New relay found ({Name})", device.Relay.Name);
             }
         }
-
-        if (found)
-        {
-            return changed;
-        }
-
-        db.Relays.Add(new RelayEntry
-        {
-            Id = Guid.NewGuid(),
-            Type = "Tasmota",
-            Name = $"{data.FriendlyName} MQTT",
-            Config = new TasmotaMqttClientConfig { DeviceId = data.Topic },
-        });
-
-        _logger.LogInformation("New relay found ({Name})", $"{data.FriendlyName} MQTT");
-
-        return true;
+        return changed;
     }
 
-    private bool TryUpdateHttpRelays(IEnumerable<RelayEntry> httpRelays, TasmotaDiscoveryMessage data, SmartHomeDbContext db)
+    private static bool MqttRelayMatches((RelayEntry, TasmotaMqttClientConfig) relay, (RelayEntry, TasmotaMqttClientConfig) device) =>
+        relay.Item2.DeviceId == device.Item2.DeviceId && relay.Item2.RelayId == device.Item2.RelayId;
+
+    private static bool UpdateMqttRelayWithDevice((RelayEntry, TasmotaMqttClientConfig) matchedRelay, (RelayEntry, TasmotaMqttClientConfig) device)
     {
-        var found = false;
-        var changed = false;
-        foreach (var relay in httpRelays)
+        if (matchedRelay.Item1.Name != device.Item1.Name)
         {
-            if (relay.Name == data.FriendlyName || relay.Name == data.Topic)
+            matchedRelay.Item1.Name = device.Item1.Name;
+            return true;
+        }
+        return false;
+    }
+
+    private static IEnumerable<RelayEntry> GetMqttEntriesFromData(TasmotaDiscoveryMessage data)
+    {
+        var relayCount = data.Relays.Count(i => i != 0);
+        for (var r = 1; r <= relayCount; r++)
+        {
+            var nameSuffix = relayCount > 1 ? $"-{r}" : string.Empty;
+            yield return new RelayEntry
             {
-                found = true;
-                var config = ((JsonElement)relay.Config).Deserialize<TasmotaHttpClientConfig>();
-                if (config is not null && config.Host != data.Ip)
+                Id = Guid.NewGuid(),
+                Type = "Tasmota",
+                Name = $"{data.FriendlyName}{nameSuffix} MQTT",
+                Config = new TasmotaMqttClientConfig
                 {
-                    relay.Config = new TasmotaHttpClientConfig
-                    {
-                        Host = data.Ip,
-                        RelayId = 1,
-                    };
-                    changed = true;
-                    _logger.LogDebug("Updater {Name} relay ip to {Ip}", relay.Name, data.Ip);
-                }
-
-                break;
-            }
+                    DeviceId = data.Topic,
+                    RelayId = r,
+                },
+            };
         }
+    }
 
-        if (found)
+    private static bool HttpRelayMatches((RelayEntry, TasmotaHttpClientConfig) relay, (RelayEntry, TasmotaHttpClientConfig) device) =>
+        relay.Item1.Name == device.Item1.Name && relay.Item2.RelayId == device.Item2.RelayId;
+
+    private static bool UpdateHttpRelayWithDevice((RelayEntry, TasmotaHttpClientConfig) matchedRelay, (RelayEntry, TasmotaHttpClientConfig) device)
+    {
+        if (matchedRelay.Item2.Host != device.Item2.Host)
         {
-            return changed;
+            matchedRelay.Item1.Config = matchedRelay.Item2 with { Host = device.Item2.Host };
+            return true;
         }
+        return false;
+    }
 
-        var name = data.FriendlyName ?? data.Topic;
-        db.Relays.Add(new RelayEntry
+    private static IEnumerable<RelayEntry> GetHttpEntriesFromData(TasmotaDiscoveryMessage data)
+    {
+        var relayCount = data.Relays.Count(i => i != 0);
+        for (var r = 1; r <= relayCount; r++)
         {
-            Id = Guid.NewGuid(),
-            Type = "Tasmota",
-            Name = name,
-            Config = new TasmotaHttpClientConfig { Host = data.Ip },
-        });
-
-        _logger.LogInformation("New relay found ({Name})", name);
-        return true;
+            var nameSuffix = relayCount > 1 ? $"-{r}" : string.Empty;
+            yield return new RelayEntry
+            {
+                Id = Guid.NewGuid(),
+                Type = "Tasmota",
+                Name = data.FriendlyName + nameSuffix,
+                Config = new TasmotaHttpClientConfig
+                {
+                    Host = data.Ip,
+                    RelayId = r,
+                },
+            };
+        }
     }
 
     private bool TryGetKind(RelayEntry relay, out TasmotaClientKind kind)
@@ -138,4 +157,11 @@ public class TasmotaDeviceUpdaterService
 
         return true;
     }
+
+    private static T Resolve<T>(object config) => config switch
+    {
+        T c => c,
+        JsonElement json => json.Deserialize<T>()!,
+        _ => throw new InvalidOperationException(),
+    };
 }

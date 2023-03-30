@@ -59,15 +59,19 @@ internal static class SmartHomeDbTestContextFactory
         return new MockContextFactory(() => CreateInMemory(dbName));
     }
 
-    public sealed class MockContextFactory : IDbContextFactory<SmartHomeDbContext>
+    public sealed class MockContextFactory : IDbContextFactory<SmartHomeDbContext>, IDisposable
     {
         private readonly Func<SmartHomeDbContext> _factory;
+        private readonly SmartHomeDbContext _ctx; // To have at least one context active and not let db be freed
 
         public MockContextFactory(Func<SmartHomeDbContext> factory)
         {
             _factory = factory;
+            _ctx = _factory();
         }
 
         public SmartHomeDbContext CreateDbContext() => _factory();
+
+        public void Dispose() => _ctx.Dispose();
     }
 }
