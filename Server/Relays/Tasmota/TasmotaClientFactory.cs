@@ -12,6 +12,8 @@ public class TasmotaClientFactory
         _bus = bus;
     }
 
+    public const string HttpClientName = "Tasmota";
+
     private readonly ILoggerFactory _loggerFactory;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IMessageBus _bus;
@@ -27,7 +29,7 @@ public class TasmotaClientFactory
     {
         var withSchema = config.Host.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? config.Host : "http://" + config.Host;
         return new TasmotaHttpClient(_loggerFactory.CreateLogger<TasmotaHttpClient>(),
-            _httpClientFactory.CreateClient("Tasmota"), new Uri(withSchema));
+            _httpClientFactory.CreateClient(HttpClientName), new Uri(withSchema));
     }
 
     private TasmotaMqttClient CreateMqtt(TasmotaMqttClientConfig mqtt) =>

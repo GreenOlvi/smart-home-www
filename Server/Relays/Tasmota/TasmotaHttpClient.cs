@@ -9,9 +9,9 @@ public sealed class TasmotaHttpClient : ITasmotaClient
 {
     public TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl)
     {
-        _logger = logger;
-        _httpClient = httpClient;
-        _baseUrl = baseUrl;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
     }
 
     private readonly ILogger<TasmotaHttpClient> _logger;
