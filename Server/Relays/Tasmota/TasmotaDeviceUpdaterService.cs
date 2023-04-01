@@ -3,6 +3,7 @@ using System.Text.Json;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Server.Config;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
@@ -10,11 +11,13 @@ public class TasmotaDeviceUpdaterService
 {
     private readonly ILogger<TasmotaDeviceUpdaterService> _logger;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+    private readonly TasmotaDiscoveryConfig _config;
 
-    public TasmotaDeviceUpdaterService(ILogger<TasmotaDeviceUpdaterService> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+    public TasmotaDeviceUpdaterService(ILogger<TasmotaDeviceUpdaterService> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, TasmotaDiscoveryConfig config)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
+        _config = config;
     }
 
     public async Task UpdateDevice(TasmotaDiscoveryMessage data)
@@ -27,10 +30,19 @@ public class TasmotaDeviceUpdaterService
             .Select(t => t.Item2)
             .ToArray();
 
-        var updatedHttp = TryUpdateRelays<TasmotaHttpClientConfig>(pairs.Where(p => p.kind == TasmotaClientKind.Http).Select(p => p.r),
-            data, db, GetHttpEntriesFromData, HttpRelayMatches, UpdateHttpRelayWithDevice);
-        var updatedMqtt = TryUpdateRelays<TasmotaMqttClientConfig>(pairs.Where(p => p.kind == TasmotaClientKind.Mqtt).Select(p => p.r),
-            data, db, GetMqttEntriesFromData, MqttRelayMatches, UpdateMqttRelayWithDevice);
+        var updatedHttp = false;
+        if (_config.UpdateHttpRelays)
+        {
+            updatedHttp = TryUpdateRelays<TasmotaHttpClientConfig>(pairs.Where(p => p.kind == TasmotaClientKind.Http).Select(p => p.r),
+                data, db, GetHttpEntriesFromData, HttpRelayMatches, UpdateHttpRelayWithDevice);
+        }
+
+        var updatedMqtt = false;
+        if (_config.UpdateMqttRelays)
+        {
+            updatedMqtt = TryUpdateRelays<TasmotaMqttClientConfig>(pairs.Where(p => p.kind == TasmotaClientKind.Mqtt).Select(p => p.r),
+                data, db, GetMqttEntriesFromData, MqttRelayMatches, UpdateMqttRelayWithDevice);
+        }
 
         if (updatedMqtt || updatedHttp)
         {

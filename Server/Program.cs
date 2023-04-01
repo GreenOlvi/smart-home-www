@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.Hubs;
@@ -26,8 +25,7 @@ internal static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        MapConfig(builder);
-
+        builder.MapConfig();
         AddServices(builder);
 
         if (builder.Environment.IsDevelopment())
@@ -130,18 +128,5 @@ internal static class Program
     {
         builder.Services.AddHttpClient<HttpClient>("Tasmota", client => { client.Timeout = TimeSpan.FromSeconds(5); });
         builder.Services.AddHttpClient<HttpClient>("Telegram");
-    }
-
-    private static void MapConfig(WebApplicationBuilder builder)
-    {
-        builder.Configuration.AddJsonFile("secrets.json");
-
-        var generalConfig = new GeneralConfig();
-        builder.Configuration.Bind(generalConfig);
-
-        builder.Services.AddSingleton(generalConfig);
-        builder.Services.AddSingleton(generalConfig.Firmwares);
-        builder.Services.AddSingleton(generalConfig.Mqtt);
-        builder.Services.AddSingleton(generalConfig.Telegram);
     }
 }
