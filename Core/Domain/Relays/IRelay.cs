@@ -1,6 +1,6 @@
 ﻿namespace SmartHomeWWW.Core.Domain.Relays;
 
-public interface IRelay
+public interface IRelay : IDisposable
 {
     public Task<RelayState> GetStateAsync();
     public Task<RelayState> SetStateAsync(bool state);

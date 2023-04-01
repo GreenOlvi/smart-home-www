@@ -26,7 +26,7 @@ public class RelayFactoryTests
 
         var factory = new RelayFactory(tcf);
 
-        var relay = factory.Create(entry);
+        using var relay = factory.Create(entry);
 
         relay.Should().BeOfType<TasmotaRelay>();
     }
@@ -49,7 +49,7 @@ public class RelayFactoryTests
 
         var factory = new RelayFactory(tcf);
 
-        var relay = factory.Create(entry);
+        using var relay = factory.Create(entry);
 
         relay.Should().BeOfType<TasmotaRelay>();
     }

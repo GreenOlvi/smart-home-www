@@ -5,7 +5,7 @@ using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public class TasmotaHttpClient : ITasmotaClient
+public sealed class TasmotaHttpClient : ITasmotaClient
 {
     public TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl)
     {
@@ -15,7 +15,7 @@ public class TasmotaHttpClient : ITasmotaClient
     }
 
     private readonly ILogger<TasmotaHttpClient> _logger;
-    private readonly HttpClient _httpClient;    // TODO: HttpClient is not disposed
+    private readonly HttpClient _httpClient;
     private readonly Uri _baseUrl;
 
     public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value) =>
@@ -44,4 +44,6 @@ public class TasmotaHttpClient : ITasmotaClient
         }
         return Maybe.None;
     }
+
+    public void Dispose() => _httpClient.Dispose();
 }

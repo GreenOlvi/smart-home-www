@@ -101,7 +101,7 @@ public class RelayController : ControllerBase
             return NotFound();
         }
 
-        var relay = _relayFactory.Create(relayEntry);
+        using var relay = _relayFactory.Create(relayEntry);
         var status = await relay.GetStateAsync();
 
         return new RelayStateViewModel
@@ -122,7 +122,7 @@ public class RelayController : ControllerBase
             return NotFound();
         }
 
-        var relay = _relayFactory.Create(relayEntry);
+        using var relay = _relayFactory.Create(relayEntry);
 
         switch (value.ToLowerInvariant())
         {

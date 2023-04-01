@@ -6,7 +6,7 @@ using SmartHomeWWW.Server.Messages.Commands;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public class TasmotaMqttClient : ITasmotaClient
+public sealed class TasmotaMqttClient : ITasmotaClient
 {
     public TasmotaMqttClient(ILogger<TasmotaMqttClient> logger, IMessageBus bus, string deviceId)
     {
@@ -44,4 +44,5 @@ public class TasmotaMqttClient : ITasmotaClient
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public void Dispose() { }
 }
