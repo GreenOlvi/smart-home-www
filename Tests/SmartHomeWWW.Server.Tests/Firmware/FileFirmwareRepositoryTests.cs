@@ -1,11 +1,4 @@
-﻿using System;
-using System.IO.Abstractions.TestingHelpers;
-using Castle.Core.Logging;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using NUnit.Framework;
-using SmartHomeWWW.Core.Firmwares;
+﻿using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 
@@ -31,7 +24,7 @@ public class FileFirmwareRepositoryTests
         }
     }
 
-    private readonly ILogger<FileFirmwareRepository> _logger = NullLogger<FileFirmwareRepository>.Instance;
+    private readonly NullLogger<FileFirmwareRepository> _logger = NullLogger<FileFirmwareRepository>.Instance;
 
     [Test]
     public void GetAllFirmwaresTest()

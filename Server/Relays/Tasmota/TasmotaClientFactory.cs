@@ -1,7 +1,7 @@
 ﻿using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Messages;
 
-namespace SmartHomeWWW.Server.Relays;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public class TasmotaClientFactory
 {
@@ -11,6 +11,8 @@ public class TasmotaClientFactory
         _httpClientFactory = httpClientFactory;
         _bus = bus;
     }
+
+    public const string HttpClientName = "Tasmota";
 
     private readonly ILoggerFactory _loggerFactory;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -27,9 +29,9 @@ public class TasmotaClientFactory
     {
         var withSchema = config.Host.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) ? config.Host : "http://" + config.Host;
         return new TasmotaHttpClient(_loggerFactory.CreateLogger<TasmotaHttpClient>(),
-            _httpClientFactory.CreateClient("Tasmota"), new Uri(withSchema));
+            _httpClientFactory.CreateClient(HttpClientName), new Uri(withSchema));
     }
 
     private TasmotaMqttClient CreateMqtt(TasmotaMqttClientConfig mqtt) =>
-        new (_loggerFactory.CreateLogger<TasmotaMqttClient>(), _bus, mqtt.DeviceId);
+        new(_loggerFactory.CreateLogger<TasmotaMqttClient>(), _bus, mqtt.DeviceId);
 }

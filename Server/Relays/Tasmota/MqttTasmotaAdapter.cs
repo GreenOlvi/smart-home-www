@@ -3,7 +3,7 @@ using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
 using System.Text.Json;
 
-namespace SmartHomeWWW.Server.Mqtt;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
     IMessageHandler<MqttMessageReceivedEvent>,

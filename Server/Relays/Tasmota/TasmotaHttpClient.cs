@@ -3,19 +3,19 @@ using CSharpFunctionalExtensions;
 using Flurl;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
-namespace SmartHomeWWW.Server.Relays;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public class TasmotaHttpClient : ITasmotaClient
+public sealed class TasmotaHttpClient : ITasmotaClient
 {
     public TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl)
     {
-        _logger = logger;
-        _httpClient = httpClient;
-        _baseUrl = baseUrl;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
     }
 
     private readonly ILogger<TasmotaHttpClient> _logger;
-    private readonly HttpClient _httpClient;    // TODO: HttpClient is not disposed
+    private readonly HttpClient _httpClient;
     private readonly Uri _baseUrl;
 
     public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value) =>
@@ -44,4 +44,6 @@ public class TasmotaHttpClient : ITasmotaClient
         }
         return Maybe.None;
     }
+
+    public void Dispose() => _httpClient.Dispose();
 }

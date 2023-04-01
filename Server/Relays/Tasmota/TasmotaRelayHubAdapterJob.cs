@@ -6,8 +6,9 @@ using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Events;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
-namespace SmartHomeWWW.Server.Relays;
+namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandler<TasmotaPropertyUpdateEvent>
 {
@@ -36,7 +37,7 @@ public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandle
             {
                 continue;
             }
-            result[c.DeviceId] = relay.Id;
+            result[$"{c.DeviceId}-{c.RelayId}"] = relay.Id;
         }
 
         return result;
@@ -44,14 +45,23 @@ public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandle
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
+    private static readonly Regex PowerPattern = new(@"^POWER(?<relayId>\d+)?$", RegexOptions.Compiled);
+
     public async Task Handle(TasmotaPropertyUpdateEvent message)
     {
-        if  (message.PropertyName != "POWER")
+        if (!PowerPattern.IsMatch(message.PropertyName))
         {
             return;
         }
 
-        var id = await GetRelayId(message.DeviceId);
+        var relayId = 1;
+        var m = PowerPattern.Match(message.PropertyName);
+        if (m.Groups["relayId"].Success && int.TryParse(m.Groups["relayId"].Value, out var parsedId))
+        {
+            relayId = parsedId;
+        }
+
+        var id = await GetRelayId(message.DeviceId, relayId);
         if (id is null)
         {
             return;
@@ -67,8 +77,8 @@ public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandle
         await _hubConnection.SendUpdateRelayState(id.Value, state);
     }
 
-    private Task<Guid?> GetRelayId(string deviceId) =>
-        Task.FromResult((Guid?)(_deviceIdCache.Value.TryGetValue(deviceId, out var id) ? id : null));
+    private Task<Guid?> GetRelayId(string deviceId, int relayId) =>
+        Task.FromResult((Guid?)(_deviceIdCache.Value.TryGetValue($"{deviceId}-{relayId}", out var id) ? id : null));
 
     public Task Start(CancellationToken cancellationToken = default)
     {

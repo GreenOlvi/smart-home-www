@@ -1,10 +1,7 @@
-﻿using FluentAssertions;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
-using NUnit.Framework;
-using SmartHomeWWW.Core.Domain.Entities;
+﻿using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Relays;
+using SmartHomeWWW.Server.Relays.Tasmota;
 
 namespace SmartHomeWWW.Server.Tests.Relays;
 
@@ -22,14 +19,18 @@ public class RelayFactoryTests
             ConfigSerialized = @"{""Host"":""relay1.local"",""RelayId"":1}",
         };
 
+        var httpFactory = new Mock<IHttpClientFactory>();
+        httpFactory.Setup(f => f.CreateClient(TasmotaClientFactory.HttpClientName))
+            .Returns(() => new HttpClient());
+
         var tcf = new TasmotaClientFactory(
             NullLoggerFactory.Instance,
-            new Mock<IHttpClientFactory>().Object,
+            httpFactory.Object,
             new Mock<IMessageBus>().Object);
 
         var factory = new RelayFactory(tcf);
 
-        var relay = factory.Create(entry);
+        using var relay = factory.Create(entry);
 
         relay.Should().BeOfType<TasmotaRelay>();
     }
@@ -45,14 +46,18 @@ public class RelayFactoryTests
             ConfigSerialized = @"{""Kind"":""Mqtt"",""DeviceId"":""tasmota_0A1B2C"",""RelayId"":1}",
         };
 
+        var httpFactory = new Mock<IHttpClientFactory>();
+        httpFactory.Setup(f => f.CreateClient(TasmotaClientFactory.HttpClientName))
+            .Returns(() => new HttpClient());
+
         var tcf = new TasmotaClientFactory(
             NullLoggerFactory.Instance,
-            new Mock<IHttpClientFactory>().Object,
+            httpFactory.Object,
             new Mock<IMessageBus>().Object);
 
         var factory = new RelayFactory(tcf);
 
-        var relay = factory.Create(entry);
+        using var relay = factory.Create(entry);
 
         relay.Should().BeOfType<TasmotaRelay>();
     }

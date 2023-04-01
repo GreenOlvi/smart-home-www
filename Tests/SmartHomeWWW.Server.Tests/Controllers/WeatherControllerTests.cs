@@ -1,54 +1,19 @@
-using System;
-using System.Text.Json;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
-using NUnit.Framework;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
-using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Controllers;
 using SmartHomeWWW.Server.Messages;
 
 namespace SmartHomeWWW.Server.Tests.Controllers;
 
-public sealed class WeatherControllerTests : IDisposable
+public sealed class WeatherControllerTests
 {
-    [SetUp]
-    public async Task Setup()
-    {
-        var dbOptions = new DbContextOptionsBuilder<SmartHomeDbContext>()
-            .UseSqlite("Data Source=:memory:;Mode=Memory;Cache=Shared",
-                o => o.MigrationsAssembly("SmartHomeWWW.Server"))
-            .Options;
-
-        _context = new SmartHomeDbContext(dbOptions);
-        await _context.Database.OpenConnectionAsync();
-        await _context.Database.EnsureCreatedAsync();
-
-        _contextFactoryMock = new Mock<IDbContextFactory<SmartHomeDbContext>>(MockBehavior.Strict);
-        _contextFactoryMock.Setup(factory => factory.CreateDbContext())
-            .Returns(() => new SmartHomeDbContext(dbOptions));
-
-        _messageBusMock = new Mock<IMessageBus>(MockBehavior.Loose);
-    }
-
-    [TearDown]
-    public Task Cleanup() => _context!.Database.CloseConnectionAsync();
-
-    private SmartHomeDbContext? _context;
     private readonly ILogger<WeatherController> _weatherLogger = NullLogger<WeatherController>.Instance;
-    private Mock<IDbContextFactory<SmartHomeDbContext>>? _contextFactoryMock;
-    private Mock<IMessageBus> _messageBusMock = new (MockBehavior.Loose);
+    private readonly Mock<IMessageBus> _messageBusMock = new (MockBehavior.Loose);
 
     [Test]
     public async Task GetCurrentWeatherShouldNotCrashWithNoDataTestAsync()
     {
-        var controller = new WeatherController(_weatherLogger, _contextFactoryMock!.Object, _messageBusMock.Object);
+        var controller = new WeatherController(_weatherLogger, CreateContextFactory(), _messageBusMock.Object);
         (await controller.GetCurrent()).Result.Should().BeOfType<NoContentResult>();
     }
 
@@ -70,7 +35,10 @@ public sealed class WeatherControllerTests : IDisposable
 
         var serialized = JsonSerializer.Serialize(weather);
 
-        _context!.WeatherCaches.Add(new WeatherCache
+        var cf = CreateContextFactory();
+
+        using var context = cf.CreateDbContext();
+        context!.WeatherCaches.Add(new WeatherCache
         {
             Id = Guid.NewGuid(),
             Name = "current",
@@ -78,9 +46,9 @@ public sealed class WeatherControllerTests : IDisposable
             Timestamp = timestamp.AddSeconds(1),
             Expires = timestamp.AddDays(1),
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var controller = new WeatherController(_weatherLogger, _contextFactoryMock!.Object, _messageBusMock.Object);
+        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object);
 
         var result = await controller.GetCurrent();
         result.Value.Should().Be(weather);
@@ -89,7 +57,10 @@ public sealed class WeatherControllerTests : IDisposable
     [Test]
     public async Task PostNewWeatherDataTestAsync()
     {
-        var controller = new WeatherController(_weatherLogger, _contextFactoryMock!.Object, _messageBusMock.Object);
+        var cf = CreateContextFactory();
+        using var context = cf.CreateDbContext();
+
+        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object);
 
         var timestamp = DateTime.UtcNow;
         var weather = new WeatherReport
@@ -109,10 +80,8 @@ public sealed class WeatherControllerTests : IDisposable
         var r = response as ObjectResult;
         r!.StatusCode.Should().Be(201);
 
-        var w = await _context!.WeatherCaches.SingleAsync(w => w.Timestamp == timestamp);
+        var w = await context.WeatherCaches.SingleAsync(w => w.Timestamp == timestamp);
         w.Timestamp.Should().Be(timestamp);
         w.Name.Should().Be("current");
     }
-
-    public void Dispose() => _context?.Dispose();
 }
