@@ -23,7 +23,7 @@ namespace SmartHomeWWW.Server;
 
 internal static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -71,18 +71,13 @@ internal static class Program
         app.MapControllers();
         app.MapFallbackToFile("index.html");
 
-        app.Run();
+        await app.RunAsync();
     }
 
     private static void AddServices(WebApplicationBuilder builder)
     {
         // Add services to the container.
-        builder.Services.AddControllersWithViews()
-            .AddJsonOptions(o =>
-            {
-                o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+        builder.Services.AddControllersWithViews();
 
         builder.Services.AddRazorPages();
         builder.Services.AddSignalR();

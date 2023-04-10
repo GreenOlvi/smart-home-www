@@ -20,6 +20,7 @@ public class RelayProxy
     public Guid Id => _relay.Id;
     public string Name => _relay.Name;
     public string Type => _relay.Type;
+    public string Kind => _relay.Kind?.ToString() ?? string.Empty;
     public RelayViewState State { get; private set; }
 
     public async ValueTask Toggle()
