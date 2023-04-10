@@ -16,6 +16,8 @@ using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Watchdog;
 using System.IO.Abstractions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SmartHomeWWW.Server;
 
@@ -75,7 +77,13 @@ internal static class Program
     private static void AddServices(WebApplicationBuilder builder)
     {
         // Add services to the container.
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews()
+            .AddJsonOptions(o =>
+            {
+                o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+
         builder.Services.AddRazorPages();
         builder.Services.AddSignalR();
 

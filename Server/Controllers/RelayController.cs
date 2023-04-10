@@ -2,8 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Core.ViewModel;
 using SmartHomeWWW.Server.Messages;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Controllers;
 
@@ -26,14 +28,41 @@ public class RelayController : ControllerBase
     private readonly IMessageBus _bus;
     private readonly IServiceProvider _sp;
 
+    public record RelayListParameters
+    {
+        public string? Type { get; init; }
+        public TasmotaClientKind? Kind { get; init; }
+        public string? Search { get; init; }
+    }
+
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RelayEntryViewModel>>> GetRelays()
+    public async Task<ActionResult<IEnumerable<RelayEntryViewModel>>> GetRelays([FromQuery] RelayListParameters parameters)
     {
         using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-        var relays = await dbContext.Relays
+        var relays = await ApplyFilter(dbContext.Relays, parameters)
             .Select(r => RelayEntryViewModel.From(r))
             .ToArrayAsync();
+
+        if (parameters.Kind is not null)
+        {
+            relays = relays.Where(r => r.Kind == parameters.Kind).ToArray();
+        }
+
         return Ok(relays);
+    }
+
+    private static IQueryable<RelayEntry> ApplyFilter(IQueryable<RelayEntry> relays, RelayListParameters parameters)
+    {
+        var r = relays;
+        if (parameters.Type is not null)
+        {
+            r = r.Where(x => x.Type == parameters.Type);
+        }
+        if (parameters.Search is not null)
+        {
+            r = r.Where(x => EF.Functions.Like(x.Name, "%" + parameters.Search + "%"));
+        }
+        return r;
     }
 
     [HttpGet("{id}")]
