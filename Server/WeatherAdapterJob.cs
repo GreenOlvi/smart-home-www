@@ -43,7 +43,7 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
         foreach (var alert in alerts)
         {
             var key = $"WeatherAlertNotified_{alert.GetHashCode()}";
-            if (await _cache.ContainsKeyAsync(key))
+            if (!await _cache.ContainsKeyAsync(key))
             {
                 _logger.LogInformation("New weather alert. Sending notification.");
                 _bus.Publish(FormatAlert(alert));

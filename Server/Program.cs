@@ -1,3 +1,5 @@
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -6,6 +8,7 @@ using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
+using SmartHomeWWW.Server.HealthChecks;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
@@ -16,8 +19,6 @@ using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Watchdog;
 using System.IO.Abstractions;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace SmartHomeWWW.Server;
 
@@ -44,7 +45,6 @@ internal static class Program
         loggerFactory.AddProvider(new MessageBusLoggerProvider(app.Services.GetRequiredService<IMessageBus>()));
 
         // Configure the HTTP request pipeline.
-        app.UseResponseCompression();
 
         if (app.Environment.IsDevelopment())
         {
@@ -54,6 +54,8 @@ internal static class Program
         }
         else
         {
+            app.UseResponseCompression();
+
             app.UseExceptionHandler("/Error");
 
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
@@ -66,6 +68,11 @@ internal static class Program
         app.UseRouting();
 
         app.MapHub<SensorsHub>(SensorsHub.RelativePath);
+
+        app.MapHealthChecks("/status", new HealthCheckOptions
+        {
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        });
 
         app.MapRazorPages();
         app.MapControllers();
@@ -82,12 +89,14 @@ internal static class Program
         builder.Services.AddRazorPages();
         builder.Services.AddSignalR();
 
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.AddResponseCompression(opts =>
+        if (builder.Environment.IsDevelopment())
         {
-            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
-        });
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+            });
+        }
 
         builder.Services.AddScoped<IFirmwareRepository, FileFirmwareRepository>();
 
@@ -125,11 +134,19 @@ internal static class Program
         builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
 
         builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
+
+        AddHealthChecks(builder);
     }
 
     private static void AddHttpClients(WebApplicationBuilder builder)
     {
         builder.Services.AddHttpClient<HttpClient>("Tasmota", client => { client.Timeout = TimeSpan.FromSeconds(5); });
         builder.Services.AddHttpClient<HttpClient>("Telegram");
+    }
+
+    private static void AddHealthChecks(WebApplicationBuilder builder)
+    {
+        builder.Services.AddHealthChecks()
+            .AddCheck<DbHealthCheck>("db-check", timeout: TimeSpan.FromSeconds(30));
     }
 }
