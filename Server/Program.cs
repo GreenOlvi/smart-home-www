@@ -89,14 +89,11 @@ internal static class Program
         builder.Services.AddRazorPages();
         builder.Services.AddSignalR();
 
-        if (builder.Environment.IsDevelopment())
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddResponseCompression(opts =>
         {
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddResponseCompression(opts =>
-            {
-                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
-            });
-        }
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+        });
 
         builder.Services.AddScoped<IFirmwareRepository, FileFirmwareRepository>();
 
