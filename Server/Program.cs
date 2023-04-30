@@ -45,7 +45,6 @@ internal static class Program
         loggerFactory.AddProvider(new MessageBusLoggerProvider(app.Services.GetRequiredService<IMessageBus>()));
 
         // Configure the HTTP request pipeline.
-        app.UseResponseCompression();
 
         if (app.Environment.IsDevelopment())
         {
@@ -55,6 +54,8 @@ internal static class Program
         }
         else
         {
+            app.UseResponseCompression();
+
             app.UseExceptionHandler("/Error");
 
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
@@ -88,12 +89,14 @@ internal static class Program
         builder.Services.AddRazorPages();
         builder.Services.AddSignalR();
 
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.AddResponseCompression(opts =>
+        if (builder.Environment.IsDevelopment())
         {
-            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
-        });
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddResponseCompression(opts =>
+            {
+                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+            });
+        }
 
         builder.Services.AddScoped<IFirmwareRepository, FileFirmwareRepository>();
 
