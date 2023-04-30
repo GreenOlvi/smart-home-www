@@ -1,3 +1,5 @@
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -66,7 +68,10 @@ internal static class Program
 
         app.MapHub<SensorsHub>(SensorsHub.RelativePath);
 
-        app.MapHealthChecks("/status");
+        app.MapHealthChecks("/status", new HealthCheckOptions
+        {
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        });
 
         app.MapRazorPages();
         app.MapControllers();

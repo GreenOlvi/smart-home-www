@@ -29,9 +29,9 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     private readonly TelegramBotClient _bot;
     private readonly IMessageBus _messageBus;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly HashSet<long> _allowedUsers = new ();
+    private readonly HashSet<long> _allowedUsers = new();
 
-    private readonly CancellationTokenSource _cancellationTokenSource = new ();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -43,7 +43,14 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
         _messageBus.Subscribe<TelegramSendTextMessageCommand>(this);
         _messageBus.Subscribe<TelegramRefreshAllowedUsersCommand>(this);
 
-        await LoadAllowedUsers();
+        try
+        {
+            await LoadAllowedUsers();
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Error loading allowed users");
+        }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
