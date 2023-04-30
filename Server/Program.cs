@@ -6,6 +6,7 @@ using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
+using SmartHomeWWW.Server.HealthChecks;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
@@ -16,8 +17,6 @@ using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Watchdog;
 using System.IO.Abstractions;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace SmartHomeWWW.Server;
 
@@ -66,6 +65,8 @@ internal static class Program
         app.UseRouting();
 
         app.MapHub<SensorsHub>(SensorsHub.RelativePath);
+
+        app.MapHealthChecks("/status");
 
         app.MapRazorPages();
         app.MapControllers();
@@ -125,11 +126,19 @@ internal static class Program
         builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
 
         builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
+
+        AddHealthChecks(builder);
     }
 
     private static void AddHttpClients(WebApplicationBuilder builder)
     {
         builder.Services.AddHttpClient<HttpClient>("Tasmota", client => { client.Timeout = TimeSpan.FromSeconds(5); });
         builder.Services.AddHttpClient<HttpClient>("Telegram");
+    }
+
+    private static void AddHealthChecks(WebApplicationBuilder builder)
+    {
+        builder.Services.AddHealthChecks()
+            .AddCheck<DbHealthCheck>("db-check", timeout: TimeSpan.FromSeconds(30));
     }
 }
