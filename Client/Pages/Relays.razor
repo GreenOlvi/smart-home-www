@@ -1,6 +1,7 @@
 ﻿@page "/relays"
 @using SmartHomeWWW.Client.Models;
 @using SmartHomeWWW.Core.Domain.Relays;
+@using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
 @inject ILogger<Relays> Logger
 @inject RelaysHttpClient RelaysClient
@@ -10,6 +11,15 @@
     <MudText Typo="Typo.h2">Relays</MudText>
 
     <MudGrid Justify="Justify.FlexStart">
+        <MudItem xs="12">
+            <MudChipSet MultiSelection="false" SelectedChipChanged="FilterByKind" Mandatory="true" Filter="true">
+                <MudChip Color="Color.Primary" Text="All" Default="_tasmotaKindFilter is null" />
+                @foreach (var kind in Enum.GetNames<TasmotaClientKind>())
+                {
+                <MudChip Color="Color.Primary" Text="@kind" Default="_tasmotaKindFilter.HasValue && _tasmotaKindFilter.Value.ToString() == kind" />
+                }
+            </MudChipSet>
+        </MudItem>
 
     @if (RelayList != null && RelayList.Any())
     {
@@ -41,6 +51,8 @@
     private IReadOnlyList<RelayProxy> RelayList = Array.Empty<RelayProxy>();
     private bool _isLoading = false;
 
+    private TasmotaClientKind? _tasmotaKindFilter = TasmotaClientKind.Mqtt;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -62,7 +74,18 @@
     private async Task LoadRelays()
     {
         _isLoading = true;
-        RelayList = (await RelaysClient.GetRelays()).Select(r => new RelayProxy(r, RelaysClient)).ToList();
+
+        IEnumerable<RelayEntryViewModel> relays;
+        if (_tasmotaKindFilter.HasValue)
+        {
+            relays = (await RelaysClient.GetRelays(_tasmotaKindFilter.Value));
+        }
+        else
+        {
+            relays = (await RelaysClient.GetRelays());
+        }
+
+        RelayList = relays.Select(r => new RelayProxy(r, RelaysClient)).ToList();
         _isLoading = false;
     }
 
@@ -70,5 +93,19 @@
     {
         HubConnection.RemoveOnRelayStateUpdated();
         return ValueTask.CompletedTask;
+    }
+
+    private Task FilterByKind(MudChip chip)
+    {
+        if (Enum.TryParse<TasmotaClientKind>(chip.Text, true, out var kind))
+        {
+            _tasmotaKindFilter = kind;
+        }
+        else
+        {
+            _tasmotaKindFilter = null;
+        }
+
+        return LoadRelays();
     }
 }
