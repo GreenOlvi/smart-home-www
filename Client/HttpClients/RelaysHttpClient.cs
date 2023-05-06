@@ -35,4 +35,14 @@ public class RelaysHttpClient
         var result = await _httpClient.GetFromJsonAsync<RelayStateViewModel>($"api/relay/{id}/state", cancellationToken);
         return result.State;
     }
+
+    public async Task SetRelay(Guid id, bool on, CancellationToken cancellationToken = default)
+    {
+        var content = new FormUrlEncodedContent(new[]
+        {
+            new KeyValuePair<string, string>("value", on ? "on" : "off"),
+        });
+
+        await _httpClient.PostAsync($"api/relay/{id}/state", content, cancellationToken);
+    }
 }

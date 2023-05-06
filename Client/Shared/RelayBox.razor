@@ -2,16 +2,24 @@
 @using SmartHomeWWW.Core.Domain.Relays;
 @using SmartHomeWWW.Core.ViewModel
 @using static SmartHomeWWW.Client.Models.RelayProxy;
-@inject RelaysHttpClient RelayClient
 
-<h3>Relay <i>@Entry.Name</i></h3>
-<p>@Entry.Type</p>
-<div class="btn @StateClass">
-    <span class="spinner-border @(StateClass)" hidden="@(!IsFetching)" role="status"></span>
-    @StateText
-</div>
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h5">@Entry.Name</MudText>
+            <MudText Typo="Typo.body2">@Entry.Type @Entry.Kind</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
 
-<button type="button" class="btn btn-primary" @onclick="(async () => await Entry.Toggle())">Toggle</button>
+    <MudCardContent>
+        <MudButton Variant="Variant.Filled" Color="StateColor" OnClick="Refresh">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" hidden="@(!IsFetching)" Size="Size.Small"/>
+            @StateText
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Toggle">Toggle</MudButton>
+    </MudCardContent>
+
+</MudCard>
 
 @code {
     [Parameter]
@@ -20,14 +28,14 @@
     private RelayViewState State => Entry.State;
     private bool IsFetching => State == RelayViewState.Fetching;
 
-    private string StateClass =>
+    private Color StateColor =>
         State switch
         {
-            RelayViewState.Fetching => "btn-secondary",
-            RelayViewState.On => "btn-success",
-            RelayViewState.Off => "btn-danger",
-            RelayViewState.Error => "btn-warning",
-            _ => "btn-secondary",
+            RelayViewState.Fetching => Color.Default,
+            RelayViewState.On => Color.Success,
+            RelayViewState.Off => Color.Error,
+            RelayViewState.Error => Color.Warning,
+            _ => Color.Secondary,
         };
 
     private string StateText =>
@@ -43,7 +51,11 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await Task.Delay(300);
         await Entry.FetchState();
     }
 
+    private Task Toggle(MouseEventArgs e) => Entry.Toggle().AsTask();
+    private Task Refresh(MouseEventArgs e) => Entry.FetchState().AsTask();
+    private Task SetState(bool on) => Entry.SetState(on).AsTask();
 }

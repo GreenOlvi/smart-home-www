@@ -21,13 +21,20 @@ public class RelayProxy
     public string Name => _relay.Name;
     public string Type => _relay.Type;
     public string Kind => _relay.Kind?.ToString() ?? string.Empty;
-    public RelayViewState State { get; private set; }
+    public RelayViewState State { get; private set; } = RelayViewState.Fetching;
 
     public async ValueTask Toggle()
     {
         State = RelayViewState.Fetching;
-        var s = await _client.ToggleRelay(_relay.Id);
+        using var cts = new CancellationTokenSource(RelayClientTimeout);
+        var s = await _client.ToggleRelay(Id, cts.Token);
         UpdateState(s);
+    }
+
+    public async ValueTask SetState(bool on)
+    {
+        using var cts = new CancellationTokenSource(RelayClientTimeout);
+        await _client.SetRelay(Id, on, cts.Token);
     }
 
     public async ValueTask FetchState()

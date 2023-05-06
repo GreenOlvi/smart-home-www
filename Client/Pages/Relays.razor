@@ -7,34 +7,34 @@
 @inject ISensorsHub HubConnection
 
 <main>
-    <div class="text-center">
-        <h1>Relays</h1>
-    </div>
+    <MudText Typo="Typo.h2">Relays</MudText>
+
+    <MudGrid Justify="Justify.FlexStart">
 
     @if (RelayList != null && RelayList.Any())
     {
-    <div class="container px-4 py5">
-        <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
-            @foreach (var relay in RelayList)
-            {
-            <div class="col"><RelayBox Entry="relay" /></div>
-            }
-        </div>
-    </div>
+        @foreach (var relay in RelayList)
+        {
+            <MudItem xs="3">
+                <RelayBox Entry="relay" />
+            </MudItem>
+        }
     }
     else
     {
-        if (_isLoading)
+        <MudItem xs="12">
+        @if (_isLoading)
         {
-            <div class="col align-content-center">
-                <span class="spinner-border text-primary" role="status"></span>
-            </div>
+            <MudProgressCircular Color="Color.Default" Indeterminate="true" />
         }
         else
         {
-            <div class="alert alert-warning" role="alert">No relays found</div>
+            <MudAlert Severity="Severity.Warning">No relays found</MudAlert>
         }
+        </MudItem>
     }
+
+    </MudGrid>
 </main>
 
 @code {
