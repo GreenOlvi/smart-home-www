@@ -1,5 +1,6 @@
 ﻿using SmartHomeWWW.Client.HttpClients;
 using SmartHomeWWW.Core.Domain.Relays;
+using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Core.ViewModel;
 
 namespace SmartHomeWWW.Client.Models;
@@ -20,15 +21,18 @@ public class RelayProxy
     public Guid Id => _relay.Id;
     public string Name => _relay.Name;
     public string Type => _relay.Type;
-    public string Kind => _relay.Kind?.ToString() ?? string.Empty;
+    public TasmotaClientKind? Kind => _relay.Kind;
     public RelayViewState State { get; private set; } = RelayViewState.Fetching;
 
     public async ValueTask Toggle()
     {
-        State = RelayViewState.Fetching;
         using var cts = new CancellationTokenSource(RelayClientTimeout);
         var s = await _client.ToggleRelay(Id, cts.Token);
-        UpdateState(s);
+
+        if (Kind.HasValue && Kind.Value == TasmotaClientKind.Http)
+        {
+            UpdateState(s);
+        }
     }
 
     public async ValueTask SetState(bool on)

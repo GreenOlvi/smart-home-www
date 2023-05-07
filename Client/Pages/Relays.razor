@@ -25,7 +25,7 @@
     {
         @foreach (var relay in RelayList)
         {
-            <MudItem xs="3">
+            <MudItem hidden="@(!IsVisible(relay))">
                 <RelayBox Entry="relay" />
             </MudItem>
         }
@@ -48,9 +48,9 @@
 </main>
 
 @code {
-    private IReadOnlyList<RelayProxy> RelayList = Array.Empty<RelayProxy>();
-    private bool _isLoading = false;
+    private readonly List<RelayProxy> RelayList = new();
 
+    private bool _isLoading = false;
     private TasmotaClientKind? _tasmotaKindFilter = TasmotaClientKind.Mqtt;
 
     protected override async Task OnInitializedAsync()
@@ -60,7 +60,7 @@
 
         HubConnection.OnRelayStateUpdated((id, state) =>
         {
-            Logger.LogInformation("Received RelayStateUpdated for {Id} to '{State}'", id, state);
+            Logger.LogDebug("Received RelayStateUpdated for {Id} to '{State}'", id, state);
             foreach (var relay in RelayList.Where(r => r.Id == id))
             {
                 relay.UpdateState(state);
@@ -74,18 +74,9 @@
     private async Task LoadRelays()
     {
         _isLoading = true;
-
-        IEnumerable<RelayEntryViewModel> relays;
-        if (_tasmotaKindFilter.HasValue)
-        {
-            relays = (await RelaysClient.GetRelays(_tasmotaKindFilter.Value));
-        }
-        else
-        {
-            relays = (await RelaysClient.GetRelays());
-        }
-
-        RelayList = relays.Select(r => new RelayProxy(r, RelaysClient)).ToList();
+        var relays = await RelaysClient.GetRelays();
+        RelayList.Clear();
+        RelayList.AddRange(relays.Select(r => new RelayProxy(r, RelaysClient)));
         _isLoading = false;
     }
 
@@ -94,6 +85,9 @@
         HubConnection.RemoveOnRelayStateUpdated();
         return ValueTask.CompletedTask;
     }
+
+    private bool IsVisible(RelayProxy relay) =>
+        !_tasmotaKindFilter.HasValue || _tasmotaKindFilter.Value == relay.Kind;
 
     private Task FilterByKind(MudChip chip)
     {
@@ -106,6 +100,7 @@
             _tasmotaKindFilter = null;
         }
 
-        return LoadRelays();
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 }
