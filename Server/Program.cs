@@ -103,11 +103,14 @@ internal static class Program
         builder.Services.AddDbContextFactory<SmartHomeDbContext>(optionsBuilder =>
             optionsBuilder.UseSqlite(
                 builder.Configuration.GetConnectionString("SmartHomeSqliteContext"),
-                o => o.MigrationsAssembly("SmartHomeWWW.Server")));
+                o => o.MigrationsAssembly("SmartHomeWWW.Server"))
+            .EnableSensitiveDataLogging(builder.Environment.IsDevelopment()));
+
+        var hubUrl = GetHubUrl(builder);
 
         builder.Services.AddTransient<IHubConnection, HubConnectionWrapper>();
         builder.Services.AddSingleton(sp => new HubConnectionBuilder()
-            .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
+            .WithUrl(hubUrl)
             .WithAutomaticReconnect()
             .Build());
 
@@ -133,6 +136,21 @@ internal static class Program
         builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
 
         AddHealthChecks(builder);
+    }
+
+    private static Uri GetHubUrl(WebApplicationBuilder builder)
+    {
+        var hubUrl = builder.Configuration.GetValue<string>("URLS")
+                ?.Split(";")
+                .FirstOrDefault(u => u.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase))
+            ?? "http://localhost:80";
+
+        var uri = new UriBuilder(hubUrl)
+        {
+            Path = SensorsHub.RelativePath
+        };
+
+        return uri.Uri;
     }
 
     private static void AddHttpClients(WebApplicationBuilder builder)
