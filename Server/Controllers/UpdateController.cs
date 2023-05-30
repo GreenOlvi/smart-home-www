@@ -16,12 +16,10 @@ public class UpdateController : ControllerBase
     private readonly ILogger<UpdateController> _logger;
     private readonly IFirmwareRepository _firmwareRepository;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly IHubConnection _hubConnection;
 
-    public UpdateController(ILogger<UpdateController> logger, IHubConnection hubConnection, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+    public UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
     {
         _logger = logger;
-        _hubConnection = hubConnection;
         _firmwareRepository = firmwareRepository;
         _dbContextFactory = dbContextFactory;
     }
@@ -69,10 +67,7 @@ public class UpdateController : ControllerBase
         }
 
         using var db = _dbContextFactory.CreateDbContext();
-        var sensor = await GetAndUpdateSensor(db, mac, deviceVersion);
-        await db.SaveChangesAsync();
-
-        await NotifySensorsHub(sensor);
+        var sensor = await GetOrCreateSensor(db, mac, deviceVersion);
 
         var channel = GetSensorUpdateChannel(sensor);
         _logger.LogDebug("Sensor uses [{Channel}] update channel", channel);
@@ -104,7 +99,7 @@ public class UpdateController : ControllerBase
         };
     }
 
-    private static async Task<Sensor> GetAndUpdateSensor(SmartHomeDbContext db, string mac, string firmwareVersion)
+    private static async Task<Sensor> GetOrCreateSensor(SmartHomeDbContext db, string mac, string firmwareVersion)
     {
         var sensor = await db.Sensors
             .FirstOrDefaultAsync(s => s.Mac == mac);
@@ -116,13 +111,13 @@ public class UpdateController : ControllerBase
                 Id = Guid.NewGuid(),
                 Mac = mac,
                 ChipType = "ESP8266",
+                FirmwareVersion = firmwareVersion,
+                LastContact = DateTime.UtcNow,
             };
 
             db.Sensors.Add(sensor);
+            await db.SaveChangesAsync();
         }
-
-        sensor.FirmwareVersion = firmwareVersion;
-        sensor.LastContact = DateTime.UtcNow;
 
         return sensor;
     }
@@ -134,8 +129,6 @@ public class UpdateController : ControllerBase
             "beta" => UpdateChannel.Beta,
             _ => UpdateChannel.Stable,
         };
-
-    private async Task NotifySensorsHub(Sensor sensor) => await _hubConnection.SendAsync("UpdateSensor", sensor);
 
     private static string DumpHeaders(IHeaderDictionary headers)
     {
