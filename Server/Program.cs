@@ -15,6 +15,7 @@ using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Relays.Tasmota;
+using SmartHomeWWW.Server.Sensors;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Watchdog;
@@ -130,6 +131,7 @@ internal static class Program
         builder.Services.AddTransient<TasmotaRelayHubAdapterJob>();
         builder.Services.AddTransient<WeatherAdapterJob>();
         builder.Services.AddTransient<WatchdogJob>();
+        builder.Services.AddTransient<SensorMonitorJob>();
 
         builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
 

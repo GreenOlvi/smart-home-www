@@ -26,12 +26,6 @@ public class UpdateControllerTests
 
         sc.AddTransient(sp => CreateInMemoryAsync(dbName).Result);
 
-        var hubConn = new Mock<IHubConnection>(MockBehavior.Strict);
-        hubConn.Setup(h => h.State).Returns(HubConnectionState.Connected);
-        hubConn.Setup(h => h.SendAsync(It.IsAny<string>(), It.IsAny<object?>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        sc.AddTransient(sp => hubConn.Object);
-
         _sp = sc.BuildServiceProvider();
         _db = _sp.GetRequiredService<SmartHomeDbContext>();
     }
@@ -50,7 +44,6 @@ public class UpdateControllerTests
         var context = new DefaultHttpContext();
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            _sp.GetRequiredService<IHubConnection>(),
             repo.Object,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {
@@ -81,7 +74,6 @@ public class UpdateControllerTests
 
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            _sp.GetRequiredService<IHubConnection>(),
             repo,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {
@@ -122,7 +114,6 @@ public class UpdateControllerTests
 
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            _sp.GetRequiredService<IHubConnection>(),
             repo,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {
@@ -164,7 +155,6 @@ public class UpdateControllerTests
 
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            _sp.GetRequiredService<IHubConnection>(),
             repo,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {
@@ -218,7 +208,6 @@ public class UpdateControllerTests
 
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            _sp.GetRequiredService<IHubConnection>(),
             repo,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {
@@ -261,7 +250,6 @@ public class UpdateControllerTests
 
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            _sp.GetRequiredService<IHubConnection>(),
             repo,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {
@@ -302,7 +290,6 @@ public class UpdateControllerTests
 
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            _sp.GetRequiredService<IHubConnection>(),
             repo,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {

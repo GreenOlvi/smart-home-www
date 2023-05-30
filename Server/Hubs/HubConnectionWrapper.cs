@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.Relays;
 
 namespace SmartHomeWWW.Server.Hubs;
@@ -36,6 +37,9 @@ public class HubConnectionWrapper : IHubConnection
 
     public Task SendUpdateRelayState(Guid id, RelayState state, CancellationToken cancellationToken = default) =>
         SendAsync(nameof(SensorsHub.UpdateRelayState), id, state, cancellationToken);
+
+    public Task SendUpdateSensor(Sensor sensor, CancellationToken cancellationToken = default) =>
+        SendAsync(nameof(SensorsHub.UpdateSensor), sensor, cancellationToken);
 
     private Task StartAsync(CancellationToken cancellationToken = default) => _hubConnection.StartAsync(cancellationToken);
 }

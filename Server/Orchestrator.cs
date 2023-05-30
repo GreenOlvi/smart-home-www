@@ -1,4 +1,5 @@
 ﻿using SmartHomeWWW.Server.Relays.Tasmota;
+using SmartHomeWWW.Server.Sensors;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Watchdog;
 
@@ -18,6 +19,7 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
             sp.GetRequiredService<TelegramLogForwarder>(),
             sp.GetRequiredService<WeatherAdapterJob>(),
             sp.GetRequiredService<WatchdogJob>(),
+            sp.GetRequiredService<SensorMonitorJob>(),
         };
     }
 
