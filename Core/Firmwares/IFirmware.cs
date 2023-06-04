@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SmartHomeWWW.Core.Firmwares;
+﻿namespace SmartHomeWWW.Core.Firmwares;
 
 public interface IFirmware
 {

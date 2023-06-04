@@ -1,5 +1,4 @@
-﻿using System;
-using SmartHomeWWW.Core.Domain.Entities;
+﻿using SmartHomeWWW.Core.Domain.Entities;
 
 namespace SmartHomeWWW.Core.ViewModel;
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using SmartHomeWWW.Core.Domain;
-
-namespace SmartHomeWWW.Core.Firmwares;
+﻿namespace SmartHomeWWW.Core.Firmwares;
 
 public interface IFirmwareRepository
 {
