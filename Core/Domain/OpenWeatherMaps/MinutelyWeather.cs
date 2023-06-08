@@ -3,8 +3,12 @@ using SmartHomeWWW.Core.Utils;
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
-public record MinutelyWeather
+public readonly record struct MinutelyWeather
 {
+    public MinutelyWeather()
+    {
+    }
+
     [JsonConverter(typeof(UnixEpochDateTimeConverter))]
     [JsonPropertyName("dt")]
     public DateTime Timestamp { get; init; } = DateTime.UnixEpoch;

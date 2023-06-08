@@ -5,5 +5,5 @@ namespace SmartHomeWWW.Server.Messages.Events;
 public class WeatherUpdatedEvent : IMessage
 {
     public string Type { get; init; } = string.Empty;
-    public WeatherReport? Weather { get; init; }
+    public WeatherReport Weather { get; init; }
 }

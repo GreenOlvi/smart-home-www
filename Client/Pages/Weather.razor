@@ -23,27 +23,27 @@
         @if (CurrentReport is not null)
         {
             <pre>
-[@CurrentReport.Latitude; @CurrentReport.Longitude]
-Timezone: @CurrentReport.Timezone
-Timezone offset: @CurrentReport.TimezoneOffset
+[@CurrentReport.Value.Latitude; @CurrentReport.Value.Longitude]
+Timezone: @CurrentReport.Value.Timezone
+Timezone offset: @CurrentReport.Value.TimezoneOffset
             </pre>
 
-            @if (CurrentReport.Alerts.Any())
+            @if (CurrentReport.Value.Alerts.Any())
             {
                 <div>
                     <strong>Alerts:</strong>
-                    @foreach (var alert in CurrentReport.Alerts)
+                    @foreach (var alert in CurrentReport.Value.Alerts)
                     {
                         <WeatherAlertComponent Alert="@alert" />
                     }
                 </div>
             }
 
-            <CurrentWeatherComponent Weather="@CurrentReport.Current" />
+            <CurrentWeatherComponent Weather="@CurrentReport.Value.Current" />
 
             <div>
                 <strong>Minutely:</strong>
-                @foreach (var min in CurrentReport.Minutely)
+                @foreach (var min in CurrentReport.Value.Minutely)
                 {
                     <MinutelyWeatherComponent Weather="@min" />
                 }
@@ -51,7 +51,7 @@ Timezone offset: @CurrentReport.TimezoneOffset
 
             <div>
                 <strong>Hourly:</strong>
-                @foreach (var hour in CurrentReport.Hourly)
+                @foreach (var hour in CurrentReport.Value.Hourly)
                 {
                     <HourlyWeatherComponent Weather="@hour" />
                 }
@@ -59,11 +59,15 @@ Timezone offset: @CurrentReport.TimezoneOffset
 
             <div>
                 <strong>Daily:</strong>
-                @foreach (var daily in CurrentReport.Daily)
+                @foreach (var daily in CurrentReport.Value.Daily)
                 {
                     <DailyWeatherComponent Weather="@daily" />
                 }
             </div>
+        }
+        else
+        {
+            <div class="alert alert-warning" role="alert">No current weather</div>
         }
     }
 

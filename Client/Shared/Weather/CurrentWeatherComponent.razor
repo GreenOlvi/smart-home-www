@@ -1,7 +1,5 @@
 ﻿@using Core.Domain.OpenWeatherMaps
 
-@if (Weather is not null)
-{
     <pre>State at @Weather.Timestamp.ToLocalTime()
 
 Sunrise: @Weather.Sunrise.ToLocalTime()
@@ -19,13 +17,12 @@ Visibility: @Weather.Visibility
 Wind speed: @Weather.WindSpeed
 Wind degree: @Weather.WindDegree</pre>
 
-    @foreach (var description in Weather.Weather)
-    {
-        <WeatherDescriptionComponent Description=@description />
-    }
+@foreach (var description in Weather.Weather)
+{
+    <WeatherDescriptionComponent Description=@description />
 }
 
 @code {
     [Parameter]
-    public Core.Domain.OpenWeatherMaps.CurrentWeather? Weather { get; init; }
+    public Core.Domain.OpenWeatherMaps.CurrentWeather Weather { get; init; }
 }

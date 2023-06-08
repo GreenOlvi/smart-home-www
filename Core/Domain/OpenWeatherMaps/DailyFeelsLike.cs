@@ -2,7 +2,7 @@
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
-public record DailyFeelsLike
+public readonly record struct DailyFeelsLike
 {
     public float Day { get; init; }
     public float Night { get; init; }

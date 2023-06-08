@@ -1,7 +1,5 @@
 ﻿@using SmartHomeWWW.Core.Domain.OpenWeatherMaps
 
-@if (Weather is not null)
-{
     <pre>
 Timestamp: @Weather.Timestamp.ToLocalTime()
 Temperature: @Weather.Temperature°C
@@ -17,14 +15,13 @@ Wind degree: @Weather.WindDegree
 Wind gust: @Weather.WindGust
 Probability of precipitation: @Weather.ProbabilityOfPrecipitation
     </pre>
-    @foreach (var description in Weather.Weather)
-    {
-        <WeatherDescriptionComponent Description=@description />
-    }
+@foreach (var description in Weather.Weather)
+{
+    <WeatherDescriptionComponent Description=@description />
 }
 
 @code {
     [Parameter]
-    public HourlyWeather? Weather { get; init; }
+    public HourlyWeather Weather { get; init; }
 
 }

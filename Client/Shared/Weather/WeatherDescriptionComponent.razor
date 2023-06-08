@@ -1,11 +1,8 @@
 ﻿@using SmartHomeWWW.Core.Domain.OpenWeatherMaps
 
-@if (Description is not null)
-{
-    <pre>[@Description.Icon] @Description.Main - @Description.Description</pre>
-}
+<pre>[@Description.Icon] @Description.Main - @Description.Description</pre>
 
 @code {
     [Parameter]
-    public WeatherDescription? Description { get; init; }
+    public WeatherDescription Description { get; init; }
 }

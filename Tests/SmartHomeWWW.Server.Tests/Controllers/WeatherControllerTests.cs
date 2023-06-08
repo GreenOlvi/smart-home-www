@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Server.Controllers;
@@ -14,11 +15,10 @@ public sealed class WeatherControllerTests
     public async Task GetCurrentWeatherShouldNotCrashWithNoDataTestAsync()
     {
         var controller = new WeatherController(_weatherLogger, CreateContextFactory(), _messageBusMock.Object);
-        (await controller.GetCurrent()).Result.Should().BeOfType<NoContentResult>();
+        (await controller.GetCurrent()).Should().BeOfType<NotFoundResult>();
     }
 
     [Test]
-    [Ignore("Struggling with report comparision")]
     public async Task GetCurrentWeatherShouldReturnLatestValueTestAsync()
     {
         var timestamp = DateTime.UtcNow.Date.AddMinutes(-10);
@@ -51,7 +51,9 @@ public sealed class WeatherControllerTests
         var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object);
 
         var result = await controller.GetCurrent();
-        result.Value.Should().Be(weather);
+        result.Should().BeOfType<OkObjectResult>();
+        var okObject = (OkObjectResult)result;
+        okObject.Value.Should().BeEquivalentTo(weather);
     }
 
     [Test]

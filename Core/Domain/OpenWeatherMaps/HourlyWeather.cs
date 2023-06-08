@@ -3,8 +3,12 @@ using SmartHomeWWW.Core.Utils;
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
-public record HourlyWeather
+public readonly record struct HourlyWeather
 {
+    public HourlyWeather()
+    {
+    }
+
     [JsonConverter(typeof(UnixEpochDateTimeConverter))]
     [JsonPropertyName("dt")]
     public DateTime Timestamp { get; init; } = DateTime.UnixEpoch;
@@ -37,7 +41,7 @@ public record HourlyWeather
     [JsonPropertyName("wind_gust")]
     public float WindGust { get; init; }
 
-    public WeatherDescription[] Weather { get; init; } = Array.Empty<WeatherDescription>();
+    public IReadOnlyCollection<WeatherDescription> Weather { get; init; } = Array.Empty<WeatherDescription>();
 
     [JsonPropertyName("pop")]
     public float ProbabilityOfPrecipitation { get; init; }

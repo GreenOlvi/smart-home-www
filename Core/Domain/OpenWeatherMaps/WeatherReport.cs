@@ -2,8 +2,12 @@
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
-public record WeatherReport
+public readonly record struct WeatherReport
 {
+    public WeatherReport()
+    {
+    }
+
     [JsonPropertyName("lat")]
     public float Latitude { get; init; }
 
@@ -15,13 +19,13 @@ public record WeatherReport
     [JsonPropertyName("timezone_offset")]
     public long TimezoneOffset { get; init; }
 
-    public CurrentWeather Current { get; init; } = new CurrentWeather();
+    public CurrentWeather Current { get; init; }
 
-    public MinutelyWeather[] Minutely { get; init; } = Array.Empty<MinutelyWeather>();
+    public IReadOnlyCollection<MinutelyWeather> Minutely { get; init; } = Array.Empty<MinutelyWeather>();
 
-    public HourlyWeather[] Hourly { get; init; } = Array.Empty<HourlyWeather>();
+    public IReadOnlyCollection<HourlyWeather> Hourly { get; init; } = Array.Empty<HourlyWeather>();
 
-    public DailyWeather[] Daily { get; init; } = Array.Empty<DailyWeather>();
+    public IReadOnlyCollection<DailyWeather> Daily { get; init; } = Array.Empty<DailyWeather>();
 
-    public WeatherAlert[] Alerts { get; init; } = Array.Empty<WeatherAlert>();
+    public IReadOnlyCollection<WeatherAlert> Alerts { get; init; } = Array.Empty<WeatherAlert>();
 }

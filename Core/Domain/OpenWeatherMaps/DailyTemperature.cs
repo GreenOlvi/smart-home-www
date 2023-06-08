@@ -2,7 +2,7 @@
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
-public record DailyTemperature
+public readonly record struct DailyTemperature
 {
     public float Day { get; init; }
     public float Min { get; init; }

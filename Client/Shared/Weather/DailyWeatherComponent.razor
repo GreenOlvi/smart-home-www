@@ -1,7 +1,5 @@
 ﻿@using Core.Domain.OpenWeatherMaps
 
-@if (Weather is not null)
-{
     <pre>State at @Weather.Timestamp.ToLocalTime()
 Sunrise: @Weather.Sunrise.ToLocalTime()
 Sunset: @Weather.Sunset.ToLocalTime()
@@ -18,15 +16,14 @@ Wind gust: @Weather.WindGust
 Probability of precipitation: @Weather.ProbabilityOfPrecipitation
 UVI: @Weather.Uvi
 Clouds: @Weather.Clouds</pre>
-    @foreach (var description in Weather.Weather)
-    {
-        <WeatherDescriptionComponent Description=@description />
-    }
+@foreach (var description in Weather.Weather)
+{
+    <WeatherDescriptionComponent Description=@description />
 }
 
 @code {
     [Parameter]
-    public DailyWeather? Weather { get; init; }
+    public DailyWeather Weather { get; init; }
 
     Func<DailyTemperature, string> DailyTempTemplate =
         t => $"Day: {t.Day}°C; Min: {t.Min}°C; Max: {t.Max}°C; Night: {t.Night}°C; Evening: {t.Evening}°C; Morning: {t.Morning}°C";

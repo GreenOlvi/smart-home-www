@@ -1,11 +1,8 @@
 ﻿@using SmartHomeWWW.Core.Domain.OpenWeatherMaps
 
-@if (Weather is not null)
-{
-    <pre>@Weather.Timestamp.ToLocalTime() - @Weather.Precipitation</pre>
-}
+<pre>@Weather.Timestamp.ToLocalTime() - @Weather.Precipitation</pre>
 
 @code {
     [Parameter]
-    public MinutelyWeather? Weather { get; init; }
+    public MinutelyWeather Weather { get; init; }
 }

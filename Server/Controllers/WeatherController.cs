@@ -27,29 +27,33 @@ public class WeatherController : ControllerBase
     private readonly IMessageBus _bus;
 
     [HttpGet("current")]
-    public async Task<ActionResult<WeatherReport>> GetCurrent(long after = 0)
+    public async Task<IActionResult> GetCurrent(long after = 0)
     {
         var afterDt = DateTimeOffset.FromUnixTimeSeconds(after).DateTime;
 
         using var db = _dbContextFactory.CreateDbContext();
         var current = await db.WeatherCaches
-            .Where(w => w.Timestamp > afterDt)
+            .Where(w => w.Timestamp > afterDt && w.Name == "current")
             .OrderByDescending(w => w.Timestamp)
             .FirstOrDefaultAsync();
 
-        if (current?.Data == null)
+        if (current is null)
         {
+            return NotFound();
+        }
+
+        var report = JsonSerializer.Deserialize<WeatherReport?>(current.Data);
+        if (report is null)
+        {
+            _logger.LogWarning("Could not parse weather data id={Id}", current.Id);
             return NoContent();
         }
 
-        var report = JsonSerializer.Deserialize<WeatherReport>(current.Data);
-        return report is null
-            ? NoContent()
-            : (ActionResult<WeatherReport>)report;
+        return Ok(report.Value);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<WeatherReport>> GetWeather(Guid id)
+    public async Task<IActionResult> GetWeather(Guid id)
     {
         using var db = _dbContextFactory.CreateDbContext();
         var weather = await db.WeatherCaches.FindAsync(id);
@@ -58,14 +62,18 @@ public class WeatherController : ControllerBase
             return NotFound();
         }
 
-        var report = JsonSerializer.Deserialize<WeatherReport>(weather.Data);
-        return report is null
-            ? NoContent()
-            : (ActionResult<WeatherReport>)report;
+        var report = JsonSerializer.Deserialize<WeatherReport?>(weather.Data);
+        if (report is null)
+        {
+            _logger.LogWarning("Could not parse weather data id={Id}", weather.Id);
+            return NoContent();
+        }
+
+        return Ok(report.Value);
     }
 
     [HttpPost("{type=current}")]
-    public async Task<ActionResult> PostWeather(string type, [FromBody] WeatherReport value)
+    public async Task<IActionResult> PostWeather(string type, [FromBody] WeatherReport value)
     {
         _logger.LogInformation("Received new weather data");
         var timestamp = value.Current.Timestamp;

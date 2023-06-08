@@ -3,8 +3,12 @@ using SmartHomeWWW.Core.Utils;
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
-public record WeatherAlert
+public readonly record struct WeatherAlert
 {
+    public WeatherAlert()
+    {
+    }
+
     [JsonPropertyName("sender_name")]
     public string SenderName { get; init; } = string.Empty;
 

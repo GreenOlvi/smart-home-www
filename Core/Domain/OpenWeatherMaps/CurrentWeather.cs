@@ -3,8 +3,12 @@ using SmartHomeWWW.Core.Utils;
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
-public record CurrentWeather
+public readonly record struct CurrentWeather
 {
+    public CurrentWeather()
+    {
+    }
+
     [JsonConverter(typeof(UnixEpochDateTimeConverter))]
     [JsonPropertyName("dt")]
     public DateTime Timestamp { get; init; } = DateTime.UnixEpoch;
@@ -40,5 +44,5 @@ public record CurrentWeather
     [JsonPropertyName("wind_deg")]
     public int WindDegree { get; init; }
 
-    public WeatherDescription[] Weather { get; init; } = Array.Empty<WeatherDescription>();
+    public IReadOnlyCollection<WeatherDescription> Weather { get; init; } = Array.Empty<WeatherDescription>();
 }

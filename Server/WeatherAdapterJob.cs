@@ -30,15 +30,15 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
 
     public async Task Handle(WeatherUpdatedEvent message)
     {
-        if (message.Weather?.Alerts.Any() ?? false)
+        await _hubConnection.SendAsync("UpdateWeather", message.Weather);
+
+        if (message.Weather.Alerts.Any())
         {
             await NotifyAlerts(message.Weather.Alerts);
         }
-
-        await _hubConnection.SendAsync("UpdateWeather", message.Weather);
     }
 
-    private async Task NotifyAlerts(WeatherAlert[] alerts)
+    private async Task NotifyAlerts(IEnumerable<WeatherAlert> alerts)
     {
         foreach (var alert in alerts)
         {
