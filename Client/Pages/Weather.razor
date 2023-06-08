@@ -97,6 +97,7 @@ Timezone offset: @CurrentReport.Value.TimezoneOffset
         _isLoading = true;
         CurrentReport = await WeatherClient.GetCurrent();
         _isLoading = false;
+        StateHasChanged();
     }
 
     public ValueTask DisposeAsync()
