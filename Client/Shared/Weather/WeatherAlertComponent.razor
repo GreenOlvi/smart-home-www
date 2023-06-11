@@ -1,5 +1,6 @@
 ﻿@using Core.Domain.OpenWeatherMaps
 
+<div class="alert alert-warning" role="alert">
     <pre>
 Event: @Alert.Event
 Sender: @Alert.SenderName
@@ -7,6 +8,7 @@ From: @Alert.Start.ToLocalTime()
 To: @Alert.End.ToLocalTime()
 Description: @Alert.Description
     </pre>
+</div>
 
 @code {
     [Parameter]
