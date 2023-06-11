@@ -14,6 +14,8 @@ namespace SmartHomeWWW.Server.Weather;
 
 public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<WeatherUpdatedEvent>, IMessageHandler<MqttMessageReceivedEvent>
 {
+    private const string WeatherTopic = "env/out/weather";
+
     private readonly ILogger<WeatherAdapterJob> _logger;
     private readonly IMessageBus _bus;
     private readonly IHubConnection _hubConnection;
@@ -86,8 +88,6 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
         return Task.CompletedTask;
     }
 
-    private const string WeatherTopic = "env/test/weather";
-
     public async Task Handle(MqttMessageReceivedEvent message)
     {
         if (message.Topic != WeatherTopic)
@@ -95,7 +95,7 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
             return;
         }
 
-        var weather = JsonSerializer.Deserialize<WeatherReport?>(message.Payload, new JsonSerializerOptions { PropertyNameCaseInsensitive= true });
+        var weather = JsonSerializer.Deserialize<WeatherReport?>(message.Payload, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (weather is null)
         {
             _logger.LogWarning("Could not parse weather data");

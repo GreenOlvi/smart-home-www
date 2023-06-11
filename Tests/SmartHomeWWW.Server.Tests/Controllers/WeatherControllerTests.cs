@@ -1,20 +1,25 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Server.Controllers;
 using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Server.Repositories;
 
 namespace SmartHomeWWW.Server.Tests.Controllers;
 
 public sealed class WeatherControllerTests
 {
     private readonly ILogger<WeatherController> _weatherLogger = NullLogger<WeatherController>.Instance;
+    private readonly ILogger<WeatherReportRepository> _weatherRepoLogger = NullLogger<WeatherReportRepository>.Instance;
     private readonly Mock<IMessageBus> _messageBusMock = new (MockBehavior.Loose);
 
     [Test]
     public async Task GetCurrentWeatherShouldNotCrashWithNoDataTestAsync()
     {
-        var controller = new WeatherController(_weatherLogger, CreateContextFactory(), _messageBusMock.Object);
+        var cf = CreateContextFactory();
+        using var db = cf.CreateDbContext();
+        var repo = new WeatherReportRepository(_weatherRepoLogger, db);
+
+        var controller = new WeatherController(_weatherLogger, CreateContextFactory(), _messageBusMock.Object, db, repo);
         (await controller.GetCurrent()).Should().BeOfType<NotFoundResult>();
     }
 
@@ -48,7 +53,9 @@ public sealed class WeatherControllerTests
         });
         await context.SaveChangesAsync();
 
-        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object);
+        var repo = new WeatherReportRepository(_weatherRepoLogger, context);
+
+        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object, context, repo);
 
         var result = await controller.GetCurrent();
         result.Should().BeOfType<OkObjectResult>();
@@ -61,8 +68,9 @@ public sealed class WeatherControllerTests
     {
         var cf = CreateContextFactory();
         using var context = cf.CreateDbContext();
+        var repo = new WeatherReportRepository(_weatherRepoLogger, context);
 
-        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object);
+        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object, context, repo);
 
         var timestamp = DateTime.UtcNow;
         var weather = new WeatherReport
@@ -78,12 +86,6 @@ public sealed class WeatherControllerTests
 
         var response = await controller.PostWeather("current", weather);
         response.Should().NotBeNull();
-
-        var r = response as ObjectResult;
-        r!.StatusCode.Should().Be(201);
-
-        var w = await context.WeatherCaches.SingleAsync(w => w.Timestamp == timestamp);
-        w.Timestamp.Should().Be(timestamp);
-        w.Name.Should().Be("current");
+        response.Should().BeOfType<OkResult>();
     }
 }
