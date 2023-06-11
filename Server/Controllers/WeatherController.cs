@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Events;
@@ -13,43 +13,28 @@ namespace SmartHomeWWW.Server.Controllers;
 [ApiController]
 public class WeatherController : ControllerBase
 {
-    public WeatherController(ILogger<WeatherController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IMessageBus bus)
+    public WeatherController(ILogger<WeatherController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IMessageBus bus, SmartHomeDbContext db,
+        IWeatherReportRepository weatherReportRepository)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _bus = bus;
+        _db = db;
+        _weatherReportRepository = weatherReportRepository;
     }
-
-    private static readonly TimeSpan ExpireTime = TimeSpan.FromDays(1);
 
     private readonly ILogger<WeatherController> _logger;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
     private readonly IMessageBus _bus;
+    private readonly SmartHomeDbContext _db;
+    private readonly IWeatherReportRepository _weatherReportRepository;
 
     [HttpGet("current")]
     public async Task<IActionResult> GetCurrent(long after = 0)
     {
         var afterDt = DateTimeOffset.FromUnixTimeSeconds(after).DateTime;
-
-        using var db = _dbContextFactory.CreateDbContext();
-        var current = await db.WeatherCaches
-            .Where(w => w.Timestamp > afterDt && w.Name == "current")
-            .OrderByDescending(w => w.Timestamp)
-            .FirstOrDefaultAsync();
-
-        if (current is null)
-        {
-            return NotFound();
-        }
-
-        var report = JsonSerializer.Deserialize<WeatherReport?>(current.Data);
-        if (report is null)
-        {
-            _logger.LogWarning("Could not parse weather data id={Id}", current.Id);
-            return NoContent();
-        }
-
-        return Ok(report.Value);
+        var report = await _weatherReportRepository.GetCurrentWeatherReport(afterDt);
+        return report is null ? NotFound() : Ok(report.Value);
     }
 
     [HttpGet("{id}")]
@@ -76,36 +61,12 @@ public class WeatherController : ControllerBase
     public async Task<IActionResult> PostWeather(string type, [FromBody] WeatherReport value)
     {
         _logger.LogInformation("Received new weather data");
-        var timestamp = value.Current.Timestamp;
 
-        using var db = _dbContextFactory.CreateDbContext();
+        await _weatherReportRepository.SaveWeatherReport(value, type);
+        await _db.SaveChangesAsync();
 
-        var weather = await db.WeatherCaches.FirstOrDefaultAsync(w => w.Name == type && w.Timestamp == timestamp);
-        if (weather is null)
-        {
-            weather = new WeatherCache()
-            {
-                Id = Guid.NewGuid(),
-                Data = JsonSerializer.Serialize(value),
-                Timestamp = timestamp,
-                Expires = timestamp + ExpireTime,
-                Name = type,
-            };
-            db.WeatherCaches.Add(weather);
-        }
-        else
-        {
-            weather.Data = JsonSerializer.Serialize(value);
-            db.WeatherCaches.Update(weather);
-        }
+        _bus.Publish(new WeatherUpdatedEvent { Type = type, Weather = value });
 
-        var expired = db.WeatherCaches.Where(w => w.Expires <= DateTime.UtcNow);
-        db.WeatherCaches.RemoveRange(expired);
-
-        await db.SaveChangesAsync();
-
-        _bus.Publish(new WeatherUpdatedEvent { Type = weather.Name, Weather = value });
-
-        return CreatedAtAction(nameof(GetWeather), new { id = weather.Id }, weather);
+        return Ok();
     }
 }

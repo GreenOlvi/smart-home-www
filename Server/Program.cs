@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
+using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Config;
@@ -15,10 +16,12 @@ using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Mqtt;
 using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Relays.Tasmota;
+using SmartHomeWWW.Server.Repositories;
 using SmartHomeWWW.Server.Sensors;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Telegram.Authorisation;
 using SmartHomeWWW.Server.Watchdog;
+using SmartHomeWWW.Server.Weather;
 using System.IO.Abstractions;
 
 namespace SmartHomeWWW.Server;
@@ -129,6 +132,8 @@ internal static class Program
         builder.Services.AddTransient<WeatherAdapterJob>();
         builder.Services.AddTransient<WatchdogJob>();
         builder.Services.AddTransient<SensorMonitorJob>();
+
+        builder.Services.AddScoped<IWeatherReportRepository, WeatherReportRepository>();
 
         builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
 

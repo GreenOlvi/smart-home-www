@@ -2,6 +2,7 @@
 using SmartHomeWWW.Server.Sensors;
 using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Watchdog;
+using SmartHomeWWW.Server.Weather;
 
 namespace SmartHomeWWW.Server;
 
@@ -11,13 +12,15 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
     {
         _logger = logger;
 
+        _scope = sp.CreateScope();
+
         _jobs = new ()
         {
             sp.GetRequiredService<MqttTasmotaAdapter>(),
             sp.GetRequiredService<TasmotaRelayHubAdapterJob>(),
             sp.GetRequiredService<TelegramBotJob>(),
             sp.GetRequiredService<TelegramLogForwarder>(),
-            sp.GetRequiredService<WeatherAdapterJob>(),
+            _scope.ServiceProvider.GetRequiredService<WeatherAdapterJob>(),
             sp.GetRequiredService<WatchdogJob>(),
             sp.GetRequiredService<SensorMonitorJob>(),
         };
@@ -25,6 +28,7 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
 
     private readonly ILogger<Orchestrator> _logger;
     private readonly List<IOrchestratorJob> _jobs;
+    private readonly IServiceScope _scope;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -44,5 +48,6 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
         {
             await job.DisposeAsync();
         }
+        _scope.Dispose();
     }
 }

@@ -1,29 +1,37 @@
 ﻿using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+using SmartHomeWWW.Core.Domain.Repositories;
+using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
+using System.Text.Json;
 using Telegram.Bot.Types.Enums;
 
-namespace SmartHomeWWW.Server;
+namespace SmartHomeWWW.Server.Weather;
 
-public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<WeatherUpdatedEvent>
+public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<WeatherUpdatedEvent>, IMessageHandler<MqttMessageReceivedEvent>
 {
     private readonly ILogger<WeatherAdapterJob> _logger;
     private readonly IMessageBus _bus;
     private readonly IHubConnection _hubConnection;
     private readonly TelegramConfig _telegramConfig;
     private readonly IKeyValueStore _cache;
+    private readonly IWeatherReportRepository _weatherReportRepository;
+    private readonly SmartHomeDbContext _db;
 
-    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, TelegramConfig telegramConfig, IKeyValueStore cache)
+    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, TelegramConfig telegramConfig,
+        IKeyValueStore cache, IWeatherReportRepository weatherReportRepository, SmartHomeDbContext db)
     {
         _logger = logger;
         _bus = bus;
         _hubConnection = hubConnection;
         _telegramConfig = telegramConfig;
         _cache = cache;
+        _weatherReportRepository = weatherReportRepository;
+        _db = db;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
@@ -65,13 +73,41 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
 
     public Task Start(CancellationToken cancellationToken)
     {
-        _bus.Subscribe(this);
+        _bus.Subscribe<WeatherUpdatedEvent>(this);
+        _bus.Subscribe<MqttMessageReceivedEvent>(this);
+        _bus.Publish(new MqttSubscribeToTopicCommand { Topic = WeatherTopic });
         return Task.CompletedTask;
     }
 
     public Task Stop(CancellationToken cancellationToken)
     {
-        _bus.Unsubscribe(this);
+        _bus.Unsubscribe<WeatherUpdatedEvent>(this);
+        _bus.Unsubscribe<MqttMessageReceivedEvent>(this);
         return Task.CompletedTask;
+    }
+
+    private const string WeatherTopic = "env/test/weather";
+
+    public async Task Handle(MqttMessageReceivedEvent message)
+    {
+        if (message.Topic != WeatherTopic)
+        {
+            return;
+        }
+
+        var weather = JsonSerializer.Deserialize<WeatherReport?>(message.Payload, new JsonSerializerOptions { PropertyNameCaseInsensitive= true });
+        if (weather is null)
+        {
+            _logger.LogWarning("Could not parse weather data");
+            _logger.LogDebug("Payload: {Payload}", message.Payload);
+            return;
+        }
+
+        _logger.LogInformation("Received new weather data");
+
+        await _weatherReportRepository.SaveWeatherReport(weather.Value);
+        await _db.SaveChangesAsync();
+
+        _bus.Publish(new WeatherUpdatedEvent { Type = "current", Weather = weather.Value });
     }
 }
