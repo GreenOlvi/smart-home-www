@@ -1,6 +1,5 @@
 ﻿using SmartHomeWWW.Server.Relays.Tasmota;
 using SmartHomeWWW.Server.Sensors;
-using SmartHomeWWW.Server.Telegram;
 using SmartHomeWWW.Server.Watchdog;
 using SmartHomeWWW.Server.Weather;
 
@@ -18,8 +17,6 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
         {
             sp.GetRequiredService<MqttTasmotaAdapter>(),
             sp.GetRequiredService<TasmotaRelayHubAdapterJob>(),
-            sp.GetRequiredService<TelegramBotJob>(),
-            sp.GetRequiredService<TelegramLogForwarder>(),
             _scope.ServiceProvider.GetRequiredService<WeatherAdapterJob>(),
             sp.GetRequiredService<WatchdogJob>(),
             sp.GetRequiredService<SensorMonitorJob>(),

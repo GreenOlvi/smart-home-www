@@ -1,4 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Messages.Commands;
+﻿using SmartHomeWWW.Core.MessageBus;
+
+namespace SmartHomeWWW.Server.Messages.Commands;
 
 public record MqttSubscribeToTopicCommand : IMessage
 {

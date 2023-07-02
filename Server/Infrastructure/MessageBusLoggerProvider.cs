@@ -1,5 +1,5 @@
-﻿using SmartHomeWWW.Server.Messages;
-using SmartHomeWWW.Server.Messages.Events;
+﻿using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Core.MessageBus.Events;
 
 namespace SmartHomeWWW.Server.Infrastructure;
 

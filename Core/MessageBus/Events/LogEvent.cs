@@ -1,4 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Messages.Events;
+﻿using Microsoft.Extensions.Logging;
+
+namespace SmartHomeWWW.Core.MessageBus.Events;
 
 public record LogEvent : IMessage
 {

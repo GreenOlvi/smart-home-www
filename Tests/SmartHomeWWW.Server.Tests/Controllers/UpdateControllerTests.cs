@@ -1,7 +1,6 @@
 ﻿using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Controllers;
-using SmartHomeWWW.Server.Hubs;
 using System.Collections;
 
 namespace SmartHomeWWW.Server.Tests.Controllers;

@@ -1,4 +1,4 @@
-﻿namespace SmartHomeWWW.Server.Telegram.Authorisation;
+﻿namespace SmartHomeWWW.Server.TelegramBotModule.Authorisation;
 
 public enum AuthorizedActions
 {

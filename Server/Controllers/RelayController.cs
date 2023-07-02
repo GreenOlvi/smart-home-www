@@ -3,9 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Core.ViewModel;
-using SmartHomeWWW.Server.Messages;
-using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Controllers;
 

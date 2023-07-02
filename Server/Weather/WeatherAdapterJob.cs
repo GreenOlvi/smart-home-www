@@ -1,12 +1,13 @@
 ﻿using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server.Config;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;
-using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
+using SmartHomeWWW.Server.TelegramBotModule;
+using SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
 using System.Text.Json;
 using Telegram.Bot.Types.Enums;
 

@@ -1,4 +1,4 @@
-﻿using SmartHomeWWW.Server.Messages;
+﻿using SmartHomeWWW.Core.MessageBus;
 
 namespace SmartHomeWWW.Server.Watchdog;
 
