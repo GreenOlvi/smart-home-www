@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server.Config;
-using SmartHomeWWW.Server.Messages;
-using SmartHomeWWW.Server.Messages.Commands;
-using SmartHomeWWW.Server.Messages.Events;
+using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
+using SmartHomeWWW.Server.TelegramBotModule.Messages.Events;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBotModule;
 
 public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<TelegramSendTextMessageCommand>,
@@ -47,7 +48,7 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
         {
             await LoadAllowedUsers();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading allowed users");
         }

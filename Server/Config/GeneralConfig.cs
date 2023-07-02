@@ -1,4 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Config;
+﻿using SmartHomeWWW.Server.TelegramBotModule;
+
+namespace SmartHomeWWW.Server.Config;
 
 public record GeneralConfig
 {

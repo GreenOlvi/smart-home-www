@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server.Config;
-using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Server.TelegramBotModule.Authorisation;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBotModule;
 
 public static class ServiceCollectionExtensions
 {
@@ -24,4 +26,14 @@ public static class ServiceCollectionExtensions
                 sp.GetRequiredService<TelegramConfig>(),
                 sp.GetRequiredService<IMessageBus>(),
                 sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>()));
+
+    public static IServiceCollection AddTelegramCommandHandler(this IServiceCollection services) =>
+        services.AddTransient<IAuthorisationService, AuthorisationService>()
+            .AddHostedService<TelegramBotCommandHandlerJob>();
+
+    public static IServiceCollection AddTelegramLogForwarder(this IServiceCollection services) =>
+        services.AddHostedService(sp =>
+            new TelegramLogForwarder(
+                sp.GetRequiredService<IMessageBus>(),
+                sp.GetRequiredService<TelegramConfig>().OwnerId));
 }

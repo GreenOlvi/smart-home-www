@@ -1,12 +1,13 @@
-﻿using System.Net;
-using SmartHomeWWW.Server.Messages;
-using SmartHomeWWW.Server.Messages.Commands;
-using SmartHomeWWW.Server.Messages.Events;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Core.MessageBus.Events;
+using SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
 using Telegram.Bot.Types.Enums;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public sealed class TelegramLogForwarder : IOrchestratorJob, IMessageHandler<LogEvent>
+public sealed class TelegramLogForwarder : IHostedService, IMessageHandler<LogEvent>
 {
     private const string _defaultCategory = "default";
 
@@ -15,7 +16,7 @@ public sealed class TelegramLogForwarder : IOrchestratorJob, IMessageHandler<Log
 
     private readonly Dictionary<string, LogLevel> Levels = new()
     {
-        {_defaultCategory, LogLevel.Warning },
+        { _defaultCategory, LogLevel.Warning },
     };
 
     public TelegramLogForwarder(IMessageBus messageBus, long ownerId)
@@ -24,13 +25,13 @@ public sealed class TelegramLogForwarder : IOrchestratorJob, IMessageHandler<Log
         _ownerId = ownerId;
     }
 
-    public Task Start(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _messageBus.Subscribe(this);
         return Task.CompletedTask;
     }
 
-    public Task Stop(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         _messageBus.Unsubscribe(this);
         return Task.CompletedTask;
@@ -58,7 +59,7 @@ public sealed class TelegramLogForwarder : IOrchestratorJob, IMessageHandler<Log
         ParseMode = ParseMode.Html,
     };
 
-    private static Dictionary<LogLevel, string> LogIcons = new()
+    private static readonly Dictionary<LogLevel, string> LogIcons = new()
     {
         { LogLevel.Trace, "🔍" },
         { LogLevel.Debug, "🪲" },
@@ -66,6 +67,4 @@ public sealed class TelegramLogForwarder : IOrchestratorJob, IMessageHandler<Log
         { LogLevel.Warning, "⚠️" },
         { LogLevel.Error, "🛑" },
     };
-
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

@@ -1,4 +1,4 @@
-﻿namespace SmartHomeWWW.Server.Messages;
+﻿namespace SmartHomeWWW.Core.MessageBus;
 
 public interface IMessageHandler<T> where T : IMessage
 {

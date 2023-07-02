@@ -1,4 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Messages.Events;
+﻿using SmartHomeWWW.Core.MessageBus;
+
+namespace SmartHomeWWW.Server.Messages.Events;
 
 public readonly record struct TasmotaPropertyUpdateEvent : IMessage
 {

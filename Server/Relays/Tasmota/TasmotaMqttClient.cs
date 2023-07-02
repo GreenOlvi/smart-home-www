@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using CSharpFunctionalExtensions;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
-using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Messages.Commands;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;

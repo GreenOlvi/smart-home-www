@@ -1,6 +1,7 @@
-﻿using Telegram.Bot.Types.Enums;
+﻿using SmartHomeWWW.Core.MessageBus;
+using Telegram.Bot.Types.Enums;
 
-namespace SmartHomeWWW.Server.Messages.Commands;
+namespace SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
 
 public record TelegramSendTextMessageCommand : IMessage
 {

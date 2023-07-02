@@ -1,29 +1,30 @@
-﻿using SmartHomeWWW.Server.Messages;
-using SmartHomeWWW.Server.Messages.Commands;
-using SmartHomeWWW.Server.Messages.Events;
-using SmartHomeWWW.Server.Telegram.Authorisation;
-using SmartHomeWWW.Server.Telegram.BotCommands;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Server.TelegramBotModule.Authorisation;
+using SmartHomeWWW.Server.TelegramBotModule.BotCommands;
+using SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
+using SmartHomeWWW.Server.TelegramBotModule.Messages.Events;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public sealed class TelegramBotJob : IOrchestratorJob,
-    IMessageHandler<TelegramMessageReceivedEvent>
+public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandler<TelegramMessageReceivedEvent>
 {
-    public TelegramBotJob(ILogger<TelegramBotJob> logger, IMessageBus bus, IAuthorisationService authorisationService, IServiceProvider serviceProvider)
+    public TelegramBotCommandHandlerJob(ILogger<TelegramBotCommandHandlerJob> logger, IMessageBus bus, IAuthorisationService authorisationService, IServiceProvider serviceProvider)
     {
         _logger = logger;
         _bus = bus;
         _authService = authorisationService;
-        _commandRegistry = new (serviceProvider);
+        _commandRegistry = new(serviceProvider);
         RegisterCommands();
     }
 
-    private readonly ILogger<TelegramBotJob> _logger;
+    private readonly ILogger<TelegramBotCommandHandlerJob> _logger;
     private readonly IMessageBus _bus;
     private readonly CommandRegistry _commandRegistry;
     private readonly IAuthorisationService _authService;
-    private readonly CancellationTokenSource _cancellationTokenSource = new ();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private void RegisterCommands()
     {
@@ -32,16 +33,14 @@ public sealed class TelegramBotJob : IOrchestratorJob,
         _commandRegistry.AddCommand<UsersCommand>("users");
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
-
-    public Task Start(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogDebug("Starting TelegramBotJob");
         _bus.Subscribe(this);
         return Task.CompletedTask;
     }
 
-    public Task Stop(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogWarning("Stopping TelegramBotJob");
         _bus.Unsubscribe(this);

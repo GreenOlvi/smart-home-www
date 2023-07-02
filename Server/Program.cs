@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 using SmartHomeWWW.Server.HealthChecks;
@@ -18,8 +19,7 @@ using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Relays.Tasmota;
 using SmartHomeWWW.Server.Repositories;
 using SmartHomeWWW.Server.Sensors;
-using SmartHomeWWW.Server.Telegram;
-using SmartHomeWWW.Server.Telegram.Authorisation;
+using SmartHomeWWW.Server.TelegramBotModule;
 using SmartHomeWWW.Server.Watchdog;
 using SmartHomeWWW.Server.Weather;
 using System.IO.Abstractions;
@@ -118,7 +118,11 @@ internal static class Program
         AddHttpClients(builder);
 
         builder.Services.AddMqttClientHostedService();
-        builder.Services.AddTelegramBotHostedService();
+
+        builder.Services
+            .AddTelegramBotHostedService()
+            .AddTelegramCommandHandler()
+            .AddTelegramLogForwarder();
 
         builder.Services.AddSingleton<IFileSystem, FileSystem>();
         builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();
@@ -126,8 +130,6 @@ internal static class Program
         builder.Services.AddHostedService<Orchestrator>();
         builder.Services.AddTransient<MqttTasmotaAdapter>();
         builder.Services.AddTransient<TasmotaDeviceUpdaterService>();
-        builder.Services.AddTransient<TelegramBotJob>();
-        builder.Services.AddTransient(sp => new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), sp.GetRequiredService<TelegramConfig>().OwnerId));
         builder.Services.AddTransient<TasmotaRelayHubAdapterJob>();
         builder.Services.AddTransient<WeatherAdapterJob>();
         builder.Services.AddTransient<WatchdogJob>();
@@ -136,8 +138,6 @@ internal static class Program
         builder.Services.AddScoped<IWeatherReportRepository, WeatherReportRepository>();
 
         builder.Services.AddSingleton<IKeyValueStore, DbKeyValueStore>();
-
-        builder.Services.AddTransient<IAuthorisationService, AuthorisationService>();
 
         AddHealthChecks(builder);
     }

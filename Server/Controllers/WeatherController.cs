@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Messages.Events;
 
 namespace SmartHomeWWW.Server.Controllers;

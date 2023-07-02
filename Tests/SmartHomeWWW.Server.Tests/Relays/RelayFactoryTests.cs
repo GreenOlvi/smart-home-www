@@ -1,5 +1,5 @@
 ﻿using SmartHomeWWW.Core.Domain.Entities;
-using SmartHomeWWW.Server.Messages;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Relays;
 using SmartHomeWWW.Server.Relays.Tasmota;
 

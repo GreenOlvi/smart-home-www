@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server.Messages;
-using SmartHomeWWW.Server.Messages.Commands;
+using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram.BotCommands;
+namespace SmartHomeWWW.Server.TelegramBotModule.BotCommands;
 
 public class UsersCommand : ITelegramBotCommand
 {

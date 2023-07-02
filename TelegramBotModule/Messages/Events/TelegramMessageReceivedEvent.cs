@@ -1,6 +1,7 @@
-﻿using Telegram.Bot.Types;
+﻿using SmartHomeWWW.Core.MessageBus;
+using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Messages.Events;
+namespace SmartHomeWWW.Server.TelegramBotModule.Messages.Events;
 
 public record TelegramMessageReceivedEvent : IMessage
 {

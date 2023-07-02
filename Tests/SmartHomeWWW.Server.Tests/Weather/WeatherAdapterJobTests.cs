@@ -2,12 +2,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 using SmartHomeWWW.Core.Domain.Repositories;
-using SmartHomeWWW.Server.Config;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;
 using SmartHomeWWW.Server.Messages;
 using SmartHomeWWW.Server.Messages.Events;
 using SmartHomeWWW.Server.Repositories;
+using SmartHomeWWW.Server.TelegramBotModule;
 using SmartHomeWWW.Server.Weather;
 using System;
 using System.Collections.Generic;

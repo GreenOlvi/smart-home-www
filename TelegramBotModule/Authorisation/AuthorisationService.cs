@@ -4,7 +4,7 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram.Authorisation;
+namespace SmartHomeWWW.Server.TelegramBotModule.Authorisation;
 
 public class AuthorisationService : IAuthorisationService
 {

@@ -1,6 +1,7 @@
-﻿using SmartHomeWWW.Server.Telegram.BotCommands;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SmartHomeWWW.Server.TelegramBotModule.BotCommands;
 
-namespace SmartHomeWWW.Server.Telegram;
+namespace SmartHomeWWW.Server.TelegramBotModule;
 
 public class CommandRegistry
 {
@@ -10,7 +11,7 @@ public class CommandRegistry
     }
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, Type> _commands = new ();
+    private readonly Dictionary<string, Type> _commands = new();
 
     public void AddCommand<T>(string keyword) where T : ITelegramBotCommand =>
         _commands.Add(keyword, typeof(T));

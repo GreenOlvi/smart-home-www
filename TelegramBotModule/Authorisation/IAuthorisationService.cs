@@ -2,7 +2,7 @@
 using SmartHomeWWW.Core.Domain.Entities;
 using Telegram.Bot.Types;
 
-namespace SmartHomeWWW.Server.Telegram.Authorisation;
+namespace SmartHomeWWW.Server.TelegramBotModule.Authorisation;
 
 public interface IAuthorisationService
 {
