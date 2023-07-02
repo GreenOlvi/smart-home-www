@@ -2,6 +2,7 @@
 
 public record TelegramConfig
 {
-    public string ApiKey { get; set; } = string.Empty;
-    public long OwnerId { get; set; }
+    public string ApiKey { get; init; } = null!;
+    public long OwnerId { get; init; }
+    public string? HttpClientName { get; init; }
 }

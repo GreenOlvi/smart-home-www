@@ -3,7 +3,7 @@ using SmartHomeWWW.Server.TelegramBotModule.BotCommands;
 
 namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public class CommandRegistry
+public sealed class CommandRegistry
 {
     public CommandRegistry(IServiceProvider serviceProvider)
     {

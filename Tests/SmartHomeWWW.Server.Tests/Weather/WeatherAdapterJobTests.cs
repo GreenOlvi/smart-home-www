@@ -47,8 +47,6 @@ public class WeatherAdapterJobTests
     [Test]
     public async Task WeatherReportIsStoredInCacheTest()
     {
-        var bus = _sp.GetRequiredService<IMessageBus>();
-
         var repo = _sp.GetRequiredService<IWeatherReportRepository>();
         (await repo.GetCurrentWeatherReport()).Should().BeNull();
 

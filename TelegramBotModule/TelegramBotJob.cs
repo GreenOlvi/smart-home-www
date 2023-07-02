@@ -9,7 +9,7 @@ using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandler<TelegramMessageReceivedEvent>
+public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandler<TelegramMessageReceivedEvent>, IDisposable
 {
     public TelegramBotCommandHandlerJob(ILogger<TelegramBotCommandHandlerJob> logger, IMessageBus bus, IAuthorisationService authorisationService, IServiceProvider serviceProvider)
     {
@@ -144,5 +144,10 @@ public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandl
 
         _logger.LogError("Could not create instance of '{cmd}' for user '{user}'", cmd, message.From?.ToString());
         return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Dispose();
     }
 }

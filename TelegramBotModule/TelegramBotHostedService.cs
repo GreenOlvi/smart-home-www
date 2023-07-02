@@ -15,21 +15,29 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<TelegramSendTextMessageCommand>,
     IMessageHandler<TelegramRefreshAllowedUsersCommand>
 {
-    public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, HttpClient httpClient, TelegramConfig config,
+    public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, IHttpClientFactory httpClientFactory, TelegramConfig config,
         IMessageBus messageBus, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
     {
         _logger = logger;
         _config = config;
         _messageBus = messageBus;
-        _bot = new TelegramBotClient(_config.ApiKey, httpClient);
+        _httpClientFactory = httpClientFactory;
         _dbContextFactory = dbContextFactory;
+
+        var httpClient =  _config.HttpClientName is null
+            ? _httpClientFactory.CreateClient()
+            : _httpClientFactory.CreateClient(_config.HttpClientName);
+
+        _bot = new TelegramBotClient(_config.ApiKey, httpClient);
     }
 
     private readonly ILogger<TelegramBotHostedService> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly TelegramConfig _config;
-    private readonly TelegramBotClient _bot;
     private readonly IMessageBus _messageBus;
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+
+    private readonly ITelegramBotClient _bot;
     private readonly HashSet<long> _allowedUsers = new();
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
