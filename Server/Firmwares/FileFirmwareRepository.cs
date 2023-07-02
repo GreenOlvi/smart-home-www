@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using System.Text.RegularExpressions;
-using SmartHomeWWW.Core.Domain;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Utils;
 using SmartHomeWWW.Server.Config;

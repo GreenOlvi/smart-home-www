@@ -5,7 +5,6 @@ using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Core.ViewModel;
-using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Controllers;
 

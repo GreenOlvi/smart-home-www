@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using SmartHomeWWW.Core.Infrastructure;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.TelegramBotModule.Authorisation;
 

@@ -4,7 +4,6 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.ViewModel;
-using SmartHomeWWW.Server.Hubs;
 using System.Text;
 
 namespace SmartHomeWWW.Server.Controllers;
