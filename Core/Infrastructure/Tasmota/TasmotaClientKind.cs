@@ -2,6 +2,7 @@
 
 public enum TasmotaClientKind
 {
+    Unknown = 0,
     Http,
     Mqtt,
 }

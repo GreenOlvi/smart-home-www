@@ -16,7 +16,7 @@ public class RelayFactoryTests
             Id = Guid.Parse("3be25090-efe0-4b4e-a0d1-4218733ceecc"),
             Name = "Test relay",
             Type = "Tasmota",
-            ConfigSerialized = @"{""Host"":""relay1.local"",""RelayId"":1}",
+            Config = new { Host = "relay1.local", RelayId = 1 },
         };
 
         var httpFactory = new Mock<IHttpClientFactory>();
@@ -43,7 +43,7 @@ public class RelayFactoryTests
             Id = Guid.Parse("3be25090-efe0-4b4e-a0d1-4218733ceecd"),
             Name = "Test relay",
             Type = "Tasmota",
-            ConfigSerialized = @"{""Kind"":""Mqtt"",""DeviceId"":""tasmota_0A1B2C"",""RelayId"":1}",
+            Config = new { Kind = "Mqtt", DeviceId = "tasmota_0A1B2C", RelayId = 1 },
         };
 
         var httpFactory = new Mock<IHttpClientFactory>();

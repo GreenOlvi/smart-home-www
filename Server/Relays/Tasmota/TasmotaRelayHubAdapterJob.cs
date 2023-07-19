@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
@@ -32,8 +33,7 @@ public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandle
 
         foreach (var relay in db.Relays)
         {
-            var c = ((JsonElement)relay.Config).Deserialize<TasmotaMqttClientConfig>();
-            if (c is null || c.DeviceId == string.Empty)
+            if (RelayEntry.ParseTasmotaConfig(relay.Config) is not TasmotaMqttClientConfig c || c.DeviceId == string.Empty)
             {
                 continue;
             }

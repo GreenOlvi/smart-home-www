@@ -15,4 +15,12 @@ public sealed class SmartHomeDbContext : DbContext
     public DbSet<SettingEntry> Settings { get; init; } = null!;
     public DbSet<TelegramUser> TelegramUsers { get; init; } = null!;
     public DbSet<WeatherCache> WeatherCaches { get; init; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder
+            .Entity<RelayEntry>()
+            .Property(e => e.Config)
+            .HasConversion<JsonConverter<object>>();
+    }
 }

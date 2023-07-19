@@ -19,14 +19,14 @@ public class TasmotaRelayHubAdapterJobTests
         db.Relays.Add(new RelayEntry
         {
             Id = relayId,
-            ConfigSerialized = """{"Kind":"Mqtt","DeviceId":"tas-1234AB","RelayId":1}""",
+            Config = new { Kind = "Mqtt", DeviceId = "tas-1234AB", RelayId = 1 },
             Name = "test relay",
             Type = "Tasmota",
         });
         db.Relays.Add(new RelayEntry
         {
             Id = Guid.NewGuid(),
-            ConfigSerialized = """{"Kind":"Http","Host":"192.168.1.10","RelayId":1}""",
+            Config = new { Kind = "Http", Host = "192.168.1.10", RelayId = 1 },
             Name = "test http relay",
             Type = "Tasmota",
         });
@@ -70,14 +70,14 @@ public class TasmotaRelayHubAdapterJobTests
         db.Relays.Add(new RelayEntry
         {
             Id = relay1Id,
-            ConfigSerialized = """{"Kind":"Mqtt","DeviceId":"tas-1234AB","RelayId":1}""",
+            Config = new { Kind = "Mqtt", DeviceId = "tas-1234AB", RelayId = 1 },
             Name = "test relay-1",
             Type = "Tasmota",
         });
         db.Relays.Add(new RelayEntry
         {
             Id = relay2Id,
-            ConfigSerialized = """{"Kind":"Mqtt","DeviceId":"tas-1234AB","RelayId":2}""",
+            Config = new { Kind = "Mqtt", DeviceId = "tas-1234AB", RelayId = 2 },
             Name = "test relay-2",
             Type = "Tasmota",
         });
