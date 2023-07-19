@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics;
-using SmartHomeWWW.Core.Infrastructure.Tasmota;
+﻿using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
@@ -28,6 +27,11 @@ public record RelayEntry
             return c;
         }
 
+        if (config is JsonElement e)
+        {
+            return ParseTasmotaConfig(e);
+        }
+
         var configType = config.GetType();
         var kindValue = configType.GetProperty("Kind")?.GetValue(config) as string;
 
@@ -48,6 +52,37 @@ public record RelayEntry
             {
                 DeviceId = configType.GetProperty("DeviceId")?.GetValue(config) as string ?? string.Empty,
                 RelayId = (int)(configType.GetProperty("RelayId")?.GetValue(config) ?? 1),
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(config)),
+        };
+    }
+
+    private static ITasmotaClientConfig ParseTasmotaConfig(JsonElement config)
+    {
+        var kind = TasmotaClientKind.Http;
+        if (config.TryGetProperty(nameof(Kind), out var kindProperty))
+        {
+            if (!Enum.TryParse(kindProperty.GetString(), out kind))
+            {
+                throw new InvalidOperationException("Could not parse tasmota config");
+            }
+        }
+
+        return kind switch
+        {
+            TasmotaClientKind.Http => new TasmotaHttpClientConfig
+            {
+                Host = config.GetProperty("Host").GetString() ?? string.Empty,
+                RelayId = config.TryGetProperty("RelayId", out var idProp)
+                    ? idProp.GetInt32()
+                    : 1,
+            },
+            TasmotaClientKind.Mqtt => new TasmotaMqttClientConfig
+            {
+                DeviceId = config.GetProperty("DeviceId").GetString() ?? string.Empty,
+                RelayId = config.TryGetProperty("RelayId", out var idProp)
+                    ? idProp.GetInt32()
+                    : 1,
             },
             _ => throw new ArgumentOutOfRangeException(nameof(config)),
         };

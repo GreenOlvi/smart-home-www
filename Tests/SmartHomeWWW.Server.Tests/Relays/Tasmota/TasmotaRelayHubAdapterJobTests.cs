@@ -4,6 +4,7 @@ using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Server.Relays.Tasmota;
 using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Core.Infrastructure.Tasmota;
 
 namespace SmartHomeWWW.Server.Tests.Relays.Tasmota;
 
@@ -19,14 +20,14 @@ public class TasmotaRelayHubAdapterJobTests
         db.Relays.Add(new RelayEntry
         {
             Id = relayId,
-            Config = new { Kind = "Mqtt", DeviceId = "tas-1234AB", RelayId = 1 },
+            Config = new TasmotaMqttClientConfig { DeviceId = "tas-1234AB", RelayId = 1 },
             Name = "test relay",
             Type = "Tasmota",
         });
         db.Relays.Add(new RelayEntry
         {
             Id = Guid.NewGuid(),
-            Config = new { Kind = "Http", Host = "192.168.1.10", RelayId = 1 },
+            Config = new TasmotaHttpClientConfig { Host = "192.168.1.10", RelayId = 1 },
             Name = "test http relay",
             Type = "Tasmota",
         });
@@ -70,14 +71,14 @@ public class TasmotaRelayHubAdapterJobTests
         db.Relays.Add(new RelayEntry
         {
             Id = relay1Id,
-            Config = new { Kind = "Mqtt", DeviceId = "tas-1234AB", RelayId = 1 },
+            Config = new TasmotaMqttClientConfig { DeviceId = "tas-1234AB", RelayId = 1 },
             Name = "test relay-1",
             Type = "Tasmota",
         });
         db.Relays.Add(new RelayEntry
         {
             Id = relay2Id,
-            Config = new { Kind = "Mqtt", DeviceId = "tas-1234AB", RelayId = 2 },
+            Config = new TasmotaMqttClientConfig {  DeviceId = "tas-1234AB", RelayId = 2 },
             Name = "test relay-2",
             Type = "Tasmota",
         });
