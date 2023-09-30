@@ -9,7 +9,9 @@ WORKDIR /src
 COPY ["Server/SmartHomeWWW.Server.csproj", "Server/"]
 COPY ["Core/SmartHomeWWW.Core.csproj", "Core/"]
 COPY ["Client/SmartHomeWWW.Client.csproj", "Client/"]
+COPY ["TelegramBotModule/TelegramBotModule.csproj", "TelegramBotModule/"]
 RUN dotnet restore "Server/SmartHomeWWW.Server.csproj"
+
 COPY . .
 WORKDIR "/src/Server"
 RUN dotnet build "SmartHomeWWW.Server.csproj" -c Release -o /app/build
