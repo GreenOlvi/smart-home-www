@@ -1,4 +1,5 @@
-﻿using SmartHomeWWW.Core.Domain.Repositories;
+﻿using NSubstitute;
+using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;
@@ -21,8 +22,8 @@ public class WeatherAdapterJobTests
         var sc = new ServiceCollection();
 
         sc.AddScoped<IMessageBus, BasicMessageBus>();
-        sc.AddSingleton(sp => Mock.Of<IHubConnection>());
-        sc.AddSingleton(sp => Mock.Of<IKeyValueStore>());
+        sc.AddSingleton(sp => Substitute.For<IHubConnection>());
+        sc.AddSingleton(sp => Substitute.For<IKeyValueStore>());
         sc.AddSingleton<TelegramConfig>();
         sc.AddLogging(o =>
         {

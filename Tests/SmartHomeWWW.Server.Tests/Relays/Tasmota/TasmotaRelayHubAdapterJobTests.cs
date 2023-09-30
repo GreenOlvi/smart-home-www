@@ -32,12 +32,12 @@ public class TasmotaRelayHubAdapterJobTests
         });
         await db.SaveChangesAsync();
 
-        var bus = new Mock<IMessageBus>();
-        var dbContextFactory = new Mock<IDbContextFactory<SmartHomeDbContext>>();
-        dbContextFactory.Setup(f => f.CreateDbContextAsync(CancellationToken.None).Result).Returns(db);
-        var hub = new Mock<IHubConnection>();
+        var bus = Substitute.For<IMessageBus>();
+        var dbContextFactory = Substitute.For<IDbContextFactory<SmartHomeDbContext>>();
+        dbContextFactory.CreateDbContextAsync(CancellationToken.None).Returns(db);
+        var hub = Substitute.For<IHubConnection>();
 
-        var adapter = new TasmotaRelayHubAdapterJob(dbContextFactory.Object, bus.Object, hub.Object);
+        var adapter = new TasmotaRelayHubAdapterJob(dbContextFactory, bus, hub);
         await adapter.Start();
 
         await adapter.Handle(new Messages.Events.TasmotaPropertyUpdateEvent
@@ -47,9 +47,9 @@ public class TasmotaRelayHubAdapterJobTests
             Value = "ON",
         });
 
-        hub.Verify(h => h.SendUpdateRelayState(relayId, RelayState.On, CancellationToken.None), Times.Once());
+        _ = hub.Received().SendUpdateRelayState(relayId, RelayState.On, CancellationToken.None);
 
-        hub.Invocations.Clear();
+        hub.ClearReceivedCalls();
         await adapter.Handle(new Messages.Events.TasmotaPropertyUpdateEvent
         {
             DeviceId = "tas-1234AB",
@@ -57,7 +57,7 @@ public class TasmotaRelayHubAdapterJobTests
             Value = "OFF",
         });
 
-        hub.Verify(h => h.SendUpdateRelayState(relayId, RelayState.Off, CancellationToken.None), Times.Once());
+        _ = hub.Received().SendUpdateRelayState(relayId, RelayState.Off, CancellationToken.None);
     }
 
     [Test]
@@ -83,12 +83,12 @@ public class TasmotaRelayHubAdapterJobTests
         });
         await db.SaveChangesAsync();
 
-        var bus = new Mock<IMessageBus>();
-        var dbContextFactory = new Mock<IDbContextFactory<SmartHomeDbContext>>();
-        dbContextFactory.Setup(f => f.CreateDbContextAsync(CancellationToken.None).Result).Returns(db);
-        var hub = new Mock<IHubConnection>();
+        var bus = Substitute.For<IMessageBus>();
+        var dbContextFactory = Substitute.For<IDbContextFactory<SmartHomeDbContext>>();
+        dbContextFactory.CreateDbContextAsync(CancellationToken.None).Returns(db);
+        var hub = Substitute.For<IHubConnection>();
 
-        var adapter = new TasmotaRelayHubAdapterJob(dbContextFactory.Object, bus.Object, hub.Object);
+        var adapter = new TasmotaRelayHubAdapterJob(dbContextFactory, bus, hub);
         await adapter.Start();
 
         await adapter.Handle(new Messages.Events.TasmotaPropertyUpdateEvent
@@ -98,9 +98,9 @@ public class TasmotaRelayHubAdapterJobTests
             Value = "ON",
         });
 
-        hub.Verify(h => h.SendUpdateRelayState(relay2Id, RelayState.On, CancellationToken.None), Times.Once());
+        _ = hub.Received().SendUpdateRelayState(relay2Id, RelayState.On, CancellationToken.None);
 
-        hub.Invocations.Clear();
+        hub.ClearReceivedCalls();
         await adapter.Handle(new Messages.Events.TasmotaPropertyUpdateEvent
         {
             DeviceId = "tas-1234AB",
@@ -108,9 +108,9 @@ public class TasmotaRelayHubAdapterJobTests
             Value = "OFF",
         });
 
-        hub.Verify(h => h.SendUpdateRelayState(relay1Id, RelayState.Off, CancellationToken.None), Times.Once());
+        _ = hub.Received().SendUpdateRelayState(relay1Id, RelayState.Off, CancellationToken.None);
 
-        hub.Invocations.Clear();
+        hub.ClearReceivedCalls();
         await adapter.Handle(new Messages.Events.TasmotaPropertyUpdateEvent
         {
             DeviceId = "tas-1234AB",
@@ -118,6 +118,6 @@ public class TasmotaRelayHubAdapterJobTests
             Value = "ON",
         });
 
-        hub.Verify(h => h.SendUpdateRelayState(relay1Id, RelayState.On, CancellationToken.None), Times.Once());
+        _ = hub.Received().SendUpdateRelayState(relay1Id, RelayState.On, CancellationToken.None);
     }
 }

@@ -1,4 +1,5 @@
-﻿using SmartHomeWWW.Core.Firmwares;
+﻿using NSubstitute;
+using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Controllers;
 using System.Collections;
@@ -8,7 +9,7 @@ namespace SmartHomeWWW.Server.Tests.Controllers;
 [TestFixture]
 public class UpdateControllerTests
 {
-    private IServiceProvider _sp = new Mock<IServiceProvider>(MockBehavior.Strict).Object;
+    private IServiceProvider _sp = Substitute.For<IServiceProvider>();
     private SmartHomeDbContext? _db;
 
     [SetUp]
@@ -18,10 +19,9 @@ public class UpdateControllerTests
         sc.AddSingleton<ILogger<UpdateController>>(sp => NullLogger<UpdateController>.Instance);
 
         var dbName = Guid.NewGuid().ToString();
-        var contextFactoryMock = new Mock<IDbContextFactory<SmartHomeDbContext>>(MockBehavior.Strict);
-        contextFactoryMock.Setup(factory => factory.CreateDbContext())
-            .Returns(() => CreateInMemoryAsync(dbName).Result);
-        sc.AddSingleton(sp => contextFactoryMock.Object);
+        var contextFactoryMock = Substitute.For<IDbContextFactory<SmartHomeDbContext>>();
+        contextFactoryMock.CreateDbContext().Returns(x => CreateInMemoryAsync(dbName).GetAwaiter().GetResult());
+        sc.AddSingleton(sp => contextFactoryMock);
 
         sc.AddTransient(sp => CreateInMemoryAsync(dbName).Result);
 
@@ -38,12 +38,12 @@ public class UpdateControllerTests
     [Test]
     public async Task UpdateFirmwareDefaultQueryTest()
     {
-        var repo = new Mock<IFirmwareRepository>(MockBehavior.Strict);
+        var repo = Substitute.For<IFirmwareRepository>();
 
         var context = new DefaultHttpContext();
         var controller = new UpdateController(
             _sp.GetRequiredService<ILogger<UpdateController>>(),
-            repo.Object,
+            repo,
             _sp.GetRequiredService<IDbContextFactory<SmartHomeDbContext>>())
         {
             ControllerContext = new ControllerContext()

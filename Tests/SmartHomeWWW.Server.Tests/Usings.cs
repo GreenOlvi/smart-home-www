@@ -7,7 +7,7 @@ global using System.Text.Json;
 global using System.Threading.Tasks;
 global using NUnit.Framework;
 global using FluentAssertions;
-global using Moq;
+global using NSubstitute;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.Extensions.DependencyInjection;

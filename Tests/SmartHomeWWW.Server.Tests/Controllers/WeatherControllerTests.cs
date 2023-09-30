@@ -1,3 +1,4 @@
+using NSubstitute;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.MessageBus;
@@ -10,7 +11,7 @@ public sealed class WeatherControllerTests
 {
     private readonly ILogger<WeatherController> _weatherLogger = NullLogger<WeatherController>.Instance;
     private readonly ILogger<WeatherReportRepository> _weatherRepoLogger = NullLogger<WeatherReportRepository>.Instance;
-    private readonly Mock<IMessageBus> _messageBusMock = new (MockBehavior.Loose);
+    private readonly IMessageBus _messageBusMock = Substitute.For<IMessageBus>();
 
     [Test]
     public async Task GetCurrentWeatherShouldNotCrashWithNoDataTestAsync()
@@ -19,7 +20,7 @@ public sealed class WeatherControllerTests
         using var db = cf.CreateDbContext();
         var repo = new WeatherReportRepository(_weatherRepoLogger, db);
 
-        var controller = new WeatherController(_weatherLogger, CreateContextFactory(), _messageBusMock.Object, db, repo);
+        var controller = new WeatherController(_weatherLogger, CreateContextFactory(), _messageBusMock, db, repo);
         (await controller.GetCurrent()).Should().BeOfType<NotFoundResult>();
     }
 
@@ -55,7 +56,7 @@ public sealed class WeatherControllerTests
 
         var repo = new WeatherReportRepository(_weatherRepoLogger, context);
 
-        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object, context, repo);
+        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock, context, repo);
 
         var result = await controller.GetCurrent();
         result.Should().BeOfType<OkObjectResult>();
@@ -70,7 +71,7 @@ public sealed class WeatherControllerTests
         using var context = cf.CreateDbContext();
         var repo = new WeatherReportRepository(_weatherRepoLogger, context);
 
-        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock.Object, context, repo);
+        var controller = new WeatherController(_weatherLogger, cf, _messageBusMock, context, repo);
 
         var timestamp = DateTime.UtcNow;
         var weather = new WeatherReport

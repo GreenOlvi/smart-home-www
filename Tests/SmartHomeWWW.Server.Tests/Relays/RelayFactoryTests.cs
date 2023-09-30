@@ -19,14 +19,14 @@ public class RelayFactoryTests
             ConfigSerialized = @"{""Host"":""relay1.local"",""RelayId"":1}",
         };
 
-        var httpFactory = new Mock<IHttpClientFactory>();
-        httpFactory.Setup(f => f.CreateClient(TasmotaClientFactory.HttpClientName))
-            .Returns(() => new HttpClient());
+        var httpFactory = Substitute.For<IHttpClientFactory>();
+        httpFactory.CreateClient(TasmotaClientFactory.HttpClientName)
+            .Returns(x => new HttpClient());
 
         var tcf = new TasmotaClientFactory(
             NullLoggerFactory.Instance,
-            httpFactory.Object,
-            new Mock<IMessageBus>().Object);
+            httpFactory,
+            Substitute.For<IMessageBus>());
 
         var factory = new RelayFactory(tcf);
 
@@ -46,14 +46,14 @@ public class RelayFactoryTests
             ConfigSerialized = @"{""Kind"":""Mqtt"",""DeviceId"":""tasmota_0A1B2C"",""RelayId"":1}",
         };
 
-        var httpFactory = new Mock<IHttpClientFactory>();
-        httpFactory.Setup(f => f.CreateClient(TasmotaClientFactory.HttpClientName))
-            .Returns(() => new HttpClient());
+        var httpFactory = Substitute.For<IHttpClientFactory>();
+        httpFactory.CreateClient(TasmotaClientFactory.HttpClientName)
+            .Returns(x => new HttpClient());
 
         var tcf = new TasmotaClientFactory(
             NullLoggerFactory.Instance,
-            httpFactory.Object,
-            new Mock<IMessageBus>().Object);
+            httpFactory,
+            Substitute.For<IMessageBus>());
 
         var factory = new RelayFactory(tcf);
 

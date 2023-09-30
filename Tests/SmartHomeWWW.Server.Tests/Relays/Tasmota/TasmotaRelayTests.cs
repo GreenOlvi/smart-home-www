@@ -11,11 +11,11 @@ public class TasmotaRelayTests
     [Test]
     public async Task GetStateAsyncTest()
     {
-        var client = new Mock<ITasmotaClient>();
-        client.Setup(c => c.GetValueAsync("POWER"))
-            .ReturnsAsync(Maybe.From(JsonDocument.Parse("""{"POWER":"ON"}""")));
+        var client = Substitute.For<ITasmotaClient>();
+        client.GetValueAsync("POWER")
+            .Returns(Task.FromResult(Maybe.From(JsonDocument.Parse("""{"POWER":"ON"}"""))));
 
-        using var relay = new TasmotaRelay(client.Object, 1);
+        using var relay = new TasmotaRelay(client, 1);
         var response = await relay.GetStateAsync();
         response.Should().Be(RelayState.On);
     }
@@ -23,11 +23,11 @@ public class TasmotaRelayTests
     [Test]
     public async Task GetStateAsyncOnNoResponseTest()
     {
-        var client = new Mock<ITasmotaClient>();
-        client.Setup(c => c.GetValueAsync("POWER"))
-            .ReturnsAsync(Maybe.None);
+        var client = Substitute.For<ITasmotaClient>();
+        client.GetValueAsync("POWER")
+            .Returns(Task.FromResult(Maybe<JsonDocument>.None));
 
-        using var relay = new TasmotaRelay(client.Object, 1);
+        using var relay = new TasmotaRelay(client, 1);
         var response = await relay.GetStateAsync();
         response.Should().Be(RelayState.Unknown);
     }
@@ -35,11 +35,11 @@ public class TasmotaRelayTests
     [Test]
     public async Task GetStateAsyncWithRelayIdsTest()
     {
-        var client = new Mock<ITasmotaClient>();
-        client.Setup(c => c.GetValueAsync("POWER"))
-            .ReturnsAsync(Maybe.From(JsonDocument.Parse("""{"POWER1":"OFF"}""")));
+        var client = Substitute.For<ITasmotaClient>();
+        client.GetValueAsync("POWER")
+            .Returns(Task.FromResult(Maybe.From(JsonDocument.Parse("""{"POWER1":"OFF"}"""))));
 
-        using var relay = new TasmotaRelay(client.Object, 1);
+        using var relay = new TasmotaRelay(client, 1);
         var response = await relay.GetStateAsync();
         response.Should().Be(RelayState.Off);
     }
