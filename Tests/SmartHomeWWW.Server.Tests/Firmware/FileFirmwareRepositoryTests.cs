@@ -1,4 +1,5 @@
-﻿using SmartHomeWWW.Core.Firmwares;
+﻿using Microsoft.Extensions.Options;
+using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 
@@ -37,7 +38,7 @@ public class FileFirmwareRepositoryTests
 
         var config = new FirmwaresConfig { Path = @"/firmwares" };
 
-        var repo = new FileFirmwareRepository(_logger, config, fs);
+        var repo = new FileFirmwareRepository(_logger, config.AsOptionsSnapshot(), fs);
 
         var firmwares = repo.GetAllFirmwares();
         firmwares.Should().NotBeNull();
@@ -72,7 +73,7 @@ public class FileFirmwareRepositoryTests
 
         var config = new FirmwaresConfig { Path = @"/firmwares" };
 
-        IFirmwareRepository repo = new FileFirmwareRepository(_logger, config, fs);
+        IFirmwareRepository repo = new FileFirmwareRepository(_logger, config.AsOptionsSnapshot(), fs);
 
         var firmwares = repo.GetFirmwares(UpdateChannel.Alpha);
         firmwares.Should().NotBeNull();
@@ -98,7 +99,7 @@ public class FileFirmwareRepositoryTests
 
         var config = new FirmwaresConfig { Path = @"/firmwares" };
 
-        IFirmwareRepository repo = new FileFirmwareRepository(_logger, config, fs);
+        IFirmwareRepository repo = new FileFirmwareRepository(_logger, config.AsOptionsSnapshot(), fs);
 
         var firmware = repo.GetCurrentFirmware(UpdateChannel.Alpha);
         firmware.Should().NotBeNull();

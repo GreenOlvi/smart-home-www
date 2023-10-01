@@ -14,4 +14,5 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Logging.Abstractions;
+global using static SmartHomeWWW.Server.Tests.TestHelpers;
 global using static SmartHomeWWW.Server.Tests.SmartHomeDbTestContextFactory;

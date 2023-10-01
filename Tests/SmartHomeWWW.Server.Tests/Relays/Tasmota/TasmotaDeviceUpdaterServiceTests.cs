@@ -21,7 +21,7 @@ public class TasmotaDeviceUpdaterServiceTests
         var config = JsonSerializer.Deserialize<TasmotaDiscoveryMessage>(SmartPlug)!;
         var cf = CreateContextFactory();
 
-        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config);
+        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config.AsOptions());
 
         await updater.UpdateDevice(config);
 
@@ -73,7 +73,7 @@ public class TasmotaDeviceUpdaterServiceTests
             await context.SaveChangesAsync();
         }
 
-        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config);
+        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config.AsOptions());
 
         await updater.UpdateDevice(config);
 
@@ -115,7 +115,7 @@ public class TasmotaDeviceUpdaterServiceTests
             await context.SaveChangesAsync();
         }
 
-        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config);
+        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config.AsOptions());
 
         await updater.UpdateDevice(config);
 
@@ -140,7 +140,7 @@ public class TasmotaDeviceUpdaterServiceTests
     {
         var config = JsonSerializer.Deserialize<TasmotaDiscoveryMessage>(LightSwitch)!;
         var cf = CreateContextFactory();
-        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config);
+        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config.AsOptions());
 
         await updater.UpdateDevice(config);
 
@@ -230,7 +230,7 @@ public class TasmotaDeviceUpdaterServiceTests
             await context.SaveChangesAsync();
         }
 
-        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config);
+        var updater = new TasmotaDeviceUpdaterService(Logger, cf, Config.AsOptions());
 
         await updater.UpdateDevice(config);
 
