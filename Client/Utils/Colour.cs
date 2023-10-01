@@ -1,6 +1,6 @@
 ﻿namespace SmartHomeWWW.Client.Utils;
 
-public struct Colour
+public readonly record struct Colour
 {
     public int R { get; init; }
     public int G { get; init; }

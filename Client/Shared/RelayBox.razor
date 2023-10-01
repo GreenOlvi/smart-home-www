@@ -4,20 +4,27 @@
 @using static SmartHomeWWW.Client.Models.RelayProxy;
 
 <MudCard>
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h5">@Entry.Name</MudText>
-            <MudText Typo="Typo.body2">@Entry.Type @Entry.Kind?.ToString()</MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-
     <MudCardContent>
-        <MudButton Variant="Variant.Filled" Color="StateColor" OnClick="Refresh">
-            <MudProgressCircular Indeterminate="true" Color="Color.Primary" hidden="@(!IsFetching)" Size="Size.Small"/>
-            @StateText
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Toggle">Toggle</MudButton>
+        <MudGrid Spacing="2" Justify="Justify.FlexStart">
+            <MudItem xs="12">
+                <MudText Typo="Typo.h5">@Entry.Name</MudText>
+                <MudText Typo="Typo.body2">@Entry.Type @Entry.Kind?.ToString()</MudText>
+            </MudItem>
+            <MudItem xs="3">
+                <MudButton Variant="Variant.Filled" Color="StateColor" OnClick="Refresh">
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" hidden="@(!IsFetching)" Size="Size.Small"/>
+                    @StateText
+                </MudButton>
+            </MudItem>
+            <MudItem xs="3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Toggle">Toggle</MudButton>
+            </MudItem>
+        </MudGrid>
     </MudCardContent>
+
+    <MudCardActions>
+        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Default" Size="Size.Small" Class="object-right-bottom" OnClick="Delete"/>
+    </MudCardActions>
 
 </MudCard>
 
@@ -58,4 +65,5 @@
     private Task Toggle(MouseEventArgs e) => Entry.Toggle().AsTask();
     private Task Refresh(MouseEventArgs e) => Entry.FetchState().AsTask();
     private Task SetState(bool on) => Entry.SetState(on).AsTask();
+    private Task Delete() => Entry.Delete();
 }

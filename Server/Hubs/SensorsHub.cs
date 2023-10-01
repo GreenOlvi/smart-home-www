@@ -32,4 +32,10 @@ public class SensorsHub : Hub
         _logger.LogDebug("Updated relay {Device} state to '{State}'", deviceId, state.ToString());
         await Clients.Others.SendAsync("RelayStateUpdated", deviceId, state);
     }
+
+    public Task RelayDeleted(Guid id)
+    {
+        _logger.LogDebug("Relay {Id} deleted", id);
+        return Clients.Others.SendAsync("RelayDeleted", id);
+    }
 }

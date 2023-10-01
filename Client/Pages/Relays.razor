@@ -68,6 +68,17 @@
             StateHasChanged();
         });
 
+        HubConnection.OnRelayDeleted(id =>
+        {
+            Logger.LogDebug("Received RelayDeleted for {Id}", id);
+            var deleted = RelayList.Where(r => r.Id == id).ToArray();
+            foreach (var relay in deleted)
+            {
+                RelayList.Remove(relay);
+            }
+            StateHasChanged();
+        });
+
         await HubConnection.StartIfNotConnectedAsync();
     }
 
@@ -83,6 +94,7 @@
     public ValueTask DisposeAsync()
     {
         HubConnection.RemoveOnRelayStateUpdated();
+        HubConnection.RemoveOnRelayDeleted();
         return ValueTask.CompletedTask;
     }
 

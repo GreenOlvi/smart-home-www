@@ -50,4 +50,10 @@ public class RelaysHttpClient
 
         await _httpClient.PostAsync($"api/relay/{id}/state", content, cancellationToken);
     }
+
+    public async Task<bool> DeleteRelay(Guid id, CancellationToken cancellationToken = default)
+    {
+        var result = await _httpClient.DeleteAsync($"api/relay/{id}", cancellationToken);
+        return result.IsSuccessStatusCode;
+    }
 }

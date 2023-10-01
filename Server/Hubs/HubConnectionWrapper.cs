@@ -38,6 +38,9 @@ public class HubConnectionWrapper : IHubConnection
     public Task SendUpdateRelayState(Guid id, RelayState state, CancellationToken cancellationToken = default) =>
         SendAsync(nameof(SensorsHub.UpdateRelayState), id, state, cancellationToken);
 
+    public Task SendRelayDeleted(Guid id, CancellationToken cancellationToken = default) =>
+        SendAsync(nameof(SensorsHub.RelayDeleted), id, cancellationToken);
+
     public Task SendUpdateSensor(Sensor sensor, CancellationToken cancellationToken = default) =>
         SendAsync(nameof(SensorsHub.UpdateSensor), sensor, cancellationToken);
 

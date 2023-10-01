@@ -8,6 +8,7 @@ namespace SmartHomeWWW.Client.Infrastructure;
 public class HubConnectionWrapper : IHubConnection, ISensorsHub
 {
     private const string RelayStateUpdated = "RelayStateUpdated";
+    private const string RelayDeleted = "RelayDeleted";
     private const string SensorUpdated = "SensorUpdated";
     private const string WeatherUpdated = "WeatherUpdated";
 
@@ -40,10 +41,12 @@ public class HubConnectionWrapper : IHubConnection, ISensorsHub
     public void Remove(string methodName) => _hubConnection.Remove(methodName);
 
     public IDisposable OnRelayStateUpdated(Action<Guid, RelayState> handler) => _hubConnection.On(RelayStateUpdated, handler);
+    public IDisposable OnRelayDeleted(Action<Guid> handler) => _hubConnection.On(RelayDeleted, handler);
     public IDisposable OnSensorUpdated(Action<Sensor> handler) => _hubConnection.On(SensorUpdated, handler);
     public IDisposable OnWeatherUpdated(Action<WeatherReport> handler) => _hubConnection.On(WeatherUpdated, handler);
 
     public void RemoveOnRelayStateUpdated() => _hubConnection.Remove(RelayStateUpdated);
+    public void RemoveOnRelayDeleted() => _hubConnection.Remove(RelayDeleted);
     public void RemoveOnSensorUpdated() => _hubConnection.Remove(SensorUpdated);
     public void RemoveOnWeatherUpdated() => _hubConnection.Remove(WeatherUpdated);
 }

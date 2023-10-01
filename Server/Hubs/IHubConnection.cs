@@ -11,5 +11,6 @@ public interface IHubConnection
     public Task SendAsync(string methodName, object? arg1, object? arg2, CancellationToken cancellationToken = default);
 
     public Task SendUpdateRelayState(Guid id, RelayState state, CancellationToken cancellationToken = default);
+    public Task SendRelayDeleted(Guid id, CancellationToken cancellationToken = default);
     public Task SendUpdateSensor(Sensor sensor, CancellationToken cancellationToken = default);
 }
