@@ -5,6 +5,7 @@ using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Core.ViewModel;
+using SmartHomeWWW.Server.Hubs;
 
 namespace SmartHomeWWW.Server.Controllers;
 
@@ -12,20 +13,22 @@ namespace SmartHomeWWW.Server.Controllers;
 [ApiController]
 public class RelayController : ControllerBase
 {
-    public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory, IMessageBus messageBus, IServiceProvider sp)
+    private readonly ILogger<RelayController> _logger;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+    private readonly IRelayFactory _relayFactory;
+    private readonly IMessageBus _bus;
+    private readonly IServiceProvider _sp;
+    private readonly IHubConnection _hubConnection;
+
+    public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory, IMessageBus messageBus, IServiceProvider sp, IHubConnection hubConnection)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
         _relayFactory = relayFactory;
         _bus = messageBus;
         _sp = sp;
+        _hubConnection = hubConnection;
     }
-
-    private readonly ILogger<RelayController> _logger;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly IRelayFactory _relayFactory;
-    private readonly IMessageBus _bus;
-    private readonly IServiceProvider _sp;
 
     public record RelayListParameters
     {
@@ -115,6 +118,7 @@ public class RelayController : ControllerBase
         dbContext.Relays.Remove(relay);
         await dbContext.SaveChangesAsync();
         _logger.LogInformation("Deleted relay {Id}", relay.Id);
+        await _hubConnection.SendRelayDeleted(relay.Id);
         return Ok();
     }
 

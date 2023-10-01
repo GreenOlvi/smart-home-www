@@ -23,7 +23,7 @@
     </MudCardContent>
 
     <MudCardActions>
-        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Default" Size="Size.Small" Class="object-right-bottom"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Default" Size="Size.Small" Class="object-right-bottom" OnClick="Delete"/>
     </MudCardActions>
 
 </MudCard>
@@ -65,4 +65,5 @@
     private Task Toggle(MouseEventArgs e) => Entry.Toggle().AsTask();
     private Task Refresh(MouseEventArgs e) => Entry.FetchState().AsTask();
     private Task SetState(bool on) => Entry.SetState(on).AsTask();
+    private Task Delete() => Entry.Delete();
 }

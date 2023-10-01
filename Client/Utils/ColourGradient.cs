@@ -1,6 +1,6 @@
 ﻿namespace SmartHomeWWW.Client.Utils;
 
-public class ColourGradient
+public readonly record struct ColourGradient
 {
     public ColourGradient(Colour colour1, Colour colour2)
     {

@@ -51,6 +51,8 @@ public class RelayProxy
 
     public void UpdateState(RelayState state) => State = ToViewState(state);
 
+    public Task<bool> Delete() => _client.DeleteRelay(Id);
+
     private static RelayViewState ToViewState(RelayState state) =>
         state switch
         {
