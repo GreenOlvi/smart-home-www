@@ -13,10 +13,23 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<MqttPublishMessageCommand>,
     IMessageHandler<MqttSubscribeToTopicCommand>
 {
-    public MqttClientHostedService(ILogger<MqttClientHostedService> logger, MqttFactory clientFactory, MqttClientOptions options, IMessageBus bus)
+    private readonly ILogger<MqttClientHostedService> _logger;
+    private readonly IMqttClient _client;
+    private readonly MqttClientOptions _options;
+    private readonly IMessageBus _bus;
+    private bool _stayConnected;
+    private bool _connecting;
+    private readonly AsyncPolicy ConnectPolicy;
+
+    private Task? _connectTask;
+
+    private readonly List<string> _subscribedTopics = new();
+    private readonly Queue<MqttPublishMessageCommand> _queuedMessages = new();
+
+    public MqttClientHostedService(ILogger<MqttClientHostedService> logger, MqttClientOptions options, IMessageBus bus)
     {
         _logger = logger;
-        _client = clientFactory.CreateMqttClient();
+        _client = new MqttFactory().CreateMqttClient();
         _options = options;
         _bus = bus;
 
@@ -66,19 +79,6 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
                     _logger.LogDebug(ex, "Mqtt connection failed");
                 });
     }
-
-    private readonly ILogger<MqttClientHostedService> _logger;
-    private readonly IMqttClient _client;
-    private readonly MqttClientOptions _options;
-    private readonly IMessageBus _bus;
-    private bool _stayConnected;
-    private bool _connecting;
-    private readonly AsyncPolicy ConnectPolicy;
-
-    private Task? _connectTask;
-
-    private readonly List<string> _subscribedTopics = new();
-    private readonly Queue<MqttPublishMessageCommand> _queuedMessages = new();
 
     public Task StartAsync(CancellationToken cancellationToken)
     {

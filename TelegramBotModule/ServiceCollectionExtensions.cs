@@ -13,9 +13,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IAuthorisationService, AuthorisationService>()
             .AddHostedService<TelegramBotCommandHandlerJob>();
 
-    public static IServiceCollection AddTelegramLogForwarder(this IServiceCollection services) =>
-        services.AddHostedService(sp =>
-            new TelegramLogForwarder(
-                sp.GetRequiredService<IMessageBus>(),
-                sp.GetRequiredService<TelegramConfig>().OwnerId));
+    public static IServiceCollection AddTelegramLogForwarder(this IServiceCollection services, long userId) =>
+        services.AddHostedService(sp => new TelegramLogForwarder(sp.GetRequiredService<IMessageBus>(), userId));
 }

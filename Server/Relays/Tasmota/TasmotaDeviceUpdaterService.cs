@@ -4,6 +4,7 @@ using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Config;
+using Microsoft.Extensions.Options;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
@@ -13,11 +14,11 @@ public class TasmotaDeviceUpdaterService
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
     private readonly TasmotaDiscoveryConfig _config;
 
-    public TasmotaDeviceUpdaterService(ILogger<TasmotaDeviceUpdaterService> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, TasmotaDiscoveryConfig config)
+    public TasmotaDeviceUpdaterService(ILogger<TasmotaDeviceUpdaterService> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IOptions<TasmotaDiscoveryConfig> config)
     {
         _logger = logger;
         _dbContextFactory = dbContextFactory;
-        _config = config;
+        _config = config.Value;
     }
 
     public async Task UpdateDevice(TasmotaDiscoveryMessage data)

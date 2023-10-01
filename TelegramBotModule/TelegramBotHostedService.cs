@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
@@ -15,11 +16,11 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<TelegramSendTextMessageCommand>,
     IMessageHandler<TelegramRefreshAllowedUsersCommand>
 {
-    public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, IHttpClientFactory httpClientFactory, TelegramConfig config,
+    public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, IHttpClientFactory httpClientFactory, IOptions<TelegramConfig> config,
         IMessageBus messageBus, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
     {
         _logger = logger;
-        _config = config;
+        _config = config.Value;
         _messageBus = messageBus;
         _httpClientFactory = httpClientFactory;
         _dbContextFactory = dbContextFactory;

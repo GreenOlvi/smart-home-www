@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
@@ -110,10 +111,14 @@ internal static class Program
                 o => o.MigrationsAssembly("SmartHomeWWW.Server")));
 
         builder.Services.AddTransient<IHubConnection, HubConnectionWrapper>();
-        builder.Services.AddSingleton(sp => new HubConnectionBuilder()
-            .WithUrl($"http://localhost:80{SensorsHub.RelativePath}")
-            .WithAutomaticReconnect()
-            .Build());
+        builder.Services.AddSingleton(sp =>
+        {
+            var url = sp.GetRequiredService<IOptions<HubConfig>>().Value.Url;
+            return new HubConnectionBuilder()
+                .WithUrl(url)
+                .WithAutomaticReconnect()
+                .Build();
+        });
 
         AddHttpClients(builder);
 
@@ -122,7 +127,7 @@ internal static class Program
         builder.Services
             .AddTelegramBotHostedService()
             .AddTelegramCommandHandler()
-            .AddTelegramLogForwarder();
+            .AddTelegramLogForwarder(builder.Configuration.GetValue<long>("Telegram:OwnerId"));
 
         builder.Services.AddSingleton<IFileSystem, FileSystem>();
         builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();

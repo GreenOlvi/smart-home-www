@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Utils;
 using SmartHomeWWW.Server.Config;
@@ -12,10 +13,10 @@ public class FileFirmwareRepository : IFirmwareRepository
     private readonly IFileSystem _fileSystem;
     private readonly string _firmwarePath;
 
-    public FileFirmwareRepository(ILogger<FileFirmwareRepository> logger, FirmwaresConfig config, IFileSystem fileSystem)
+    public FileFirmwareRepository(ILogger<FileFirmwareRepository> logger, IOptionsSnapshot<FirmwaresConfig> config, IFileSystem fileSystem)
     {
         _logger = logger;
-        _firmwarePath = config.Path;
+        _firmwarePath = config.Value.Path;
         _fileSystem = fileSystem;
     }
 

@@ -1,4 +1,6 @@
-﻿namespace SmartHomeWWW.Server.Config;
+﻿using SmartHomeWWW.Server.TelegramBotModule;
+
+namespace SmartHomeWWW.Server.Config;
 
 public static class ConfigExtensions
 {
@@ -6,15 +8,21 @@ public static class ConfigExtensions
     {
         builder.Configuration.AddJsonFile("secrets.json");
 
-        var generalConfig = new GeneralConfig();
-        builder.Configuration.Bind(generalConfig);
+        builder.Services.AddOptions<MqttConfig>()
+            .Bind(builder.Configuration.GetRequiredSection(nameof(GeneralConfig.Mqtt)));
 
-        builder.Services.AddSingleton(generalConfig);
-        builder.Services.AddSingleton(generalConfig.Firmwares);
-        builder.Services.AddSingleton(generalConfig.Mqtt);
-        builder.Services.AddSingleton(generalConfig.Tasmota);
-        builder.Services.AddSingleton(generalConfig.Tasmota.Discovery);
-        builder.Services.AddSingleton(generalConfig.Telegram);
+        builder.Services.AddOptions<FirmwaresConfig>()
+            .Bind(builder.Configuration.GetRequiredSection(nameof(GeneralConfig.Firmwares)));
+
+        builder.Services.AddOptions<HubConfig>()
+            .Bind(builder.Configuration.GetRequiredSection(nameof(GeneralConfig.Hub)));
+
+        builder.Services.AddOptions<TasmotaDiscoveryConfig>()
+            .Bind(builder.Configuration.GetSection(nameof(GeneralConfig.Tasmota))
+                    .GetSection(nameof(TasmotaConfig.Discovery)));
+
+        builder.Services.AddOptions<TelegramConfig>()
+            .Bind(builder.Configuration.GetRequiredSection(nameof(GeneralConfig.Telegram)));
 
         return builder;
     }

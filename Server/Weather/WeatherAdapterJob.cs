@@ -1,4 +1,5 @@
-﻿using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+﻿using Microsoft.Extensions.Options;
+using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.MessageBus;
@@ -25,13 +26,13 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
     private readonly IWeatherReportRepository _weatherReportRepository;
     private readonly SmartHomeDbContext _db;
 
-    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, TelegramConfig telegramConfig,
+    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, IOptions<TelegramConfig> telegramConfig,
         IKeyValueStore cache, IWeatherReportRepository weatherReportRepository, SmartHomeDbContext db)
     {
         _logger = logger;
         _bus = bus;
         _hubConnection = hubConnection;
-        _telegramConfig = telegramConfig;
+        _telegramConfig = telegramConfig.Value;
         _cache = cache;
         _weatherReportRepository = weatherReportRepository;
         _db = db;
