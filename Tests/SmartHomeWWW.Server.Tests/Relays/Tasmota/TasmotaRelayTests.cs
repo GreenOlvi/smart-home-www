@@ -1,7 +1,8 @@
-﻿using CSharpFunctionalExtensions;
-using SmartHomeWWW.Core.Domain.Relays;
+﻿using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Core.Utils.Functional;
 using SmartHomeWWW.Server.Relays.Tasmota;
+using static SmartHomeWWW.Core.Utils.Functional.Option<System.Text.Json.JsonDocument>;
 
 namespace SmartHomeWWW.Server.Tests.Relays.Tasmota;
 
@@ -13,7 +14,7 @@ public class TasmotaRelayTests
     {
         var client = Substitute.For<ITasmotaClient>();
         client.GetValueAsync("POWER")
-            .Returns(Task.FromResult(Maybe.From(JsonDocument.Parse("""{"POWER":"ON"}"""))));
+            .Returns(Task.FromResult<Option<JsonDocument>>(new Some(JsonDocument.Parse("""{"POWER":"ON"}"""))));
 
         using var relay = new TasmotaRelay(client, 1);
         var response = await relay.GetStateAsync();
@@ -25,7 +26,7 @@ public class TasmotaRelayTests
     {
         var client = Substitute.For<ITasmotaClient>();
         client.GetValueAsync("POWER")
-            .Returns(Task.FromResult(Maybe<JsonDocument>.None));
+            .Returns(Task.FromResult<Option<JsonDocument>>(new None()));
 
         using var relay = new TasmotaRelay(client, 1);
         var response = await relay.GetStateAsync();
@@ -37,7 +38,7 @@ public class TasmotaRelayTests
     {
         var client = Substitute.For<ITasmotaClient>();
         client.GetValueAsync("POWER")
-            .Returns(Task.FromResult(Maybe.From(JsonDocument.Parse("""{"POWER1":"OFF"}"""))));
+            .Returns(Task.FromResult<Option<JsonDocument>>(new Some(JsonDocument.Parse("""{"POWER1":"OFF"}"""))));
 
         using var relay = new TasmotaRelay(client, 1);
         var response = await relay.GetStateAsync();

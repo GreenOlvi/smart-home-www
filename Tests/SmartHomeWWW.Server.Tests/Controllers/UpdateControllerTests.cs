@@ -1,5 +1,4 @@
-﻿using NSubstitute;
-using SmartHomeWWW.Core.Firmwares;
+﻿using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Server.Controllers;
 using System.Collections;

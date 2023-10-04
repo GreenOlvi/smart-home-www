@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using SmartHomeWWW.Core.Firmwares;
+﻿using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 

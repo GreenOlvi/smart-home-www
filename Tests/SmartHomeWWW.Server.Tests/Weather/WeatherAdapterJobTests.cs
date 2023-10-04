@@ -1,5 +1,4 @@
-﻿using NSubstitute;
-using SmartHomeWWW.Core.Domain.Repositories;
+﻿using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Hubs;
 using SmartHomeWWW.Server.Infrastructure;

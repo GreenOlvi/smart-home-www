@@ -1,8 +1,9 @@
 ﻿using System.Text.Json;
-using CSharpFunctionalExtensions;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Messages.Commands;
+using SmartHomeWWW.Core.Utils.Functional;
+using static SmartHomeWWW.Core.Utils.Functional.Option<System.Text.Json.JsonDocument>;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
@@ -22,7 +23,7 @@ public sealed class TasmotaMqttClient : ITasmotaClient
     private readonly string _deviceId;
     private readonly IMessageBus _bus;
 
-    public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value)
+    public Task<Option<JsonDocument>> ExecuteCommandAsync(string command, string value)
     {
         _bus.Publish(new MqttPublishMessageCommand
         {
@@ -30,17 +31,17 @@ public sealed class TasmotaMqttClient : ITasmotaClient
             Payload = value,
         });
 
-        return Task.FromResult(Maybe<JsonDocument>.None);
+        return Task.FromResult<Option<JsonDocument>>(new None());
     }
 
-    public Task<Maybe<JsonDocument>> GetValueAsync(string command)
+    public Task<Option<JsonDocument>> GetValueAsync(string command)
     {
         _bus.Publish(new MqttPublishMessageCommand
         {
             Topic = $"cmnd/{_deviceId}/{command}",
         });
 
-        return Task.FromResult(Maybe<JsonDocument>.None);
+        return Task.FromResult<Option<JsonDocument>>(new None());
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

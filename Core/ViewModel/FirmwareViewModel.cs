@@ -2,7 +2,7 @@
 
 namespace SmartHomeWWW.Core.ViewModel;
 
-public record struct FirmwareViewModel
+public readonly record struct FirmwareViewModel
 {
     public FirmwareVersion Version { get; init; }
     public long Size { get; init; }

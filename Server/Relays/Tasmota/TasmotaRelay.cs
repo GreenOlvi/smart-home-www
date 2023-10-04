@@ -1,6 +1,6 @@
-﻿using CSharpFunctionalExtensions;
-using SmartHomeWWW.Core.Domain.Relays;
+﻿using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Core.Utils.Functional;
 using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
@@ -28,20 +28,17 @@ public sealed class TasmotaRelay : IRelay
     public async Task<RelayState> ToggleAsync() =>
         GetValueFromResponse(await _tasmota.ExecuteCommandAsync(_powerTopic, "toggle"));
 
-    private RelayState GetValueFromResponse(Maybe<JsonDocument> response)
-    {
-        if (!response.HasValue)
-        {
-            return RelayState.Unknown;
-        }
+    private RelayState GetValueFromResponse(Option<JsonDocument> response) =>
+        response.MatchSome(
+            val => GetValueFromResponse(val.Value.RootElement),
+            () => RelayState.Unknown);
 
-        var obj = response.Value.RootElement;
-        if (obj.TryGetProperty("Command", out var cmd))
+    private RelayState GetValueFromResponse(JsonElement obj)
+    {
+        if (obj.TryGetProperty("Command", out var cmd) &&
+            cmd.GetString()?.ToLowerInvariant() == "error")
         {
-            if (cmd.GetString()?.ToLowerInvariant() == "error")
-            {
-                return RelayState.Error;
-            }
+            return RelayState.Error;
         }
 
         if (!TryGetPowerValue(obj, out var value))

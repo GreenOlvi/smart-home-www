@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-        <AnalysisLevel>7.0-recommended</AnalysisLevel>
+        <AnalysisLevel>latest-recommended</AnalysisLevel>
         <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
         <RootNamespace>SmartHomeWWW.Server.TelegramBotModule</RootNamespace>
     </PropertyGroup>
@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Core\SmartHomeWWW.Core.csproj" />
+        <ProjectReference Include="..\Core\SmartHomeWWW.Core.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,3 @@
-using NSubstitute;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.MessageBus;

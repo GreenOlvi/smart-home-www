@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
-using CSharpFunctionalExtensions;
 using Flurl;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using SmartHomeWWW.Core.Utils.Functional;
+using static SmartHomeWWW.Core.Utils.Functional.Option<System.Text.Json.JsonDocument>;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
@@ -18,13 +19,13 @@ public sealed class TasmotaHttpClient : ITasmotaClient
     private readonly HttpClient _httpClient;
     private readonly Uri _baseUrl;
 
-    public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value) =>
+    public Task<Option<JsonDocument>> ExecuteCommandAsync(string command, string value) =>
         GetUrl(_baseUrl.AppendPathSegment("cm").SetQueryParam("cmnd", $"{command} {value}"));
 
-    public Task<Maybe<JsonDocument>> GetValueAsync(string command) =>
+    public Task<Option<JsonDocument>> GetValueAsync(string command) =>
         GetUrl(_baseUrl.AppendPathSegment("cm").SetQueryParam("cmnd", command));
 
-    private async Task<Maybe<JsonDocument>> GetUrl(Url uri)
+    private async Task<Option<JsonDocument>> GetUrl(Url uri)
     {
         try
         {
@@ -32,17 +33,17 @@ public sealed class TasmotaHttpClient : ITasmotaClient
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Error from relay: {StatusCode}", response.StatusCode);
-                return Maybe.None;
+                return new None();
             }
 
-            return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            return new Some(await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync()));
         }
         catch (Exception e)
         {
             _logger.LogError("Error while sending request to relay: {Message}", e.Message);
             _logger.LogDebug(e, "Exception caught");
         }
-        return Maybe.None;
+        return new None();
     }
 
     public void Dispose() => _httpClient.Dispose();
