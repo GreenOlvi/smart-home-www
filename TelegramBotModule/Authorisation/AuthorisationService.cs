@@ -1,7 +1,7 @@
-﻿using CSharpFunctionalExtensions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Core.Utils.Functional;
 using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.TelegramBotModule.Authorisation;
@@ -40,14 +40,16 @@ public class AuthorisationService : IAuthorisationService
     public async Task<bool> CanUserDo(long userId, AuthorizedActions action)
     {
         var u = await FetchUser(userId);
-        return u.HasValue && CanUserDoAction(u.Value, action);
+        return u.Match(
+            x => CanUserDoAction(x.Value, action),
+            x => false);
     }
 
-    public async Task<Maybe<TelegramUser>> AddNewUser(Contact contact)
+    public async Task<Option<TelegramUser>> AddNewUser(Contact contact)
     {
         if (contact.UserId is null)
         {
-            return Maybe<TelegramUser>.None;
+            return new Option<TelegramUser>.None();
         }
 
         var user = new TelegramUser
@@ -60,7 +62,7 @@ public class AuthorisationService : IAuthorisationService
         using var context = await _dbContextFactory.CreateDbContextAsync();
         await context.TelegramUsers.AddAsync(user);
         await context.SaveChangesAsync();
-        return user;
+        return new Option<TelegramUser>.Some(user);
     }
 
     private static bool TryGetCommandAction(Type command, out AuthorizedActions action) =>
@@ -75,16 +77,12 @@ public class AuthorisationService : IAuthorisationService
         _ => false,
     };
 
-    private async Task<Maybe<TelegramUser>> FetchUser(long userId)
+    private async Task<Option<TelegramUser>> FetchUser(long userId)
     {
         using var context = await _dbContextFactory.CreateDbContextAsync();
         var user = await context.TelegramUsers.FirstOrDefaultAsync(u => u.TelegramId == userId);
-
-        if (user == null)
-        {
-            return Maybe<TelegramUser>.None;
-        }
-
-        return user;
+        return user == null
+            ? new Option<TelegramUser>.None()
+            : new Option<TelegramUser>.Some(user);
     }
 }

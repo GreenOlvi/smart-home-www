@@ -78,33 +78,33 @@ public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandl
 
     private async Task HandleMessageWithoutText(TelegramMessageReceivedEvent message)
     {
-        if (message.Message.Contact is not null)
+        if (message.Message.Contact is null || !await _authService.CanUserDo(message.SenderId, AuthorizedActions.AddNewUser))
         {
-            if (await _authService.CanUserDo(message.SenderId, AuthorizedActions.AddNewUser))
-            {
-                var contact = message.Message.Contact;
-                var user = await _authService.AddNewUser(contact);
-                if (user.HasValue)
-                {
-                    _bus.Publish(new TelegramRefreshAllowedUsersCommand());
-                    _bus.Publish(new TelegramSendTextMessageCommand
-                    {
-                        ChatId = message.SenderId,
-                        ReplyToMessageId = message.Message.MessageId,
-                        Text = $"User '{user.Value.Username}' added",
-                    });
-                }
-                else
-                {
-                    _bus.Publish(new TelegramSendTextMessageCommand
-                    {
-                        ChatId = message.SenderId,
-                        ReplyToMessageId = message.Message.MessageId,
-                        Text = $"User not added",
-                    });
-                }
-            }
+            return;
         }
+
+        var contact = message.Message.Contact;
+        var user = await _authService.AddNewUser(contact);
+        user.Match(
+            u =>
+            {
+                _bus.Publish(new TelegramRefreshAllowedUsersCommand());
+                _bus.Publish(new TelegramSendTextMessageCommand
+                {
+                    ChatId = message.SenderId,
+                    ReplyToMessageId = message.Message.MessageId,
+                    Text = $"User '{u.Value.Username}' added",
+                });
+            },
+            _ =>
+            {
+                _bus.Publish(new TelegramSendTextMessageCommand
+                {
+                    ChatId = message.SenderId,
+                    ReplyToMessageId = message.Message.MessageId,
+                    Text = $"User not added",
+                });
+            });
     }
 
     private Task HandleUnknownCommand(string cmd, Message message)
@@ -116,7 +116,7 @@ public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandl
             Text = $"Unknown command '{cmd}'",
         });
 
-        _logger.LogWarning("User '{user}' sent unknown command '{cmd}'", message.From?.ToString(), cmd);
+        _logger.LogWarning("User '{User}' sent unknown command '{Cmd}'", message.From?.ToString(), cmd);
         return Task.CompletedTask;
     }
 
@@ -129,7 +129,7 @@ public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandl
             Text = $"Unauthorized command '{cmd}'",
         });
 
-        _logger.LogError("User '{user}' tried running unauthorized command '{cmd}'", message.From?.ToString(), cmd);
+        _logger.LogError("User '{User}' tried running unauthorized command '{Cmd}'", message.From?.ToString(), cmd);
         return Task.CompletedTask;
     }
 
@@ -142,12 +142,9 @@ public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandl
             Text = $"Could not create instance of '{cmd}'",
         });
 
-        _logger.LogError("Could not create instance of '{cmd}' for user '{user}'", cmd, message.From?.ToString());
+        _logger.LogError("Could not create instance of '{Cmd}' for user '{User}'", cmd, message.From?.ToString());
         return Task.CompletedTask;
     }
 
-    public void Dispose()
-    {
-        _cancellationTokenSource.Dispose();
-    }
+    public void Dispose() => _cancellationTokenSource.Dispose();
 }

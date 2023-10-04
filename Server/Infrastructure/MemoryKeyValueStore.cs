@@ -1,6 +1,6 @@
-﻿using CSharpFunctionalExtensions;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using SmartHomeWWW.Core.Utils.Functional;
 
 namespace SmartHomeWWW.Server.Infrastructure;
 
@@ -20,26 +20,20 @@ public class MemoryKeyValueStore : IKeyValueStore
 
     public Task<T?> GetValueAsync<T>(string key) => throw new NotImplementedException();
 
-    public Task<Maybe<T>> TryGetValueAsync<T>(string key)
+    public Task<Option<T>> TryGetValueAsync<T>(string key)
     {
         if (!_store.TryGetValue(key, out var val))
         {
-            return Task.FromResult(Maybe<T>.None);
+            return Task.FromResult<Option<T>>(new Option<T>.None());
         }
 
         var (value, expireAt) = val;
         if (expireAt <= DateTime.UtcNow)
         {
-            return Task.FromResult(Maybe<T>.None);
+            return Task.FromResult<Option<T>>(new Option<T>.None());
         }
 
-        var deserialized = Deserialize<T>(value);
-        if (deserialized is null)
-        {
-            return Task.FromResult(Maybe<T>.None);
-        }
-
-        return Task.FromResult(Maybe<T>.From(deserialized));
+        return Task.FromResult(Deserialize<T>(value));
     }
 
     public Task<bool> ContainsKeyAsync(string key)
@@ -49,7 +43,7 @@ public class MemoryKeyValueStore : IKeyValueStore
             return Task.FromResult(false);
         }
 
-        var (value, expireAt) = val;
+        var (_, expireAt) = val;
         if (expireAt <= DateTime.UtcNow)
         {
             return Task.FromResult(false);
@@ -59,5 +53,5 @@ public class MemoryKeyValueStore : IKeyValueStore
     }
 
     private string Serialize<T>(T value) => JsonSerializer.Serialize(value, _serializerOptions);
-    private T? Deserialize<T>(string value) => JsonSerializer.Deserialize<T>(value, _serializerOptions);
+    private Option<T> Deserialize<T>(string value) => JsonSerializer.Deserialize<T>(value, _serializerOptions).ToOption();
 }

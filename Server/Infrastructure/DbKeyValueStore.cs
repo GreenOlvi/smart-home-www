@@ -1,7 +1,7 @@
-﻿using CSharpFunctionalExtensions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
+using SmartHomeWWW.Core.Utils.Functional;
 using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Infrastructure;
@@ -35,23 +35,17 @@ public class DbKeyValueStore : IKeyValueStore
 
     public Task<T?> GetValueAsync<T>(string key) => throw new NotImplementedException();
 
-    public async Task<Maybe<T>> TryGetValueAsync<T>(string key)
+    public async Task<Option<T>> TryGetValueAsync<T>(string key)
     {
         var now = DateTime.UtcNow;
         await using var db = await _contextFactory.CreateDbContextAsync();
         var entry = await db.CacheEntries.FirstOrDefaultAsync(e => e.Key == key && (e.ExpireAt.HasValue == false || e.ExpireAt > now));
         if (entry is null)
         {
-            return Maybe.None;
+            return new Option<T>.None();
         }
 
-        var val = Deserialize<T>(entry.Value);
-        if (val is null)
-        {
-            return Maybe.None;
-        }
-
-        return Maybe.From(val);
+        return Deserialize<T>(entry.Value);
     }
 
     public async Task<bool> ContainsKeyAsync(string key)
@@ -72,5 +66,5 @@ public class DbKeyValueStore : IKeyValueStore
 
     private string Serialize<T>(T value) => JsonSerializer.Serialize(value, _serializerOptions);
 
-    private T? Deserialize<T>(string value) => JsonSerializer.Deserialize<T>(value, _serializerOptions);
+    private Option<T> Deserialize<T>(string value) => JsonSerializer.Deserialize<T>(value, _serializerOptions).ToOption();
 }
