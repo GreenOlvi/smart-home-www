@@ -4,14 +4,9 @@ using SmartHomeWWW.Core.Infrastructure;
 
 namespace SmartHomeWWW.Server.HealthChecks;
 
-public class DbHealthCheck : IHealthCheck
+public class DbHealthCheck(IDbContextFactory<SmartHomeDbContext> contextFactory) : IHealthCheck
 {
-    private readonly IDbContextFactory<SmartHomeDbContext> _contextFactory;
-
-    public DbHealthCheck(IDbContextFactory<SmartHomeDbContext> contextFactory)
-    {
-        _contextFactory = contextFactory;
-    }
+    private readonly IDbContextFactory<SmartHomeDbContext> _contextFactory = contextFactory;
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {

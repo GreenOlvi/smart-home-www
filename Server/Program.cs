@@ -1,5 +1,6 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -51,6 +52,11 @@ internal static class Program
 
         // Configure the HTTP request pipeline.
 
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        });
+
         if (app.Environment.IsDevelopment())
         {
             app.UseWebAssemblyDebugging();
@@ -97,7 +103,7 @@ internal static class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddResponseCompression(opts =>
         {
-            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
         });
 
         builder.Services.AddScoped<IFirmwareRepository, FileFirmwareRepository>();
@@ -153,9 +159,7 @@ internal static class Program
         builder.Services.AddHttpClient<HttpClient>("Telegram");
     }
 
-    private static void AddHealthChecks(WebApplicationBuilder builder)
-    {
+    private static void AddHealthChecks(WebApplicationBuilder builder) =>
         builder.Services.AddHealthChecks()
             .AddCheck<DbHealthCheck>("db-check", timeout: TimeSpan.FromSeconds(30));
-    }
 }

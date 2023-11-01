@@ -7,14 +7,9 @@ using SmartHomeWWW.Server.Relays.Tasmota;
 
 namespace SmartHomeWWW.Server.Relays;
 
-public class RelayFactory : IRelayFactory
+public class RelayFactory(TasmotaClientFactory tasmotaFactory) : IRelayFactory
 {
-    public RelayFactory(TasmotaClientFactory tasmotaFactory)
-    {
-        _tasmotaClientFactory = tasmotaFactory;
-    }
-
-    private readonly TasmotaClientFactory _tasmotaClientFactory;
+    private readonly TasmotaClientFactory _tasmotaClientFactory = tasmotaFactory;
 
     public IRelay Create(RelayEntry entry) => entry.Type switch
     {
@@ -22,7 +17,7 @@ public class RelayFactory : IRelayFactory
         _ => throw new InvalidOperationException($"Unknown relay type '{entry.Type}'"),
     };
 
-    private IRelay CreateTasmota(RelayEntry entry)
+    private TasmotaRelay CreateTasmota(RelayEntry entry)
     {
         var config = ParseTasmotaConfig((JsonElement)entry.Config);
         return new TasmotaRelay(_tasmotaClientFactory.CreateFor(config), config.RelayId);

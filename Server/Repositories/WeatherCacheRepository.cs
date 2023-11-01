@@ -7,20 +7,14 @@ using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Repositories;
 
-public class WeatherReportRepository : IWeatherReportRepository
+public class WeatherReportRepository(ILogger<WeatherReportRepository> logger, SmartHomeDbContext dbContext) : IWeatherReportRepository
 {
     private static readonly TimeSpan ExpireTime = TimeSpan.FromDays(1);
     private const string CurrentName = "current";
 
-    private readonly ILogger<WeatherReportRepository> _logger;
-    private readonly SmartHomeDbContext _db;
+    private readonly ILogger<WeatherReportRepository> _logger = logger;
+    private readonly SmartHomeDbContext _db = dbContext;
     private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
-
-    public WeatherReportRepository(ILogger<WeatherReportRepository> logger, SmartHomeDbContext dbContext)
-    {
-        _db = dbContext;
-        _logger = logger;
-    }
 
     public Task<WeatherReport?> GetCurrentWeatherReport() => GetCurrentWeatherReport(DateTime.MinValue);
 
@@ -75,7 +69,7 @@ public class WeatherReportRepository : IWeatherReportRepository
         await CleanExpired();
     }
 
-    private Task CleanExpired(CancellationToken cancellationToken = default) =>
+    private Task<int> CleanExpired(CancellationToken cancellationToken = default) =>
         _db.WeatherCaches.Where(w => w.Expires <= DateTime.UtcNow).ExecuteDeleteAsync(cancellationToken);
 
     private bool TryDeserialize(string value, out WeatherReport weatherReport)
