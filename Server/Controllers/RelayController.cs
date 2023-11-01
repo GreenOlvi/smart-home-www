@@ -11,24 +11,15 @@ namespace SmartHomeWWW.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class RelayController : ControllerBase
+public class RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory,
+    IMessageBus messageBus, IServiceProvider sp, IHubConnection hubConnection) : ControllerBase
 {
-    private readonly ILogger<RelayController> _logger;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly IRelayFactory _relayFactory;
-    private readonly IMessageBus _bus;
-    private readonly IServiceProvider _sp;
-    private readonly IHubConnection _hubConnection;
-
-    public RelayController(ILogger<RelayController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IRelayFactory relayFactory, IMessageBus messageBus, IServiceProvider sp, IHubConnection hubConnection)
-    {
-        _logger = logger;
-        _dbContextFactory = dbContextFactory;
-        _relayFactory = relayFactory;
-        _bus = messageBus;
-        _sp = sp;
-        _hubConnection = hubConnection;
-    }
+    private readonly ILogger<RelayController> _logger = logger;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
+    private readonly IRelayFactory _relayFactory = relayFactory;
+    private readonly IMessageBus _bus = messageBus;
+    private readonly IServiceProvider _sp = sp;
+    private readonly IHubConnection _hubConnection = hubConnection;
 
     public record RelayListParameters
     {

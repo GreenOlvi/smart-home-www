@@ -8,16 +8,10 @@ namespace SmartHomeWWW.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TelegramUsersController : ControllerBase
+public class TelegramUsersController(ILogger<TelegramUsersController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory) : ControllerBase
 {
-    public TelegramUsersController(ILogger<TelegramUsersController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
-    {
-        _logger = logger;
-        _dbContextFactory = dbContextFactory;
-    }
-
-    private readonly ILogger<TelegramUsersController> _logger;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+    private readonly ILogger<TelegramUsersController> _logger = logger;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
 
     [HttpGet]
     public async Task<IEnumerable<TelegramUserViewModel>> Get()

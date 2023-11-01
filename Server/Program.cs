@@ -153,9 +153,7 @@ internal static class Program
         builder.Services.AddHttpClient<HttpClient>("Telegram");
     }
 
-    private static void AddHealthChecks(WebApplicationBuilder builder)
-    {
+    private static void AddHealthChecks(WebApplicationBuilder builder) =>
         builder.Services.AddHealthChecks()
             .AddCheck<DbHealthCheck>("db-check", timeout: TimeSpan.FromSeconds(30));
-    }
 }

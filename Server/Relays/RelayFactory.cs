@@ -7,14 +7,9 @@ using SmartHomeWWW.Server.Relays.Tasmota;
 
 namespace SmartHomeWWW.Server.Relays;
 
-public class RelayFactory : IRelayFactory
+public class RelayFactory(TasmotaClientFactory tasmotaFactory) : IRelayFactory
 {
-    public RelayFactory(TasmotaClientFactory tasmotaFactory)
-    {
-        _tasmotaClientFactory = tasmotaFactory;
-    }
-
-    private readonly TasmotaClientFactory _tasmotaClientFactory;
+    private readonly TasmotaClientFactory _tasmotaClientFactory = tasmotaFactory;
 
     public IRelay Create(RelayEntry entry) => entry.Type switch
     {

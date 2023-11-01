@@ -11,23 +11,14 @@ namespace SmartHomeWWW.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class WeatherController : ControllerBase
+public class WeatherController(ILogger<WeatherController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IMessageBus bus, SmartHomeDbContext db,
+    IWeatherReportRepository weatherReportRepository) : ControllerBase
 {
-    public WeatherController(ILogger<WeatherController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IMessageBus bus, SmartHomeDbContext db,
-        IWeatherReportRepository weatherReportRepository)
-    {
-        _logger = logger;
-        _dbContextFactory = dbContextFactory;
-        _bus = bus;
-        _db = db;
-        _weatherReportRepository = weatherReportRepository;
-    }
-
-    private readonly ILogger<WeatherController> _logger;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly IMessageBus _bus;
-    private readonly SmartHomeDbContext _db;
-    private readonly IWeatherReportRepository _weatherReportRepository;
+    private readonly ILogger<WeatherController> _logger = logger;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
+    private readonly IMessageBus _bus = bus;
+    private readonly SmartHomeDbContext _db = db;
+    private readonly IWeatherReportRepository _weatherReportRepository = weatherReportRepository;
 
     [HttpGet("current")]
     public async Task<IActionResult> GetCurrent(long after = 0)
