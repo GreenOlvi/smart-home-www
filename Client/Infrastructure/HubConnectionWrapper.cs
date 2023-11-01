@@ -5,19 +5,14 @@ using SmartHomeWWW.Core.Domain.Relays;
 
 namespace SmartHomeWWW.Client.Infrastructure;
 
-public class HubConnectionWrapper : IHubConnection, ISensorsHub
+public class HubConnectionWrapper(HubConnection hubConnection) : IHubConnection, ISensorsHub
 {
     private const string RelayStateUpdated = "RelayStateUpdated";
     private const string RelayDeleted = "RelayDeleted";
     private const string SensorUpdated = "SensorUpdated";
     private const string WeatherUpdated = "WeatherUpdated";
 
-    private readonly HubConnection _hubConnection;
-
-    public HubConnectionWrapper(HubConnection hubConnection)
-    {
-        _hubConnection = hubConnection;
-    }
+    private readonly HubConnection _hubConnection = hubConnection;
 
     public HubConnectionState State => _hubConnection.State;
 

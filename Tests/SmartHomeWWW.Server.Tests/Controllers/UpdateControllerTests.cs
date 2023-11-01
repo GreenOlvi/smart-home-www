@@ -29,10 +29,7 @@ public class UpdateControllerTests
     }
 
     [TearDown]
-    public void Teardown()
-    {
-        _db?.Dispose();
-    }
+    public void Teardown() => _db?.Dispose();
 
     [Test]
     public async Task UpdateFirmwareDefaultQueryTest()
@@ -66,7 +63,7 @@ public class UpdateControllerTests
         };
 
         var context = new DefaultHttpContext();
-        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers.UserAgent = "ESP8266-http-Update";
         context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
         context.Request.Headers["x-ESP8266-version"] = "1.0.0";
 
@@ -106,7 +103,7 @@ public class UpdateControllerTests
         };
 
         var context = new DefaultHttpContext();
-        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers.UserAgent = "ESP8266-http-Update";
         context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
         context.Request.Headers["x-ESP8266-version"] = "0.7.0";
 
@@ -147,7 +144,7 @@ public class UpdateControllerTests
         };
 
         var context = new DefaultHttpContext();
-        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers.UserAgent = "ESP8266-http-Update";
         context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
         context.Request.Headers["x-ESP8266-version"] = "1.0.1";
 
@@ -200,7 +197,7 @@ public class UpdateControllerTests
         };
 
         var context = new DefaultHttpContext();
-        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers.UserAgent = "ESP8266-http-Update";
         context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
         context.Request.Headers["x-ESP8266-version"] = "0.7.0-alpha";
 
@@ -242,7 +239,7 @@ public class UpdateControllerTests
         };
 
         var context = new DefaultHttpContext();
-        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers.UserAgent = "ESP8266-http-Update";
         context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
         context.Request.Headers["x-ESP8266-version"] = "1.0.1-alpha";
 
@@ -282,7 +279,7 @@ public class UpdateControllerTests
         };
 
         var context = new DefaultHttpContext();
-        context.Request.Headers["User-Agent"] = "ESP8266-http-Update";
+        context.Request.Headers.UserAgent = "ESP8266-http-Update";
         context.Request.Headers["x-ESP8266-STA-MAC"] = "DE:AD:BE:EF:00:01";
         context.Request.Headers["x-ESP8266-version"] = "some-nonsense";
 
@@ -313,7 +310,7 @@ public class UpdateControllerTests
 
     private sealed class MemoryFirmwareRepository : IFirmwareRepository, IEnumerable<IFirmware>
     {
-        private readonly List<IFirmware> _firmwares = new();
+        private readonly List<IFirmware> _firmwares = [];
 
         public MemoryFirmwareRepository()
         {

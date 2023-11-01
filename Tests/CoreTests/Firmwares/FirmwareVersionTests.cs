@@ -26,8 +26,12 @@ public class FirmwareVersionTests
         if (expectedPrefix is not null)
         {
             success.Should().BeTrue();
-            result.Prefix.Should().Be(new Version(expectedPrefix));
+            var version = new Version(expectedPrefix);
+            result.Prefix.Should().Be(version);
             result.Suffix.Should().Be(expectedSuffix);
+
+            var expected = new FirmwareVersion { Prefix = version, Suffix = expectedSuffix };
+            (result == expected).Should().BeTrue();
         }
         else
         {

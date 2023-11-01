@@ -1,18 +1,13 @@
-﻿using System.Net.Http.Json;
-using SmartHomeWWW.Core.Domain.Relays;
+﻿using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Core.ViewModel;
+using System.Net.Http.Json;
 
 namespace SmartHomeWWW.Client.HttpClients;
 
-public class RelaysHttpClient
+public class RelaysHttpClient(HttpClient httpClient)
 {
-    public RelaysHttpClient(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = httpClient;
 
     public async Task<IEnumerable<RelayEntryViewModel>> GetRelays(CancellationToken cancellationToken = default) =>
         await _httpClient.GetFromJsonAsync<IEnumerable<RelayEntryViewModel>>("api/relay", cancellationToken)

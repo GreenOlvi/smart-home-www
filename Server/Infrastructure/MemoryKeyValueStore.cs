@@ -49,7 +49,7 @@ public class MemoryKeyValueStore : IKeyValueStore
             return Task.FromResult(false);
         }
 
-        var (value, expireAt) = val;
+        var (_, expireAt) = val;
         if (expireAt <= DateTime.UtcNow)
         {
             return Task.FromResult(false);

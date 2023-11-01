@@ -1,9 +1,9 @@
-﻿using System.Text.Json;
-using SmartHomeWWW.Core.Domain.Entities;
+﻿using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Relays.Tasmota;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Relays;
 

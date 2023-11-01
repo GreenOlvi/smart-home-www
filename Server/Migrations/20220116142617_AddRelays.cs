@@ -10,8 +10,7 @@ namespace SmartHomeWWW.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "Relays",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: true),

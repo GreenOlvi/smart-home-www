@@ -1,9 +1,9 @@
-﻿using System.IO.Abstractions;
-using System.Text.RegularExpressions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Utils;
 using SmartHomeWWW.Server.Config;
+using System.IO.Abstractions;
+using System.Text.RegularExpressions;
 
 namespace SmartHomeWWW.Server.Firmwares;
 

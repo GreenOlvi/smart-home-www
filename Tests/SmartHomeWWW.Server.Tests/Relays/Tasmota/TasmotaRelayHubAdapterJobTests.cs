@@ -1,9 +1,9 @@
-﻿using SmartHomeWWW.Core.Infrastructure;
-using SmartHomeWWW.Server.Hubs;
+﻿using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Domain.Relays;
-using SmartHomeWWW.Core.Domain.Entities;
-using SmartHomeWWW.Server.Relays.Tasmota;
+using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.MessageBus;
+using SmartHomeWWW.Server.Hubs;
+using SmartHomeWWW.Server.Relays.Tasmota;
 
 namespace SmartHomeWWW.Server.Tests.Relays.Tasmota;
 

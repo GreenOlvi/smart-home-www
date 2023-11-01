@@ -1,19 +1,13 @@
-﻿using System.Text.Json;
-using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+﻿using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Client.HttpClients;
 
-public class WeatherHttpClient
+public class WeatherHttpClient(ILogger<WeatherHttpClient> logger, HttpClient httpClient)
 {
-    private readonly ILogger<WeatherHttpClient> _logger;
-    private readonly HttpClient _httpClient;
+    private readonly ILogger<WeatherHttpClient> _logger = logger;
+    private readonly HttpClient _httpClient = httpClient;
     private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
-
-    public WeatherHttpClient(ILogger<WeatherHttpClient> logger, HttpClient httpClient)
-    {
-        _logger = logger;
-        _httpClient = httpClient;
-    }
 
     public async Task<WeatherReport?> GetCurrent(CancellationToken cancellationToken = default)
     {

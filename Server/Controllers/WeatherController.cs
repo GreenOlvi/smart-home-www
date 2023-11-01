@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
@@ -6,6 +5,7 @@ using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Messages.Events;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Controllers;
 

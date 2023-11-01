@@ -16,7 +16,7 @@ public class DbHealthCheck(IDbContextFactory<SmartHomeDbContext> contextFactory)
             var _ = await db.Database.ExecuteSqlAsync($"SELECT 1", cancellationToken: cancellationToken);
             return HealthCheckResult.Healthy();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return HealthCheckResult.Unhealthy(context.Registration.FailureStatus.ToString(), exception: ex);
         }

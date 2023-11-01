@@ -6,15 +6,10 @@ using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Infrastructure;
 
-public class DbKeyValueStore : IKeyValueStore
+public class DbKeyValueStore(IDbContextFactory<SmartHomeDbContext> dbContextFactory) : IKeyValueStore
 {
-    private readonly IDbContextFactory<SmartHomeDbContext> _contextFactory;
+    private readonly IDbContextFactory<SmartHomeDbContext> _contextFactory = dbContextFactory;
     private readonly JsonSerializerOptions _serializerOptions = new() { WriteIndented = false };
-
-    public DbKeyValueStore(IDbContextFactory<SmartHomeDbContext> dbContextFactory)
-    {
-        _contextFactory = dbContextFactory;
-    }
 
     public async Task AddValueAsync(string key, string value, TimeSpan? lifetime = null)
     {

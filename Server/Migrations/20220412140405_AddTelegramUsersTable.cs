@@ -10,8 +10,7 @@ namespace SmartHomeWWW.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "TelegramUsers",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     TelegramId = table.Column<long>(type: "INTEGER", nullable: false),
                     Username = table.Column<string>(type: "TEXT", nullable: false),

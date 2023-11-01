@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using SmartHomeWWW.Core.Utils;
+﻿using SmartHomeWWW.Core.Utils;
+using System.Text.Json.Serialization;
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
@@ -47,7 +47,7 @@ public readonly record struct DailyWeather
     [JsonPropertyName("wind_gust")]
     public float WindGust { get; init; }
 
-    public IReadOnlyCollection<WeatherDescription> Weather { get; init; } = Array.Empty<WeatherDescription>();
+    public IReadOnlyCollection<WeatherDescription> Weather { get; init; } = [];
 
     [JsonPropertyName("pop")]
     public float ProbabilityOfPrecipitation { get; init; }

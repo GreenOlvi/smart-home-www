@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandler<TasmotaPropertyUpdateEvent>
+public sealed partial class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandler<TasmotaPropertyUpdateEvent>
 {
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
     private readonly IMessageBus _bus;
@@ -45,7 +45,7 @@ public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandle
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
-    private static readonly Regex PowerPattern = new(@"^POWER(?<relayId>\d+)?$", RegexOptions.Compiled);
+    private static readonly Regex PowerPattern = BuildPowerPattern();
 
     public async Task Handle(TasmotaPropertyUpdateEvent message)
     {
@@ -91,4 +91,7 @@ public sealed class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandle
         _bus.Unsubscribe(this);
         return Task.CompletedTask;
     }
+
+    [GeneratedRegex(@"^POWER(?<relayId>\d+)?$", RegexOptions.Compiled)]
+    private static partial Regex BuildPowerPattern();
 }

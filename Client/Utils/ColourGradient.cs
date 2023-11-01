@@ -20,7 +20,7 @@ public readonly record struct ColourGradient
     public Colour GetIntermediate(double p)
     {
         var l = Math.Clamp(p, 0.0, 1.0);
-        return new ()
+        return new()
         {
             R = (int)(_colour1.R + (_diffR * l)),
             G = (int)(_colour1.G + (_diffG * l)),

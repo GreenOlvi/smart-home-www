@@ -1,19 +1,13 @@
 ﻿namespace SmartHomeWWW.Server.Watchdog;
 
-public class WatchJob
+public class WatchJob(TimeSpan timeout, Action onTimeout)
 {
-    private readonly TimeSpan _timeout;
-    private readonly Action _onTimeout;
+    private readonly TimeSpan _timeout = timeout;
+    private readonly Action _onTimeout = onTimeout;
     private long _time;
     private long _lastTick;
 
     public bool IsRunning { get; private set; }
-
-    public WatchJob(TimeSpan timeout, Action onTimeout)
-    {
-        _timeout = timeout;
-        _onTimeout = onTimeout;
-    }
 
     public virtual void Init()
     {

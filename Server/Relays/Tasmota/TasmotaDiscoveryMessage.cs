@@ -2,8 +2,12 @@
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public record TasmotaDiscoveryMessage
+public readonly record struct TasmotaDiscoveryMessage
 {
+    public TasmotaDiscoveryMessage()
+    {
+    }
+
     [JsonPropertyName("ip")]
     public string Ip { get; init; } = string.Empty;
 
@@ -11,7 +15,7 @@ public record TasmotaDiscoveryMessage
     public string DeviceName { get; init; } = string.Empty;
 
     [JsonPropertyName("fn")]
-    public string[] FriendlyNames { get; init; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> FriendlyNames { get; init; } = [];
 
     [JsonIgnore]
     public string? FriendlyName => FriendlyNames.FirstOrDefault();
@@ -32,5 +36,5 @@ public record TasmotaDiscoveryMessage
     public string Topic { get; init; } = string.Empty;
 
     [JsonPropertyName("rl")]
-    public int[] Relays { get; init; } = Array.Empty<int>();
+    public IReadOnlyCollection<int> Relays { get; init; } = [];
 }

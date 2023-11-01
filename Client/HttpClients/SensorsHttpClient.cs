@@ -1,16 +1,11 @@
-﻿using System.Net.Http.Json;
-using SmartHomeWWW.Core.Domain.Entities;
+﻿using SmartHomeWWW.Core.Domain.Entities;
+using System.Net.Http.Json;
 
 namespace SmartHomeWWW.Client.HttpClients;
 
-public class SensorsHttpClient
+public class SensorsHttpClient(HttpClient http)
 {
-    public SensorsHttpClient(HttpClient http)
-    {
-        _httpClient = http;
-    }
-
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = http;
 
     public async Task<IEnumerable<Sensor>> GetSensors(CancellationToken cancellationToken = default) =>
         await _httpClient.GetFromJsonAsync<IEnumerable<Sensor>>("api/sensors", cancellationToken) ?? Enumerable.Empty<Sensor>();

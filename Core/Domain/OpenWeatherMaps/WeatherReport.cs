@@ -21,11 +21,11 @@ public readonly record struct WeatherReport
 
     public CurrentWeather Current { get; init; }
 
-    public IReadOnlyCollection<MinutelyWeather> Minutely { get; init; } = Array.Empty<MinutelyWeather>();
+    public IReadOnlyCollection<MinutelyWeather> Minutely { get; init; } = [];
 
-    public IReadOnlyCollection<HourlyWeather> Hourly { get; init; } = Array.Empty<HourlyWeather>();
+    public IReadOnlyCollection<HourlyWeather> Hourly { get; init; } = [];
 
-    public IReadOnlyCollection<DailyWeather> Daily { get; init; } = Array.Empty<DailyWeather>();
+    public IReadOnlyCollection<DailyWeather> Daily { get; init; } = [];
 
-    public IReadOnlyCollection<WeatherAlert> Alerts { get; init; } = Array.Empty<WeatherAlert>();
+    public IReadOnlyCollection<WeatherAlert> Alerts { get; init; } = [];
 }

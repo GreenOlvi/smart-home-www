@@ -1,25 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
+using Microsoft.Extensions.Options;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Server.Config;
-using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public class TasmotaDeviceUpdaterService
+public class TasmotaDeviceUpdaterService(ILogger<TasmotaDeviceUpdaterService> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory,
+    IOptions<TasmotaDiscoveryConfig> config)
 {
-    private readonly ILogger<TasmotaDeviceUpdaterService> _logger;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly TasmotaDiscoveryConfig _config;
-
-    public TasmotaDeviceUpdaterService(ILogger<TasmotaDeviceUpdaterService> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory, IOptions<TasmotaDiscoveryConfig> config)
-    {
-        _logger = logger;
-        _dbContextFactory = dbContextFactory;
-        _config = config.Value;
-    }
+    private readonly ILogger<TasmotaDeviceUpdaterService> _logger = logger;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
+    private readonly TasmotaDiscoveryConfig _config = config.Value;
 
     public async Task UpdateDevice(TasmotaDiscoveryMessage data)
     {

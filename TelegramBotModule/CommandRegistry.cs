@@ -3,15 +3,10 @@ using SmartHomeWWW.Server.TelegramBotModule.BotCommands;
 
 namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public sealed class CommandRegistry
+public sealed class CommandRegistry(IServiceProvider serviceProvider)
 {
-    public CommandRegistry(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-
-    private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, Type> _commands = new();
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly Dictionary<string, Type> _commands = [];
 
     public void AddCommand<T>(string keyword) where T : ITelegramBotCommand =>
         _commands.Add(keyword, typeof(T));

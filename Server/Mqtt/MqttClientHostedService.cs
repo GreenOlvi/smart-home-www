@@ -1,11 +1,11 @@
-﻿using System.Text;
-using MQTTnet;
+﻿using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Exceptions;
 using Polly;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
+using System.Text;
 
 namespace SmartHomeWWW.Server.Mqtt;
 
@@ -23,7 +23,7 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
 
     private Task? _connectTask;
 
-    private readonly List<string> _subscribedTopics = new();
+    private readonly List<string> _subscribedTopics = [];
     private readonly Queue<MqttPublishMessageCommand> _queuedMessages = new();
 
     public MqttClientHostedService(ILogger<MqttClientHostedService> logger, MqttClientOptions options, IMessageBus bus)

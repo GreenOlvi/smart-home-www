@@ -4,14 +4,9 @@ using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.TelegramBotModule.BotCommands;
 
-public class PingCommand : ITelegramBotCommand
+public class PingCommand(IMessageBus bus) : ITelegramBotCommand
 {
-    public PingCommand(IMessageBus bus)
-    {
-        _bus = bus;
-    }
-
-    private readonly IMessageBus _bus;
+    private readonly IMessageBus _bus = bus;
 
     public Task Run(Message message, CancellationToken cancellationToken)
     {

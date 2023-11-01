@@ -10,8 +10,7 @@ namespace SmartHomeWWW.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "CacheEntries",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
                     Value = table.Column<string>(type: "TEXT", nullable: false),

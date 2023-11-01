@@ -2,14 +2,19 @@
 
 namespace SmartHomeWWW.Core.Firmwares;
 
-public record FirmwareVersion
+public readonly partial record struct FirmwareVersion
 {
     public Version Prefix { get; init; } = new Version();
-    public string? Suffix { get; init; }
+    public string? Suffix { get; init; } = null;
+
+    private static readonly Regex CombinedVersionPattern = BuildCombinedVersionPattern();
+
+    public FirmwareVersion()
+    {
+    }
 
     public override string ToString() => Suffix is null ? Prefix.ToString() : $"{Prefix}-{Suffix.ToLowerInvariant()}";
 
-    private static readonly Regex CombinedVersionPattern = new(@"^(?<prefix>\d+\.\d+\.\d+)(-(?<suffix>.+))?$", RegexOptions.Compiled);
     public static FirmwareVersion Parse(string text)
     {
         var match = CombinedVersionPattern.Match(text);
@@ -39,6 +44,6 @@ public record FirmwareVersion
         return true;
     }
 
-    public static bool operator ==(FirmwareVersion version, string other) => version.ToString() == other;
-    public static bool operator !=(FirmwareVersion version, string other) => version.ToString() != other;
+    [GeneratedRegex(@"^(?<prefix>\d+\.\d+\.\d+)(-(?<suffix>.+))?$", RegexOptions.Compiled)]
+    private static partial Regex BuildCombinedVersionPattern();
 }

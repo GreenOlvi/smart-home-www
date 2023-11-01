@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using SmartHomeWWW.Core.Utils;
+﻿using SmartHomeWWW.Core.Utils;
+using System.Text.Json.Serialization;
 
 namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 

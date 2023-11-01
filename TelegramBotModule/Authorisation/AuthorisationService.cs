@@ -6,14 +6,9 @@ using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.TelegramBotModule.Authorisation;
 
-public class AuthorisationService : IAuthorisationService
+public class AuthorisationService(IDbContextFactory<SmartHomeDbContext> dbContextFactory) : IAuthorisationService
 {
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-
-    public AuthorisationService(IDbContextFactory<SmartHomeDbContext> dbContextFactory)
-    {
-        _dbContextFactory = dbContextFactory;
-    }
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
 
     public bool CanUserRunCommand(long userId, Type command)
     {

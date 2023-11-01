@@ -1,22 +1,15 @@
-﻿using System.Text.Json;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Flurl;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
+using System.Text.Json;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public sealed class TasmotaHttpClient : ITasmotaClient
+public sealed class TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl) : ITasmotaClient
 {
-    public TasmotaHttpClient(ILogger<TasmotaHttpClient> logger, HttpClient httpClient, Uri baseUrl)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
-    }
-
-    private readonly ILogger<TasmotaHttpClient> _logger;
-    private readonly HttpClient _httpClient;
-    private readonly Uri _baseUrl;
+    private readonly ILogger<TasmotaHttpClient> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    private readonly Uri _baseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
 
     public Task<Maybe<JsonDocument>> ExecuteCommandAsync(string command, string value) =>
         GetUrl(_baseUrl.AppendPathSegment("cm").SetQueryParam("cmnd", $"{command} {value}"));

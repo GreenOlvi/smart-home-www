@@ -13,14 +13,14 @@ public sealed class Orchestrator : IHostedService, IAsyncDisposable
 
         _scope = sp.CreateScope();
 
-        _jobs = new ()
-        {
+        _jobs =
+        [
             sp.GetRequiredService<MqttTasmotaAdapter>(),
             sp.GetRequiredService<TasmotaRelayHubAdapterJob>(),
             _scope.ServiceProvider.GetRequiredService<WeatherAdapterJob>(),
             sp.GetRequiredService<WatchdogJob>(),
             sp.GetRequiredService<SensorMonitorJob>(),
-        };
+        ];
     }
 
     private readonly ILogger<Orchestrator> _logger;

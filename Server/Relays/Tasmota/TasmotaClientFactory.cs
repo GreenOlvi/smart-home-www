@@ -3,20 +3,13 @@ using SmartHomeWWW.Core.MessageBus;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public class TasmotaClientFactory
+public class TasmotaClientFactory(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IMessageBus bus)
 {
-    public TasmotaClientFactory(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory, IMessageBus bus)
-    {
-        _loggerFactory = loggerFactory;
-        _httpClientFactory = httpClientFactory;
-        _bus = bus;
-    }
-
     public const string HttpClientName = "Tasmota";
 
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IMessageBus _bus;
+    private readonly ILoggerFactory _loggerFactory = loggerFactory;
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private readonly IMessageBus _bus = bus;
 
     public ITasmotaClient CreateFor(ITasmotaClientConfig config) => config switch
     {

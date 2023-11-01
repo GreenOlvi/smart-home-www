@@ -7,23 +7,17 @@ using Telegram.Bot.Types.Enums;
 
 namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public sealed class TelegramLogForwarder : IHostedService, IMessageHandler<LogEvent>
+public sealed class TelegramLogForwarder(IMessageBus messageBus, long ownerId) : IHostedService, IMessageHandler<LogEvent>
 {
     private const string _defaultCategory = "default";
 
-    private readonly IMessageBus _messageBus;
-    private readonly long _ownerId;
+    private readonly IMessageBus _messageBus = messageBus;
+    private readonly long _ownerId = ownerId;
 
     private readonly Dictionary<string, LogLevel> Levels = new()
     {
         { _defaultCategory, LogLevel.Warning },
     };
-
-    public TelegramLogForwarder(IMessageBus messageBus, long ownerId)
-    {
-        _messageBus = messageBus;
-        _ownerId = ownerId;
-    }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
