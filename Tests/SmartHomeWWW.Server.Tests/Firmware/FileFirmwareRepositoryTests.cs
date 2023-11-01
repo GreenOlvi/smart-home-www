@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using SmartHomeWWW.Core.Firmwares;
+﻿using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Server.Config;
 using SmartHomeWWW.Server.Firmwares;
 
@@ -73,9 +72,9 @@ public class FileFirmwareRepositoryTests
 
         var config = new FirmwaresConfig { Path = @"/firmwares" };
 
-        IFirmwareRepository repo = new FileFirmwareRepository(_logger, config.AsOptionsSnapshot(), fs);
+        var repo = new FileFirmwareRepository(_logger, config.AsOptionsSnapshot(), fs);
 
-        var firmwares = repo.GetFirmwares(UpdateChannel.Alpha);
+        var firmwares = ((IFirmwareRepository)repo).GetFirmwares(UpdateChannel.Alpha);
         firmwares.Should().NotBeNull();
         firmwares.Should().HaveCount(1);
 
@@ -99,9 +98,9 @@ public class FileFirmwareRepositoryTests
 
         var config = new FirmwaresConfig { Path = @"/firmwares" };
 
-        IFirmwareRepository repo = new FileFirmwareRepository(_logger, config.AsOptionsSnapshot(), fs);
+        var repo = new FileFirmwareRepository(_logger, config.AsOptionsSnapshot(), fs);
 
-        var firmware = repo.GetCurrentFirmware(UpdateChannel.Alpha);
+        var firmware = ((IFirmwareRepository)repo).GetCurrentFirmware(UpdateChannel.Alpha);
         firmware.Should().NotBeNull();
         firmware!.Version.Should().Be(FirmwareVersion.Parse("1.0.1-alpha"));
         firmware.Channel.Should().Be(UpdateChannel.Alpha);

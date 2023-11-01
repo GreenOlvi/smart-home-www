@@ -75,7 +75,7 @@ public class WeatherReportRepository : IWeatherReportRepository
         await CleanExpired();
     }
 
-    private Task CleanExpired(CancellationToken cancellationToken = default) =>
+    private Task<int> CleanExpired(CancellationToken cancellationToken = default) =>
         _db.WeatherCaches.Where(w => w.Expires <= DateTime.UtcNow).ExecuteDeleteAsync(cancellationToken);
 
     private bool TryDeserialize(string value, out WeatherReport weatherReport)

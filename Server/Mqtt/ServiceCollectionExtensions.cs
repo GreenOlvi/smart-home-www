@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using MQTTnet;
 using MQTTnet.Client;
 using SmartHomeWWW.Server.Config;
 

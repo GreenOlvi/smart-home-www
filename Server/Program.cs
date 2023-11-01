@@ -97,7 +97,7 @@ internal static class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddResponseCompression(opts =>
         {
-            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
         });
 
         builder.Services.AddScoped<IFirmwareRepository, FileFirmwareRepository>();

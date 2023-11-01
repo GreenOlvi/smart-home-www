@@ -26,6 +26,8 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
     private readonly IWeatherReportRepository _weatherReportRepository;
     private readonly SmartHomeDbContext _db;
 
+    private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
+
     public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, IOptions<TelegramConfig> telegramConfig,
         IKeyValueStore cache, IWeatherReportRepository weatherReportRepository, SmartHomeDbContext db)
     {
@@ -44,7 +46,7 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
     {
         await _hubConnection.SendAsync("UpdateWeather", message.Weather);
 
-        if (message.Weather.Alerts.Any())
+        if (message.Weather.Alerts.Count > 0)
         {
             await NotifyAlerts(message.Weather.Alerts);
         }
@@ -97,7 +99,7 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
             return;
         }
 
-        var weather = JsonSerializer.Deserialize<WeatherReport?>(message.Payload, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var weather = JsonSerializer.Deserialize<WeatherReport?>(message.Payload, _serializerOptions);
         if (weather is null)
         {
             _logger.LogWarning("Could not parse weather data");
