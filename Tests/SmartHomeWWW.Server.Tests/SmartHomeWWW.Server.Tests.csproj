@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AnalysisLevel>7.0-recommended</AnalysisLevel>
+    <AnalysisLevel>8.0-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>

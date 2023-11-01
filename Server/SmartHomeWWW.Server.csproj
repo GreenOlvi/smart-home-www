@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>330fbfdb-22a2-423f-a6c6-7e3871ac0d58</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <AnalysisLevel>7.0-recommended</AnalysisLevel>
+    <AnalysisLevel>8.0-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
