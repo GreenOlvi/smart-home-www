@@ -24,4 +24,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 RUN mkdir -p "/data"
 RUN mkdir -p "/firmwares"
+
+ENV HTTP_PORTS=80
+
 ENTRYPOINT ["dotnet", "SmartHomeWWW.Server.dll"]

@@ -1,5 +1,6 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -50,6 +51,11 @@ internal static class Program
         loggerFactory.AddProvider(new MessageBusLoggerProvider(app.Services.GetRequiredService<IMessageBus>()));
 
         // Configure the HTTP request pipeline.
+
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        });
 
         if (app.Environment.IsDevelopment())
         {
