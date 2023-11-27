@@ -5,15 +5,10 @@ using SmartHomeWWW.Core.Domain.Relays;
 
 namespace SmartHomeWWW.Server.Hubs;
 
-public class SensorsHub : Hub
+public class SensorsHub(ILogger<SensorsHub> logger) : Hub
 {
-    public SensorsHub(ILogger<SensorsHub> logger)
-    {
-        _logger = logger;
-    }
-
     public const string RelativePath = "/sensorshub";
-    private readonly ILogger<SensorsHub> _logger;
+    private readonly ILogger<SensorsHub> _logger = logger;
 
     public async Task UpdateSensor(Sensor sensor)
     {

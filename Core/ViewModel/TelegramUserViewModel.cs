@@ -2,14 +2,14 @@
 
 namespace SmartHomeWWW.Core.ViewModel;
 
-public record TelegramUserViewModel
+public readonly record struct TelegramUserViewModel
 {
     public Guid? Id { get; init; }
-    public long? TelegramId { get; set; }
-    public string? Username { get; set; }
-    public string? UserType { get; set; }
+    public long? TelegramId { get; init; }
+    public string? Username { get; init; }
+    public string? UserType { get; init; }
 
-    public static TelegramUserViewModel From(TelegramUser user) => new ()
+    public static TelegramUserViewModel From(TelegramUser user) => new()
     {
         Id = user.Id,
         TelegramId = user.TelegramId,

@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
-using SmartHomeWWW.Core.Infrastructure.Tasmota;
+﻿using SmartHomeWWW.Core.Infrastructure.Tasmota;
 using SmartHomeWWW.Core.MessageBus;
-using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Core.Utils.Functional;
+using SmartHomeWWW.Server.Messages.Commands;
+using System.Text.Json;
 using static SmartHomeWWW.Core.Utils.Functional.Option<System.Text.Json.JsonDocument>;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
@@ -16,7 +16,7 @@ public sealed class TasmotaMqttClient : ITasmotaClient
         _deviceId = deviceId;
 
         _bus.Publish(new MqttSubscribeToTopicCommand { Topic = $"stat/{deviceId}/+" });
-        _logger.LogInformation("Created new MqttClient for '{DeviceId}'", deviceId);
+        _logger.LogDebug("Created new MqttClient for '{DeviceId}'", deviceId);
     }
 
     private readonly ILogger<TasmotaMqttClient> _logger;

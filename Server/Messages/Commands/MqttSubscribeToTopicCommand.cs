@@ -2,7 +2,7 @@
 
 namespace SmartHomeWWW.Server.Messages.Commands;
 
-public record MqttSubscribeToTopicCommand : IMessage
+public readonly record struct MqttSubscribeToTopicCommand : IMessage
 {
-    public string Topic { get; init; } = string.Empty;
+    public string Topic { get; init; }
 }

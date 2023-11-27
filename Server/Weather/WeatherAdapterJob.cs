@@ -14,29 +14,21 @@ using Telegram.Bot.Types.Enums;
 
 namespace SmartHomeWWW.Server.Weather;
 
-public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<WeatherUpdatedEvent>, IMessageHandler<MqttMessageReceivedEvent>
+public sealed class WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, IOptions<TelegramConfig> telegramConfig,
+    IKeyValueStore cache, IWeatherReportRepository weatherReportRepository, SmartHomeDbContext db)
+        : IOrchestratorJob, IMessageHandler<WeatherUpdatedEvent>, IMessageHandler<MqttMessageReceivedEvent>
 {
     private const string WeatherTopic = "env/out/weather";
 
-    private readonly ILogger<WeatherAdapterJob> _logger;
-    private readonly IMessageBus _bus;
-    private readonly IHubConnection _hubConnection;
-    private readonly TelegramConfig _telegramConfig;
-    private readonly IKeyValueStore _cache;
-    private readonly IWeatherReportRepository _weatherReportRepository;
-    private readonly SmartHomeDbContext _db;
+    private readonly ILogger<WeatherAdapterJob> _logger = logger;
+    private readonly IMessageBus _bus = bus;
+    private readonly IHubConnection _hubConnection = hubConnection;
+    private readonly TelegramConfig _telegramConfig = telegramConfig.Value;
+    private readonly IKeyValueStore _cache = cache;
+    private readonly IWeatherReportRepository _weatherReportRepository = weatherReportRepository;
+    private readonly SmartHomeDbContext _db = db;
 
-    public WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, IOptions<TelegramConfig> telegramConfig,
-        IKeyValueStore cache, IWeatherReportRepository weatherReportRepository, SmartHomeDbContext db)
-    {
-        _logger = logger;
-        _bus = bus;
-        _hubConnection = hubConnection;
-        _telegramConfig = telegramConfig.Value;
-        _cache = cache;
-        _weatherReportRepository = weatherReportRepository;
-        _db = db;
-    }
+    private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
@@ -44,7 +36,7 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
     {
         await _hubConnection.SendAsync("UpdateWeather", message.Weather);
 
-        if (message.Weather.Alerts.Any())
+        if (message.Weather.Alerts.Count > 0)
         {
             await NotifyAlerts(message.Weather.Alerts);
         }
@@ -97,7 +89,7 @@ public sealed class WeatherAdapterJob : IOrchestratorJob, IMessageHandler<Weathe
             return;
         }
 
-        var weather = JsonSerializer.Deserialize<WeatherReport?>(message.Payload, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var weather = JsonSerializer.Deserialize<WeatherReport?>(message.Payload, _serializerOptions);
         if (weather is null)
         {
             _logger.LogWarning("Could not parse weather data");

@@ -1,26 +1,20 @@
-﻿using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.TelegramBotModule.Messages.Commands;
+using System.Text;
 using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.TelegramBotModule.BotCommands;
 
-public class UsersCommand : ITelegramBotCommand
+public class UsersCommand(IMessageBus bus, IDbContextFactory<SmartHomeDbContext> dbContextFactory) : ITelegramBotCommand
 {
-    private readonly IMessageBus _bus;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-
-    public UsersCommand(IMessageBus bus, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
-    {
-        _bus = bus;
-        _dbContextFactory = dbContextFactory;
-    }
+    private readonly IMessageBus _bus = bus;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
 
     public Task Run(Message message, CancellationToken cancellationToken = default)
     {
-        var args = message.Text?.Split(' ') ?? Array.Empty<string>();
+        var args = message.Text?.Split(' ') ?? [];
 
         if (args.Length < 1)
         {

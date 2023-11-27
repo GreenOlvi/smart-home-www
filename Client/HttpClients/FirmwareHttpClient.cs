@@ -1,17 +1,12 @@
-﻿using System.Net.Http.Json;
-using SmartHomeWWW.Core.Firmwares;
+﻿using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.ViewModel;
+using System.Net.Http.Json;
 
 namespace SmartHomeWWW.Client.HttpClients;
 
-public class FirmwareHttpClient
+public class FirmwareHttpClient(HttpClient http)
 {
-    public FirmwareHttpClient(HttpClient http)
-    {
-        _httpClient = http;
-    }
-
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = http;
 
     public async Task<IEnumerable<FirmwareViewModel>> GetAllFirmwares(CancellationToken cancellationToken = default) =>
         await _httpClient.GetFromJsonAsync<IEnumerable<FirmwareViewModel>>("api/update", cancellationToken)

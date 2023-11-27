@@ -4,19 +4,12 @@ using SmartHomeWWW.Server.Messages.Events;
 
 namespace SmartHomeWWW.Server.Watchdog;
 
-public sealed class MqttWatchJob : WatchJob, IMessageHandler<MqttMessageReceivedEvent>, IAsyncDisposable
+public sealed class MqttWatchJob(ILogger<MqttWatchJob> logger, string topic, TimeSpan timeout, Action onTimeout, IMessageBus bus)
+    : WatchJob(timeout, onTimeout), IMessageHandler<MqttMessageReceivedEvent>, IAsyncDisposable
 {
-    private readonly ILogger<MqttWatchJob> _logger;
-    private readonly string _topic;
-    private readonly IMessageBus _messageBus;
-
-    public MqttWatchJob(ILogger<MqttWatchJob> logger, string topic, TimeSpan timeout, Action onTimeout, IMessageBus bus)
-        : base(timeout, onTimeout)
-    {
-        _logger = logger;
-        _topic = topic;
-        _messageBus = bus;
-    }
+    private readonly ILogger<MqttWatchJob> _logger = logger;
+    private readonly string _topic = topic;
+    private readonly IMessageBus _messageBus = bus;
 
     public override void Init()
     {

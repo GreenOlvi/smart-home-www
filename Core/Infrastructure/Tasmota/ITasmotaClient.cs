@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using SmartHomeWWW.Core.Utils.Functional;
 
 namespace SmartHomeWWW.Core.Infrastructure.Tasmota;

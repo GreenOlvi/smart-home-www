@@ -8,16 +8,10 @@ namespace SmartHomeWWW.Server.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class SensorsController : ControllerBase
+public class SensorsController(ILogger<SensorsController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory) : ControllerBase
 {
-    public SensorsController(ILogger<SensorsController> logger, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
-    {
-        _logger = logger;
-        _dbContextFactory = dbContextFactory;
-    }
-
-    private readonly ILogger<SensorsController> _logger;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
+    private readonly ILogger<SensorsController> _logger = logger;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]

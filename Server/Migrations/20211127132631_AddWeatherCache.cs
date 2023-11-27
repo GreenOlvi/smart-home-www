@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SmartHomeWWW.Migrations
 {
@@ -9,8 +8,7 @@ namespace SmartHomeWWW.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "WeatherCaches",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),

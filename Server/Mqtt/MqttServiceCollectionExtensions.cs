@@ -4,7 +4,7 @@ using SmartHomeWWW.Server.Config;
 
 namespace SmartHomeWWW.Server.Mqtt;
 
-public static class ServiceCollectionExtensions
+public static class MqttServiceCollectionExtensions
 {
     public static IServiceCollection AddMqttClientHostedService(this IServiceCollection services, Action<MqttClientOptionsBuilder> config)
     {

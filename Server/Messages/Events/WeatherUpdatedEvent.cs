@@ -3,8 +3,8 @@ using SmartHomeWWW.Core.MessageBus;
 
 namespace SmartHomeWWW.Server.Messages.Events;
 
-public class WeatherUpdatedEvent : IMessage
+public readonly record struct WeatherUpdatedEvent : IMessage
 {
-    public string Type { get; init; } = string.Empty;
+    public string Type { get; init; }
     public WeatherReport Weather { get; init; }
 }

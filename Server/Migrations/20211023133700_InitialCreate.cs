@@ -7,8 +7,7 @@ namespace SmartHomeWWW.Migrations
         protected override void Up(MigrationBuilder migrationBuilder) =>
             _ = migrationBuilder.CreateTable(
                 name: "Sensors",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Mac = table.Column<string>(type: "TEXT", nullable: true),
                     Alias = table.Column<string>(type: "TEXT", nullable: true),

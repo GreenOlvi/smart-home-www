@@ -25,7 +25,7 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
         _httpClientFactory = httpClientFactory;
         _dbContextFactory = dbContextFactory;
 
-        var httpClient =  _config.HttpClientName is null
+        var httpClient = _config.HttpClientName is null
             ? _httpClientFactory.CreateClient()
             : _httpClientFactory.CreateClient(_config.HttpClientName);
 
@@ -39,7 +39,7 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
 
     private readonly ITelegramBotClient _bot;
-    private readonly HashSet<long> _allowedUsers = new();
+    private readonly HashSet<long> _allowedUsers = [];
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 

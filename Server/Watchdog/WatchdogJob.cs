@@ -14,14 +14,14 @@ public sealed class WatchdogJob : IOrchestratorJob
         _logger = logger;
 
         // TODO: load list from settings
-        _jobs = new List<WatchJob>
-        {
+        _jobs =
+        [
             new MqttWatchJob(loggerFactory.CreateLogger<MqttWatchJob>(),
                 "rfbridge/OpenMQTTGateway_ESP8266_RF-CC1101/SYStoMQTT",
                 TimeSpan.FromSeconds(120 * 1.5),
                 () => _logger.LogError("RFBridge missed keepalive message"),
                 bus),
-        };
+        ];
     }
 
     public Task Start(CancellationToken cancellationToken)

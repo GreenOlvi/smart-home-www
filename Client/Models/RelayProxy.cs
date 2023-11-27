@@ -5,18 +5,12 @@ using SmartHomeWWW.Core.ViewModel;
 
 namespace SmartHomeWWW.Client.Models;
 
-public class RelayProxy
+public class RelayProxy(RelayEntryViewModel relay, RelaysHttpClient client)
 {
     private static readonly TimeSpan RelayClientTimeout = TimeSpan.FromSeconds(5);
 
-    private readonly RelayEntryViewModel _relay;
-    private readonly RelaysHttpClient _client;
-
-    public RelayProxy(RelayEntryViewModel relay, RelaysHttpClient client)
-    {
-        _relay = relay;
-        _client = client;
-    }
+    private readonly RelayEntryViewModel _relay = relay;
+    private readonly RelaysHttpClient _client = client;
 
     public Guid Id => _relay.Id;
     public string Name => _relay.Name;

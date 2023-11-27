@@ -10,18 +10,12 @@ namespace SmartHomeWWW.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UpdateController : ControllerBase
+public class UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
+    : ControllerBase
 {
-    private readonly ILogger<UpdateController> _logger;
-    private readonly IFirmwareRepository _firmwareRepository;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-
-    public UpdateController(ILogger<UpdateController> logger, IFirmwareRepository firmwareRepository, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
-    {
-        _logger = logger;
-        _firmwareRepository = firmwareRepository;
-        _dbContextFactory = dbContextFactory;
-    }
+    private readonly ILogger<UpdateController> _logger = logger;
+    private readonly IFirmwareRepository _firmwareRepository = firmwareRepository;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
 
     [HttpGet]
     public ActionResult<IEnumerable<IFirmware>> GetFirmwares() =>
@@ -43,7 +37,7 @@ public class UpdateController : ControllerBase
     {
         _logger.LogTrace("{Headers}", DumpHeaders(Request.Headers));
 
-        var userAgent = Request.Headers["User-Agent"];
+        var userAgent = Request.Headers.UserAgent;
         if (userAgent != "ESP8266-http-Update")
         {
             _logger.LogDebug("Not ESP");

@@ -15,8 +15,7 @@ public record RelayEntry
     public string Name { get; set; } = string.Empty;
 
     [Column("Config")]
-    public string ConfigSerialized
-    {
+    public string ConfigSerialized {
         get => JsonSerializer.Serialize(Config, SerializerOptions);
         set => Config = JsonSerializer.Deserialize<object>(value, SerializerOptions) ?? new { };
     }

@@ -4,14 +4,9 @@ using SmartHomeWWW.Core.Infrastructure;
 
 namespace SmartHomeWWW.Server.HealthChecks;
 
-public class DbHealthCheck : IHealthCheck
+public class DbHealthCheck(IDbContextFactory<SmartHomeDbContext> contextFactory) : IHealthCheck
 {
-    private readonly IDbContextFactory<SmartHomeDbContext> _contextFactory;
-
-    public DbHealthCheck(IDbContextFactory<SmartHomeDbContext> contextFactory)
-    {
-        _contextFactory = contextFactory;
-    }
+    private readonly IDbContextFactory<SmartHomeDbContext> _contextFactory = contextFactory;
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
@@ -21,7 +16,7 @@ public class DbHealthCheck : IHealthCheck
             var _ = await db.Database.ExecuteSqlAsync($"SELECT 1", cancellationToken: cancellationToken);
             return HealthCheckResult.Healthy();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return HealthCheckResult.Unhealthy(context.Registration.FailureStatus.ToString(), exception: ex);
         }

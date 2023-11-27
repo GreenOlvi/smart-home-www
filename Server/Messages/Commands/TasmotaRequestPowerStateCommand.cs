@@ -2,7 +2,7 @@
 
 namespace SmartHomeWWW.Server.Messages.Commands;
 
-public record TasmotaRequestPowerStateCommand : IMessage
+public readonly record struct TasmotaRequestPowerStateCommand : IMessage
 {
-    public string DeviceName { get; init; } = string.Empty;
+    public string DeviceName { get; init; }
 }

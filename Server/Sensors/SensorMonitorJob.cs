@@ -10,21 +10,13 @@ using System.Text.RegularExpressions;
 
 namespace SmartHomeWWW.Server.Sensors;
 
-public sealed class SensorMonitorJob : IOrchestratorJob, IMessageHandler<MqttMessageReceivedEvent>
+public sealed partial class SensorMonitorJob(ILogger<SensorMonitorJob> logger, IMessageBus bus, IDbContextFactory<SmartHomeDbContext> dbContextFactory,
+    IHubConnection hubConnection) : IOrchestratorJob, IMessageHandler<MqttMessageReceivedEvent>
 {
-    private readonly ILogger<SensorMonitorJob> _logger;
-    private readonly IMessageBus _bus;
-    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
-    private readonly IHubConnection _hubConnection;
-
-    public SensorMonitorJob(ILogger<SensorMonitorJob> logger, IMessageBus bus, IDbContextFactory<SmartHomeDbContext> dbContextFactory,
-        IHubConnection hubConnection)
-    {
-        _logger = logger;
-        _bus = bus;
-        _dbContextFactory = dbContextFactory;
-        _hubConnection = hubConnection;
-    }
+    private readonly ILogger<SensorMonitorJob> _logger = logger;
+    private readonly IMessageBus _bus = bus;
+    private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory = dbContextFactory;
+    private readonly IHubConnection _hubConnection = hubConnection;
 
     public Task Start(CancellationToken cancellationToken = default)
     {
@@ -41,7 +33,7 @@ public sealed class SensorMonitorJob : IOrchestratorJob, IMessageHandler<MqttMes
         return Task.CompletedTask;
     }
 
-    private static readonly Regex TopicMatch = new(@"^env/[^//]+/data", RegexOptions.Compiled);
+    private static readonly Regex TopicMatch = BuildTopicMatch();
 
     public Task Handle(MqttMessageReceivedEvent message)
     {
@@ -87,4 +79,7 @@ public sealed class SensorMonitorJob : IOrchestratorJob, IMessageHandler<MqttMes
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+    [GeneratedRegex(@"^env/[^//]+/data", RegexOptions.Compiled)]
+    private static partial Regex BuildTopicMatch();
 }

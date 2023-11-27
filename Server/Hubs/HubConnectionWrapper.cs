@@ -4,14 +4,9 @@ using SmartHomeWWW.Core.Domain.Relays;
 
 namespace SmartHomeWWW.Server.Hubs;
 
-public class HubConnectionWrapper : IHubConnection
+public class HubConnectionWrapper(HubConnection hubConnection) : IHubConnection
 {
-    private readonly HubConnection _hubConnection;
-
-    public HubConnectionWrapper(HubConnection hubConnection)
-    {
-        _hubConnection = hubConnection;
-    }
+    private readonly HubConnection _hubConnection = hubConnection;
 
     public HubConnectionState State => _hubConnection.State;
 

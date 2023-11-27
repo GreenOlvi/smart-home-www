@@ -1,24 +1,17 @@
-﻿using System.IO.Abstractions;
-using System.Text.RegularExpressions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SmartHomeWWW.Core.Firmwares;
 using SmartHomeWWW.Core.Utils;
 using SmartHomeWWW.Server.Config;
+using System.IO.Abstractions;
+using System.Text.RegularExpressions;
 
 namespace SmartHomeWWW.Server.Firmwares;
 
-public class FileFirmwareRepository : IFirmwareRepository
+public partial class FileFirmwareRepository(ILogger<FileFirmwareRepository> logger, IOptionsSnapshot<FirmwaresConfig> config, IFileSystem fileSystem) : IFirmwareRepository
 {
-    private readonly ILogger<FileFirmwareRepository> _logger;
-    private readonly IFileSystem _fileSystem;
-    private readonly string _firmwarePath;
-
-    public FileFirmwareRepository(ILogger<FileFirmwareRepository> logger, IOptionsSnapshot<FirmwaresConfig> config, IFileSystem fileSystem)
-    {
-        _logger = logger;
-        _firmwarePath = config.Value.Path;
-        _fileSystem = fileSystem;
-    }
+    private readonly ILogger<FileFirmwareRepository> _logger = logger;
+    private readonly IFileSystem _fileSystem = fileSystem;
+    private readonly string _firmwarePath = config.Value.Path;
 
     public IEnumerable<IFirmware> GetAllFirmwares()
     {
@@ -82,5 +75,8 @@ public class FileFirmwareRepository : IFirmwareRepository
         return false;
     }
 
-    private static readonly Regex FirmwareVersionExtract = new (@"firmware\.(?<version>[^-]+)(-(?<suffix>.+))?\.bin", RegexOptions.Compiled);
+    private static readonly Regex FirmwareVersionExtract = BuildFirmwareVersionPattern();
+
+    [GeneratedRegex(@"firmware\.(?<version>[^-]+)(-(?<suffix>.+))?\.bin", RegexOptions.Compiled)]
+    private static partial Regex BuildFirmwareVersionPattern();
 }

@@ -3,14 +3,9 @@ using SmartHomeWWW.Core.MessageBus.Events;
 
 namespace SmartHomeWWW.Server.Infrastructure;
 
-public sealed class MessageBusLoggerProvider : ILoggerProvider
+public sealed class MessageBusLoggerProvider(IMessageBus messageBus) : ILoggerProvider
 {
-    private readonly IMessageBus _messageBus;
-
-    public MessageBusLoggerProvider(IMessageBus messageBus)
-    {
-        _messageBus = messageBus;
-    }
+    private readonly IMessageBus _messageBus = messageBus;
 
     public ILogger CreateLogger(string categoryName) => new MessageBusLogger(_messageBus, categoryName);
 
@@ -18,16 +13,10 @@ public sealed class MessageBusLoggerProvider : ILoggerProvider
     {
     }
 
-    public class MessageBusLogger : ILogger
+    public class MessageBusLogger(IMessageBus messageBus, string category) : ILogger
     {
-        private readonly IMessageBus _messageBus;
-        private readonly string _category;
-
-        public MessageBusLogger(IMessageBus messageBus, string category)
-        {
-            _messageBus = messageBus;
-            _category = category;
-        }
+        private readonly IMessageBus _messageBus = messageBus;
+        private readonly string _category = category;
 
         public IDisposable BeginScope<TState>(TState state) where TState : notnull => new NoopDisposable();
 
