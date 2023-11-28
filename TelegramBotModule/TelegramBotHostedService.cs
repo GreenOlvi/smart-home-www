@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +15,9 @@ namespace SmartHomeWWW.Server.TelegramBotModule;
 
 public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<TelegramSendTextMessageCommand>,
-    IMessageHandler<TelegramRefreshAllowedUsersCommand>
+    IMessageHandler<TelegramRefreshAllowedUsersCommand>,
+    IConsumer<TelegramSendTextMessageCommand>,
+    IConsumer<TelegramRefreshAllowedUsersCommand>
 {
     public TelegramBotHostedService(ILogger<TelegramBotHostedService> logger, IHttpClientFactory httpClientFactory, IOptions<TelegramConfig> config,
         IMessageBus messageBus, IDbContextFactory<SmartHomeDbContext> dbContextFactory)
@@ -145,4 +148,6 @@ public sealed class TelegramBotHostedService : IHostedService, IAsyncDisposable,
     }
 
     public Task Handle(TelegramRefreshAllowedUsersCommand message) => LoadAllowedUsers();
+    public Task Consume(ConsumeContext<TelegramSendTextMessageCommand> context) => Handle(context.Message);
+    public Task Consume(ConsumeContext<TelegramRefreshAllowedUsersCommand> context) => Handle(context.Message);
 }

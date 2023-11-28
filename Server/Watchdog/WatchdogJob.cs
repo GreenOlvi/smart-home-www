@@ -1,4 +1,5 @@
-﻿using SmartHomeWWW.Core.MessageBus;
+﻿using MassTransit;
+using SmartHomeWWW.Core.MessageBus;
 
 namespace SmartHomeWWW.Server.Watchdog;
 
@@ -9,7 +10,7 @@ public sealed class WatchdogJob : IOrchestratorJob
     private Timer? _timer;
     private bool _didInit;
 
-    public WatchdogJob(ILogger<WatchdogJob> logger, ILoggerFactory loggerFactory, IMessageBus bus)
+    public WatchdogJob(ILogger<WatchdogJob> logger, ILoggerFactory loggerFactory, IMessageBus bus, IPublishEndpoint publisher)
     {
         _logger = logger;
 
@@ -20,7 +21,8 @@ public sealed class WatchdogJob : IOrchestratorJob
                 "rfbridge/OpenMQTTGateway_ESP8266_RF-CC1101/SYStoMQTT",
                 TimeSpan.FromSeconds(120 * 1.5),
                 () => _logger.LogError("RFBridge missed keepalive message"),
-                bus),
+                bus,
+                publisher),
         ];
     }
 

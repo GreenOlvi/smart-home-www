@@ -1,4 +1,5 @@
 using HealthChecks.UI.Client;
+using MassTransit;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ using SmartHomeWWW.Server.TelegramBotModule;
 using SmartHomeWWW.Server.Watchdog;
 using SmartHomeWWW.Server.Weather;
 using System.IO.Abstractions;
+using System.Reflection;
 
 namespace SmartHomeWWW.Server;
 
@@ -137,6 +139,19 @@ internal static class Program
 
         builder.Services.AddSingleton<IFileSystem, FileSystem>();
         builder.Services.AddSingleton<IMessageBus, BasicMessageBus>();
+
+        builder.Services.AddMassTransit(busConfigurator =>
+        {
+            busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+            var assembly = Assembly.GetEntryAssembly();
+            busConfigurator.AddConsumers(assembly);
+
+            busConfigurator.UsingInMemory((ctx, config) =>
+            {
+                config.ConfigureEndpoints(ctx);
+            });
+        });
 
         builder.Services.AddHostedService<Orchestrator>();
         builder.Services.AddTransient<MqttTasmotaAdapter>();

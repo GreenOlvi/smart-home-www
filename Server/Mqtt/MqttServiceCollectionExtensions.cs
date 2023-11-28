@@ -32,7 +32,7 @@ public static class MqttServiceCollectionExtensions
 
     public static IServiceCollection AddMqttClientHostedService(this IServiceCollection services)
     {
-        services.AddSingleton(sp =>
+        services.AddTransient(sp =>
         {
             var config = sp.GetRequiredService<IOptions<MqttConfig>>().Value;
             var opt = new MqttClientOptionsBuilder();

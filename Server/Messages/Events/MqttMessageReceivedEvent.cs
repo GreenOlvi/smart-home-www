@@ -2,8 +2,8 @@
 
 namespace SmartHomeWWW.Server.Messages.Events;
 
-public readonly record struct MqttMessageReceivedEvent : IMessage
+public record MqttMessageReceivedEvent : IMessage
 {
-    public string Topic { get; init; }
-    public string Payload { get; init; }
+    public required string Topic { get; init; }
+    public required string Payload { get; init; }
 }

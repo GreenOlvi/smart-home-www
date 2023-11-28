@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using MassTransit;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Core.MessageBus.Events;
@@ -7,7 +8,9 @@ using Telegram.Bot.Types.Enums;
 
 namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public sealed class TelegramLogForwarder(IMessageBus messageBus, long ownerId) : IHostedService, IMessageHandler<LogEvent>
+public sealed class TelegramLogForwarder(IMessageBus messageBus, long ownerId) : IHostedService,
+    IMessageHandler<LogEvent>,
+    IConsumer<LogEvent>
 {
     private const string _defaultCategory = "default";
 
@@ -45,6 +48,8 @@ public sealed class TelegramLogForwarder(IMessageBus messageBus, long ownerId) :
 
         return Task.CompletedTask;
     }
+
+    public Task Consume(ConsumeContext<LogEvent> context) => Handle(context.Message);
 
     private TelegramSendTextMessageCommand CreateMessage(LogEvent log) => new()
     {

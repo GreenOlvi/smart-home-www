@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using MassTransit;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.TelegramBotModule.Authorisation;
@@ -9,7 +10,10 @@ using Telegram.Bot.Types;
 
 namespace SmartHomeWWW.Server.TelegramBotModule;
 
-public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandler<TelegramMessageReceivedEvent>, IDisposable
+public sealed class TelegramBotCommandHandlerJob : IHostedService,
+    IMessageHandler<TelegramMessageReceivedEvent>,
+    IConsumer<TelegramMessageReceivedEvent>,
+    IDisposable
 {
     public TelegramBotCommandHandlerJob(ILogger<TelegramBotCommandHandlerJob> logger, IMessageBus bus, IAuthorisationService authorisationService, IServiceProvider serviceProvider)
     {
@@ -75,6 +79,8 @@ public sealed class TelegramBotCommandHandlerJob : IHostedService, IMessageHandl
 
         return instance.Run(message.Message, _cancellationTokenSource.Token);
     }
+
+    public Task Consume(ConsumeContext<TelegramMessageReceivedEvent> context) => Handle(context.Message);
 
     private async Task HandleMessageWithoutText(TelegramMessageReceivedEvent message)
     {

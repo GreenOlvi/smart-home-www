@@ -9,9 +9,7 @@ public class WatchJob(TimeSpan timeout, Action onTimeout)
 
     public bool IsRunning { get; private set; }
 
-    public virtual void Init()
-    {
-    }
+    public virtual Task Init() => Task.CompletedTask;
 
     public virtual void Start()
     {

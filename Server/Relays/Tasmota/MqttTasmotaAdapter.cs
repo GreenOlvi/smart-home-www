@@ -1,4 +1,5 @@
-﻿using SmartHomeWWW.Core.MessageBus;
+﻿using MassTransit;
+using SmartHomeWWW.Core.MessageBus;
 using SmartHomeWWW.Server.Messages.Commands;
 using SmartHomeWWW.Server.Messages.Events;
 using System.Text.Json;
@@ -7,7 +8,9 @@ namespace SmartHomeWWW.Server.Relays.Tasmota;
 
 public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
     IMessageHandler<MqttMessageReceivedEvent>,
-    IMessageHandler<TasmotaRequestPowerStateCommand>
+    IMessageHandler<TasmotaRequestPowerStateCommand>,
+    IConsumer<MqttMessageReceivedEvent>,
+    IConsumer<TasmotaRequestPowerStateCommand>
 {
     private readonly ILogger<MqttTasmotaAdapter> _logger;
     private readonly IMessageBus _bus;
@@ -83,4 +86,7 @@ public sealed partial class MqttTasmotaAdapter : IOrchestratorJob,
         });
         return Task.CompletedTask;
     }
+
+    public Task Consume(ConsumeContext<MqttMessageReceivedEvent> context) => Handle(context.Message);
+    public Task Consume(ConsumeContext<TasmotaRequestPowerStateCommand> context) => Handle(context.Message);
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using MassTransit;
+using Microsoft.Extensions.Options;
 using SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 using SmartHomeWWW.Core.Domain.Repositories;
 using SmartHomeWWW.Core.Infrastructure;
@@ -15,8 +16,12 @@ using Telegram.Bot.Types.Enums;
 namespace SmartHomeWWW.Server.Weather;
 
 public sealed class WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessageBus bus, IHubConnection hubConnection, IOptions<TelegramConfig> telegramConfig,
-    IKeyValueStore cache, IWeatherReportRepository weatherReportRepository, SmartHomeDbContext db)
-        : IOrchestratorJob, IMessageHandler<WeatherUpdatedEvent>, IMessageHandler<MqttMessageReceivedEvent>
+    IKeyValueStore cache, IWeatherReportRepository weatherReportRepository, SmartHomeDbContext db) :
+        IOrchestratorJob,
+        IMessageHandler<WeatherUpdatedEvent>,
+        IMessageHandler<MqttMessageReceivedEvent>,
+        IConsumer<WeatherUpdatedEvent>,
+        IConsumer<MqttMessageReceivedEvent>
 {
     private const string WeatherTopic = "env/out/weather";
 
@@ -41,6 +46,8 @@ public sealed class WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessag
             await NotifyAlerts(message.Weather.Alerts);
         }
     }
+
+    public Task Consume(ConsumeContext<WeatherUpdatedEvent> context) => Handle(context.Message);
 
     private async Task NotifyAlerts(IEnumerable<WeatherAlert> alerts)
     {
@@ -104,4 +111,6 @@ public sealed class WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessag
 
         _bus.Publish(new WeatherUpdatedEvent { Type = "current", Weather = weather.Value });
     }
+
+    public Task Consume(ConsumeContext<MqttMessageReceivedEvent> context) => Handle(context.Message);
 }

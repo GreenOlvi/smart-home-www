@@ -1,4 +1,5 @@
-﻿using MQTTnet;
+﻿using MassTransit;
+using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Exceptions;
 using Polly;
@@ -11,12 +12,15 @@ namespace SmartHomeWWW.Server.Mqtt;
 
 public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     IMessageHandler<MqttPublishMessageCommand>,
-    IMessageHandler<MqttSubscribeToTopicCommand>
+    IMessageHandler<MqttSubscribeToTopicCommand>,
+    IConsumer<MqttPublishMessageCommand>,
+    IConsumer<MqttSubscribeToTopicCommand>
 {
     private readonly ILogger<MqttClientHostedService> _logger;
     private readonly IMqttClient _client;
     private readonly MqttClientOptions _options;
-    private readonly IMessageBus _bus;
+    private readonly IMessageBus _messageBus;
+    private readonly IBus _bus;
     private bool _stayConnected;
     private bool _connecting;
     private readonly AsyncPolicy ConnectPolicy;
@@ -26,11 +30,12 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     private readonly List<string> _subscribedTopics = [];
     private readonly Queue<MqttPublishMessageCommand> _queuedMessages = new();
 
-    public MqttClientHostedService(ILogger<MqttClientHostedService> logger, MqttClientOptions options, IMessageBus bus)
+    public MqttClientHostedService(ILogger<MqttClientHostedService> logger, MqttClientOptions options, IMessageBus messageBus, IBus bus)
     {
         _logger = logger;
         _client = new MqttFactory().CreateMqttClient();
         _options = options;
+        _messageBus = messageBus;
         _bus = bus;
 
         _client.ConnectedAsync += async e =>
@@ -61,13 +66,13 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
             return Task.CompletedTask;
         };
 
-        _client.ApplicationMessageReceivedAsync += e =>
+        _client.ApplicationMessageReceivedAsync += async e =>
         {
             var topic = e.ApplicationMessage.Topic;
             var payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
             _logger.LogDebug("Mqtt message received:\n{Topic}\n{Payload}", topic, payload);
-            _bus.Publish(new MqttMessageReceivedEvent { Topic = topic, Payload = payload });
-            return Task.CompletedTask;
+            _messageBus.Publish(new MqttMessageReceivedEvent { Topic = topic, Payload = payload });
+            await _bus.Publish<MqttMessageReceivedEvent>(new() { Topic = topic, Payload = payload });
         };
 
         ConnectPolicy = Policy
@@ -87,8 +92,8 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
 
         StartConnecting();
 
-        _bus.Subscribe<MqttPublishMessageCommand>(this);
-        _bus.Subscribe<MqttSubscribeToTopicCommand>(this);
+        _messageBus.Subscribe<MqttPublishMessageCommand>(this);
+        _messageBus.Subscribe<MqttSubscribeToTopicCommand>(this);
 
         return Task.CompletedTask;
     }
@@ -96,8 +101,8 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _stayConnected = false;
-        _bus.Unsubscribe<MqttPublishMessageCommand>(this);
-        _bus.Unsubscribe<MqttSubscribeToTopicCommand>(this);
+        _messageBus.Unsubscribe<MqttPublishMessageCommand>(this);
+        _messageBus.Unsubscribe<MqttSubscribeToTopicCommand>(this);
 
         _logger.LogInformation("Mqtt service stopped");
         await _client.DisconnectAsync(new MqttClientDisconnectOptions(), cancellationToken: cancellationToken);
@@ -156,11 +161,35 @@ public sealed class MqttClientHostedService : IHostedService, IAsyncDisposable,
         return _client.PublishAsync(builder.Build());
     }
 
+    public Task Consume(ConsumeContext<MqttPublishMessageCommand> context)
+    {
+        var message = context.Message;
+        if (!_client.IsConnected)
+        {
+            _logger.LogWarning("Mqtt client not connected. Message queued.");
+            _queuedMessages.Enqueue(message);
+            return Task.CompletedTask;
+        }
+
+        var builder = new MqttApplicationMessageBuilder()
+            .WithTopic(message.Topic)
+            .WithPayload(message.Payload);
+        return _client.PublishAsync(builder.Build());
+    }
+
     public Task Handle(MqttSubscribeToTopicCommand message)
     {
         _subscribedTopics.Add(message.Topic);
         return _client.IsConnected
             ? _client.SubscribeAsync(message.Topic)
+            : Task.CompletedTask;
+    }
+
+    public Task Consume(ConsumeContext<MqttSubscribeToTopicCommand> context)
+    {
+        _subscribedTopics.Add(context.Message.Topic);
+        return _client.IsConnected
+            ? _client.SubscribeAsync(context.Message.Topic)
             : Task.CompletedTask;
     }
 }

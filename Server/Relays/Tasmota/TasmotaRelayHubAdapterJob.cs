@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Relays;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.Infrastructure.Tasmota;
@@ -10,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace SmartHomeWWW.Server.Relays.Tasmota;
 
-public sealed partial class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandler<TasmotaPropertyUpdateEvent>
+public sealed partial class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessageHandler<TasmotaPropertyUpdateEvent>, IConsumer<TasmotaPropertyUpdateEvent>
 {
     private readonly IDbContextFactory<SmartHomeDbContext> _dbContextFactory;
     private readonly IMessageBus _bus;
@@ -76,6 +77,8 @@ public sealed partial class TasmotaRelayHubAdapterJob : IOrchestratorJob, IMessa
 
         await _hubConnection.SendUpdateRelayState(id.Value, state);
     }
+
+    public Task Consume(ConsumeContext<TasmotaPropertyUpdateEvent> context) => Handle(context.Message);
 
     private Task<Guid?> GetRelayId(string deviceId, int relayId) =>
         Task.FromResult((Guid?)(_deviceIdCache.Value.TryGetValue($"{deviceId}-{relayId}", out var id) ? id : null));

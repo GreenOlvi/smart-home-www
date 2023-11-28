@@ -2,8 +2,8 @@
 
 namespace SmartHomeWWW.Server.Messages.Commands;
 
-public readonly record struct MqttPublishMessageCommand : IMessage
+public record MqttPublishMessageCommand : IMessage
 {
-    public string Topic { get; init; }
-    public string Payload { get; init; }
+    public required string Topic { get; init; }
+    public string? Payload { get; init; }
 }

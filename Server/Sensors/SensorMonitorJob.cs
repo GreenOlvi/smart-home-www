@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using SmartHomeWWW.Core.Domain.Entities;
 using SmartHomeWWW.Core.Infrastructure;
 using SmartHomeWWW.Core.MessageBus;
@@ -11,7 +12,7 @@ using System.Text.RegularExpressions;
 namespace SmartHomeWWW.Server.Sensors;
 
 public sealed partial class SensorMonitorJob(ILogger<SensorMonitorJob> logger, IMessageBus bus, IDbContextFactory<SmartHomeDbContext> dbContextFactory,
-    IHubConnection hubConnection) : IOrchestratorJob, IMessageHandler<MqttMessageReceivedEvent>
+    IHubConnection hubConnection) : IOrchestratorJob, IMessageHandler<MqttMessageReceivedEvent>, IConsumer<MqttMessageReceivedEvent>
 {
     private readonly ILogger<SensorMonitorJob> _logger = logger;
     private readonly IMessageBus _bus = bus;
@@ -54,6 +55,8 @@ public sealed partial class SensorMonitorJob(ILogger<SensorMonitorJob> logger, I
 
         return UpdateSensorAndNotify(data);
     }
+
+    public Task Consume(ConsumeContext<MqttMessageReceivedEvent> context) => Handle(context.Message);
 
     private async Task UpdateSensorAndNotify(SensorEnvData data)
     {
