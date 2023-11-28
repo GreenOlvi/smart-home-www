@@ -184,6 +184,7 @@ dotnet_diagnostic.IDE0161.severity = suggestion
 dotnet_diagnostic.IDE0052.severity = warning
 csharp_style_prefer_top_level_statements = true:silent
 csharp_style_prefer_utf8_string_literals = true:suggestion
+csharp_style_prefer_primary_constructors = true:suggestion
 
 [*.{cs,vb}]
 end_of_line= lf
@@ -273,3 +274,4 @@ dotnet_diagnostic.CA1716.severity = silent
 dotnet_diagnostic.CA1727.severity = suggestion
 dotnet_diagnostic.SA0001.severity = silent
 dotnet_diagnostic.CA1852.severity = warning
+dotnet_style_prefer_collection_expression = true:suggestion
