@@ -24,7 +24,7 @@
     <PackageReference Include="MQTTnet" Version="4.3.3.952" />
     <PackageReference Include="Polly" Version="8.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="19.2.87" />
+    <PackageReference Include="System.IO.Abstractions" Version="20.0.4" />
   </ItemGroup>
 
     <ItemGroup>
