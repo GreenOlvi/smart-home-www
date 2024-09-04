@@ -46,7 +46,7 @@ public sealed class WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessag
     {
         foreach (var alert in alerts)
         {
-            var key = $"WeatherAlertNotified_{alert.GetHashCode()}";
+            var key = $"WeatherAlertNotified_{GetAlertHashCode(alert)}";
             if (!await _cache.ContainsKeyAsync(key))
             {
                 _logger.LogInformation("New weather alert. Sending notification.");
@@ -58,6 +58,12 @@ public sealed class WeatherAdapterJob(ILogger<WeatherAdapterJob> logger, IMessag
                 _logger.LogDebug("Weather alert notification already sent. Skipping.");
             }
         }
+    }
+
+    public static int GetAlertHashCode(WeatherAlert alert)
+    {
+        var serialized = JsonSerializer.Serialize(alert);
+        return serialized.GetHashCode();
     }
 
     private TelegramSendTextMessageCommand FormatAlert(WeatherAlert alert) => new()
