@@ -2,6 +2,7 @@
 @using SmartHomeWWW.Client.Models;
 @using SmartHomeWWW.Core.Domain.Relays;
 @using SmartHomeWWW.Core.Infrastructure.Tasmota;
+@using SmartHomeWWW.Client.Shared;
 
 @inject ILogger<Relays> Logger
 @inject RelaysHttpClient RelaysClient
@@ -12,11 +13,11 @@
 
     <MudGrid Justify="Justify.FlexStart">
         <MudItem xs="12">
-            <MudChipSet MultiSelection="false" SelectedChipChanged="FilterByKind" Mandatory="true" Filter="true">
-                <MudChip Color="Color.Primary" Text="All" Default="_tasmotaKindFilter is null" />
+            <MudChipSet T="string" SelectionMode="SelectionMode.SingleSelection" SelectedValueChanged="FilterByKind" CheckMark="true">
+                <MudChip T="string" Color="Color.Primary" Text="All" Default="_tasmotaKindFilter is null" />
                 @foreach (var kind in Enum.GetNames<TasmotaClientKind>())
                 {
-                <MudChip Color="Color.Primary" Text="@kind" Default="_tasmotaKindFilter.HasValue && _tasmotaKindFilter.Value.ToString() == kind" />
+                <MudChip T="string" Color="Color.Primary" Text="@kind" Default="_tasmotaKindFilter.HasValue && _tasmotaKindFilter.Value.ToString() == kind" />
                 }
             </MudChipSet>
         </MudItem>
@@ -101,18 +102,17 @@
     private bool IsVisible(RelayProxy relay) =>
         !_tasmotaKindFilter.HasValue || _tasmotaKindFilter.Value == relay.Kind;
 
-    private Task FilterByKind(MudChip chip)
+    private void FilterByKind(string text)
     {
-        if (Enum.TryParse<TasmotaClientKind>(chip.Text, true, out var kind))
-        {
-            _tasmotaKindFilter = kind;
-        }
-        else
-        {
-            _tasmotaKindFilter = null;
-        }
+         if (Enum.TryParse<TasmotaClientKind>(text, true, out var kind))
+         {
+             _tasmotaKindFilter = kind;
+         }
+         else
+         {
+             _tasmotaKindFilter = null;
+         }
 
-        StateHasChanged();
-        return Task.CompletedTask;
+         StateHasChanged();
     }
 }
