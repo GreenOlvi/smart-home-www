@@ -13,5 +13,6 @@ public readonly record struct MinutelyWeather
     [JsonPropertyName("dt")]
     public DateTime Timestamp { get; init; } = DateTime.UnixEpoch;
 
+    [JsonPropertyName("precipitation")]
     public float Precipitation { get; init; }
 }

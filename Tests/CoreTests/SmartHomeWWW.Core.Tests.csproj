@@ -18,6 +18,14 @@
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     </PropertyGroup>
 
+    <ItemGroup>
+      <None Remove="OpenWeatherMaps\OneCall30.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="OpenWeatherMaps\OneCall30.json" />
+    </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />

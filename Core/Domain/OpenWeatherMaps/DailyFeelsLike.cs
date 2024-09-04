@@ -4,12 +4,16 @@ namespace SmartHomeWWW.Core.Domain.OpenWeatherMaps;
 
 public readonly record struct DailyFeelsLike
 {
+    [JsonPropertyName("morn")]
+    public float Morning { get; init; }
+
+    [JsonPropertyName("day")]
     public float Day { get; init; }
-    public float Night { get; init; }
 
     [JsonPropertyName("eve")]
     public float Evening { get; init; }
 
-    [JsonPropertyName("morn")]
-    public float Morning { get; init; }
+    [JsonPropertyName("night")]
+    public float Night { get; init; }
+
 }

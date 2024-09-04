@@ -13,17 +13,27 @@ public readonly record struct DailyWeather
     [JsonPropertyName("dt")]
     public DateTime Timestamp { get; init; } = DateTime.UnixEpoch;
 
+    [JsonPropertyName("sunrise")]
     [JsonConverter(typeof(UnixEpochDateTimeConverter))]
     public DateTime Sunrise { get; init; } = DateTime.UnixEpoch;
 
+    [JsonPropertyName("sunset")]
     [JsonConverter(typeof(UnixEpochDateTimeConverter))]
     public DateTime Sunset { get; init; } = DateTime.UnixEpoch;
 
+    [JsonPropertyName("moonrise")]
     [JsonConverter(typeof(UnixEpochDateTimeConverter))]
     public DateTime Moonrise { get; init; } = DateTime.UnixEpoch;
 
+    [JsonPropertyName("moonset")]
     [JsonConverter(typeof(UnixEpochDateTimeConverter))]
     public DateTime Moonset { get; init; } = DateTime.UnixEpoch;
+
+    [JsonPropertyName("moon_phase")]
+    public float MoonPhase { get; init; }
+
+    [JsonPropertyName("summary")]
+    public string Summary { get; init; } = string.Empty;
 
     [JsonPropertyName("temp")]
     public DailyTemperature Temperature { get; init; }
@@ -31,8 +41,10 @@ public readonly record struct DailyWeather
     [JsonPropertyName("feels_like")]
     public DailyFeelsLike FeelsLike { get; init; }
 
+    [JsonPropertyName("pressure")]
     public int Pressure { get; init; }
 
+    [JsonPropertyName("humidity")]
     public int Humidity { get; init; }
 
     [JsonPropertyName("dew_point")]
@@ -45,14 +57,17 @@ public readonly record struct DailyWeather
     public int WindDegree { get; init; }
 
     [JsonPropertyName("wind_gust")]
-    public float WindGust { get; init; }
+    public float? WindGust { get; init; }
 
+    [JsonPropertyName("weather")]
     public IReadOnlyCollection<WeatherDescription> Weather { get; init; } = [];
 
     [JsonPropertyName("pop")]
     public float ProbabilityOfPrecipitation { get; init; }
 
+    [JsonPropertyName("uvi")]
     public float Uvi { get; init; }
 
+    [JsonPropertyName("clouds")]
     public int Clouds { get; init; }
 }
